@@ -8,7 +8,7 @@ const firebaseConfig = {
   authDomain: "tunely-111.firebaseapp.com",
   databaseURL: "https://tunely-111-default-rtdb.firebaseio.com",
   projectId: "tunely-111",
-  storageBucket: "tunely-111.firebasestorage.app",
+  storageBucket: "tunely-111.appspot.com",
   messagingSenderId: "209540280192",
   appId: "1:209540280192:web:f3e421fc788eabccdf1b65",
   measurementId: "G-H4SETH4W1R",
@@ -41,13 +41,14 @@ export const getUserData = async (userId) => {
   }
 };
 
-// Update user data (e.g., username and profile picture URL)
+// Update User Data
 export const updateUserData = async (userId, data) => {
   try {
     const userRef = ref(database, 'users/' + userId);
     await set(userRef, data);
   } catch (error) {
     console.error("Error updating user data:", error);
+    throw error; // Pass the error back to the caller
   }
 };
 
