@@ -16,7 +16,7 @@ export const styles = StyleSheet.create({
   songCard: {
     backgroundColor: "#182952", // Purple for song cards
     padding: 10,
-    height: 50,
+    height: 40,
     borderRadius: 8,
     marginBottom: 10,
   },
