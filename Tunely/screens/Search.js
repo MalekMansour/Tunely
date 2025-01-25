@@ -9,7 +9,7 @@ export default function SearchScreen() {
       <TextInput
         style={styles.searchBar}
         placeholder="Search song, artist, album..."
-        placeholderTextColor="#E14594"
+        placeholderTextColor="#1a1a1a"
       />
       {/* Search results */}
       <FlatList

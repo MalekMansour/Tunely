@@ -1,7 +1,6 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  // General styles
   container: {
     flex: 1,
     backgroundColor: "#1a1a1a", 
@@ -14,8 +13,9 @@ export const styles = StyleSheet.create({
     marginBottom: 20,
   },
   songCard: {
-    backgroundColor: "#182952", // Purple for song cards
-    padding: 15,
+    backgroundColor: "#182952", 
+    padding: 10,
+    height: 50,
     borderRadius: 8,
     marginBottom: 10,
   },
@@ -23,14 +23,14 @@ export const styles = StyleSheet.create({
     color: "#f1f1f1", 
     fontWeight: "bold",
   },
-  // Top bar styles
+
   topBar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: "#213555", 
     padding: 10,
-    paddingTop: 40, // For status bar spacing
+    paddingTop: 40, 
   },
   profileButton: {
     padding: 2,
@@ -41,7 +41,7 @@ export const styles = StyleSheet.create({
     borderRadius: 25,
     padding: 10,
     marginBottom: 20,
-    color: "#f1f1f1", 
+    color: "#000", 
   },
   // Tab bar customization
   tabBarStyle: {

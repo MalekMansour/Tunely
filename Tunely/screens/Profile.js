@@ -1,29 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, TouchableOpacity, Alert } from "react-native";
+import { View, Text, Image, TouchableOpacity, Alert, Platform } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { styles } from "../styles";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../Utility/firebaseConfig";
-import { signOutUser, getUserData, updateUserData, uploadProfilePicture } from "../Utility/firebaseConfig";
+import { 
+  signOutUser, 
+  getUserData, 
+  updateUserData, 
+  uploadProfilePicture 
+} from "../Utility/firebaseConfig";
 
 export default function ProfileScreen({ navigation }) {
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState("User");
   const [profilePic, setProfilePic] = useState(null);
 
   useEffect(() => {
-    // Request media library permissions
     const requestPermissions = async () => {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Denied",
-          "We need permission to access your photos."
-        );
+      if (Platform.OS !== "web") {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert(
+            "Permission Denied",
+            "We need permission to access your photos."
+          );
+        }
       }
     };
 
-    // Fetch user data
     const fetchUserData = async () => {
       if (auth.currentUser) {
         try {
@@ -47,7 +51,6 @@ export default function ProfileScreen({ navigation }) {
     fetchUserData();
   }, [navigation]);
 
-  // Change profile picture
   const changeProfilePicture = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -58,10 +61,17 @@ export default function ProfileScreen({ navigation }) {
       });
 
       if (!result.canceled) {
+        console.log("Selected Image URI: ", result.uri);
         const userId = auth.currentUser.uid;
+
+        // Upload the profile picture
         const downloadURL = await uploadProfilePicture(userId, result.uri);
+        console.log("Download URL: ", downloadURL);
+
+        // Update user data
         await updateUserData(userId, { profilePic: downloadURL });
         setProfilePic(downloadURL);
+        Alert.alert("Success", "Profile picture updated!");
       } else {
         Alert.alert("No Image Selected", "You didn't select an image.");
       }
@@ -71,21 +81,17 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-  // Logout user
   const handleLogout = () => {
     Alert.alert(
       "Confirm Logout",
       "Are you sure you want to log out?",
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Cancel", style: "cancel" },
         {
           text: "Logout",
           onPress: async () => {
             try {
-              await signOutUser(auth); 
+              await signOutUser(auth);
               navigation.replace("Login");
             } catch (error) {
               console.error("Error signing out: ", error);
@@ -127,10 +133,7 @@ export default function ProfileScreen({ navigation }) {
       />
 
       <TouchableOpacity
-        style={{
-          ...styles.songCard,
-          alignItems: "center",
-        }}
+        style={{ ...styles.songCard, alignItems: "center" }}
         onPress={changeProfilePicture}
       >
         <Text style={styles.songTitle}>Change Profile Picture</Text>
@@ -139,21 +142,14 @@ export default function ProfileScreen({ navigation }) {
       <Text style={styles.title}>{username}</Text>
 
       <TouchableOpacity
-        style={{
-          ...styles.songCard,
-          alignItems: "center",
-        }}
+        style={{ ...styles.songCard, alignItems: "center" }}
         onPress={() => navigation.navigate("Settings")}
       >
         <Text style={styles.songTitle}>Settings</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={{
-          ...styles.songCard,
-          alignItems: "center",
-          marginTop: 20,
-        }}
+        style={{ ...styles.songCard, alignItems: "center", marginTop: 20 }}
         onPress={handleLogout}
       >
         <Text style={styles.songTitle}>Logout</Text>
