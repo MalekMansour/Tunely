@@ -1,7 +1,6 @@
 import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
-  // General styles
   container: {
     flex: 1,
     backgroundColor: "#1a1a1a", 
@@ -31,7 +30,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "#213555", 
     padding: 10,
-    paddingTop: 40, // For status bar spacing
+    paddingTop: 40, 
   },
   profileButton: {
     padding: 2,
@@ -42,7 +41,7 @@ export const styles = StyleSheet.create({
     borderRadius: 25,
     padding: 10,
     marginBottom: 20,
-    color: "#f1f1f1", 
+    color: "#000", 
   },
   // Tab bar customization
   tabBarStyle: {
