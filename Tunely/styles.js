@@ -15,7 +15,8 @@ export const styles = StyleSheet.create({
   },
   songCard: {
     backgroundColor: "#182952", // Purple for song cards
-    padding: 15,
+    padding: 10,
+    height: 50,
     borderRadius: 8,
     marginBottom: 10,
   },
@@ -23,7 +24,7 @@ export const styles = StyleSheet.create({
     color: "#f1f1f1", 
     fontWeight: "bold",
   },
-  // Top bar styles
+
   topBar: {
     flexDirection: "row",
     alignItems: "center",
