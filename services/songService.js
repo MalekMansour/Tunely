@@ -151,7 +151,7 @@ export const songService = {
 
   searchSongs: async (query) => {
     try {
-      const response = await fetch(`${API_URL}/search?query=${encodeURIComponent(query)}`);
+      const response = await fetch(`${API_URL}/songs/search?query=${encodeURIComponent(query)}`);
       if (!response.ok) {
         throw new Error('Failed to fetch songs');
       }
