@@ -16,7 +16,7 @@ router.get('/search', songController.searchSongs);
 router.post('/:id/play', verifyToken, songController.recordSongPlay);
 router.get('/:id', songController.getSongById);
 
-// Search song
+
 
 
 //like routes

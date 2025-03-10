@@ -10,16 +10,12 @@ import {
   FlatList,
   TextInput,
   TouchableOpacity,
-  Dimensions
 } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { auth } from '../Utility/firebaseConfig';
-import { getCurrentUser } from '../Utility/googleAuth';
-import { getUserData } from '../Utility/firebaseConfig';
 import { useUserData } from '../hooks/useUserData';
-import blankProfilePic from '../assets/blank_profile.png';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 export default function CommentScreen({ route }) {
@@ -98,6 +94,7 @@ export default function CommentScreen({ route }) {
   };
 
   return (
+    <SafeAreaView style={styles.mainContainer} edges={['top']}>
       <PanGestureHandler
         onGestureEvent={onGestureEvent}
         onHandlerStateChange={onHandlerStateChange}
@@ -165,6 +162,7 @@ export default function CommentScreen({ route }) {
           </KeyboardAvoidingView>
         </Animated.View>
       </PanGestureHandler>
+    </SafeAreaView>
   );
 }
 

@@ -88,7 +88,6 @@ getRecentlyPlayed: async (req, res) => {
     const userId = req.user.uid;
     const limit = parseInt(req.query.limit) || 7;
     
-    // Create the query with hardcoded limit to avoid parameter issues
     const query = `
       SELECT s.*, MAX(sp.played_at) as most_recent_play
       FROM songs s
