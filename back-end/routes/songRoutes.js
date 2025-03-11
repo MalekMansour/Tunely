@@ -12,11 +12,12 @@ router.post('/upload', verifyToken, upload, songController.upload);
 router.get('/recently-played', verifyToken, songController.getRecentlyPlayed);
 router.get('/', songController.getAllSongs);
 router.get('/myUploads', verifyToken, songController.getMyUploads);
+router.get('/search', songController.searchSongs);
 router.post('/:id/play', verifyToken, songController.recordSongPlay);
 router.get('/:id', songController.getSongById);
 
-// Search song
-router.get('/search', songController.searchSongs);
+
+
 
 //like routes
 router.get('/:id/like', verifyToken, likesController.checkLike);

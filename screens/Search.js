@@ -31,7 +31,7 @@ export default function SearchScreen() {
       />
       <FlatList
         data={results}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.songId.toString()}
         renderItem={({ item }) => <SongCard song={item} />}
       />
       </View>

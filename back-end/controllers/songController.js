@@ -88,7 +88,6 @@ getRecentlyPlayed: async (req, res) => {
     const userId = req.user.uid;
     const limit = parseInt(req.query.limit) || 7;
     
-    // Create the query with hardcoded limit to avoid parameter issues
     const query = `
       SELECT s.*, MAX(sp.played_at) as most_recent_play
       FROM songs s
@@ -133,11 +132,14 @@ searchSongs: async (req, res) => {
     }
 
     // Search for songs by title or artist
-    const sql = `SELECT * FROM songs WHERE title LIKE ? OR artist LIKE ?`;
+    const sql = `SELECT * FROM songs WHERE title LIKE ? OR artistName LIKE ?`;
     const values = [`%${query}%`, `%${query}%`];
 
-    const [rows] = await db.query(sql, values);
-    res.status(200).json(rows);
+    const rows = await db.query(sql, values);
+    
+    // return array
+    const results = Array.isArray(rows) ? rows : [rows];
+    res.json(results);
   } catch (error) {
     console.error('Error searching songs:', error);
     res.status(500).json({ error: error.message });

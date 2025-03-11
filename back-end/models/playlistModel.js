@@ -39,8 +39,8 @@ const PlaylistModel = {
     if (!songIds.length) return { insertId: 0 };
     
     const values = songIds.map(songId => [playlistId, songId]); 
-    const placeholders = values.map(() => "(?, ?)").join(", "); // Generates (?, ?), (?, ?), ...
-    const flattenedValues = values.flat(); // Flattens the array for binding
+    const placeholders = values.map(() => "(?, ?)").join(", "); //adds multiple song ids to the playlist instead of making multiple inssert queries
+    const flattenedValues = values.flat(); // Flat list instead of nested array for sql
 
     return await db.query(
         `INSERT INTO playlist_songs (playlist_id, song_id) VALUES ${placeholders}`,
