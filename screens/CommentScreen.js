@@ -15,7 +15,7 @@ import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useUserData } from '../hooks/useUserData';
-import blankProfilePic from '../assets/blank_profile.png';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 export default function CommentScreen({ route }) {
