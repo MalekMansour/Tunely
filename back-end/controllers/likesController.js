@@ -45,5 +45,3 @@ checkLike: async (req, res) => {
 };
 
 module.exports = likesController;
-
-

@@ -20,10 +20,12 @@ import { getCurrentUser } from '../Utility/googleAuth';
 import { getUserData } from '../Utility/firebaseConfig';
 import { useUserData } from '../hooks/useUserData';
 import blankProfilePic from '../assets/blank_profile.png';
+import { commentsService } from '../services/commentService';
 
 
 export default function CommentScreen({ route }) {
   const { song } = route.params;
+  const songId = song?.songId;
   const navigation = useNavigation();
   const [comments, setComments] = useState([]);
   const [comment, setComment] = useState('');
@@ -32,7 +34,6 @@ export default function CommentScreen({ route }) {
   const defaultCoverImage = require('../assets/note.jpg');
  
 
-  
   const translateY = useRef(new Animated.Value(0)).current;
   const scale = translateY.interpolate({
     inputRange: [0, 300],
@@ -79,23 +80,60 @@ export default function CommentScreen({ route }) {
     return date.toLocaleDateString();
   };
 
-  const handleSubmitComment = () => {
-    if (comment.trim()) {
-      const newComment = {
-        id: Date.now().toString(),
-        text: comment,
-        timestamp: new Date().toISOString(),
-        username: username, 
-        profilePic: profilePic 
+  // Use effect to fetch songs from the database
+  useEffect(() => {
+    const loadComments = async () => {
+      try {
+        const fetchedComments = await commentsService.fetchComments(songId);
+        setComments(fetchedComments);
+      } catch (error) {
+        console.error('Failed to load comments:', error);
+      }
     };
+  
+    loadComments();
+  }, [songId]);
 
-
-        
-      
-      setComments([newComment, ...comments]);
-      setComment('');
+  // Posting a comment to the backend
+  const handleSubmitComment = async () => {
+    if (comment.trim()) {
+      try {
+        const newComment = await commentsService.postComment(song.id, comment);
+        setComments([newComment, ...comments]);
+        setComment('');
+      } catch (error) {
+        console.error('Failed to post comment:', error);
+      }
     }
   };
+
+  // Handle deleting a comment
+  const handleDeleteComment = (commentId) => {
+    Alert.alert(
+      "Delete Comment",
+      "Are you sure you want to delete this comment?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Delete", 
+          style: "destructive", 
+          onPress: async () => {
+            try {
+              // Delete the comment
+              await commentsService.deleteComment(commentId);
+              
+              // Update the comment list
+              const updatedComments = await commentsService.getComments(song.songId);
+              setComments(updatedComments);
+            } catch (error) {
+              console.error("Error deleting comment:", error);
+            }
+          }
+        }
+      ]
+    );
+  };
+
 
   return (
       <PanGestureHandler
@@ -139,6 +177,12 @@ export default function CommentScreen({ route }) {
                     </View>
                     <Text style={styles.commentText}>{item.text}</Text>
                   </View>
+                  <TouchableOpacity 
+                    style={styles.deleteButton}
+                    onPress={() => handleDeleteComment(item.id)}
+                  >
+                    <FontAwesomeIcon icon={faTrash} size={20} color="#d9534f" />
+                  </TouchableOpacity>
                 </View>
               </View>
             )}
@@ -284,5 +328,11 @@ const styles = StyleSheet.create({
   commentContent: {
     flex: 1,
     marginLeft: 8,
+  },
+  deleteButton: { 
+    position: 'absolute', 
+    top: 10, 
+    right: 10, 
+    padding: 5 
   },
 });

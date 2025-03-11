@@ -13,10 +13,12 @@ const songRoutes = require('./routes/songRoutes');
 const userRoutes = require('./routes/userRoutes');
 const playlistRoutes = require('./routes/playlistRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const commentRoutes = require('./routes/commentRoutes')
 app.use('/api/songs', songRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/playlists', playlistRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/comments', commentRoutes);
 
 // Error handling
 app.use((err, req, res, next) => {

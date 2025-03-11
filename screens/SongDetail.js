@@ -110,7 +110,7 @@ export default function SongDetailScreen({ route }) {
           useNativeDriver: true,
         }).start(() => navigation.goBack());
       } else if (event.nativeEvent.translationY < -100) {
-        navigation.navigate('CommentScreen', { song });
+        navigation.navigate('CommentScreen', { song: song });
         Animated.timing(translateY, {
           toValue: -200,
           duration: 200,
