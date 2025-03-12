@@ -204,7 +204,6 @@ const PlaylistDetail = () => {
                   <Text style={styles.songTitle}>
                     {item.title} - {item.artist}
                   </Text>
-                  {/* Display Add Button if song is not in playlist */}
                   {!isSongInPlaylist(item.id) && (
                     <TouchableOpacity onPress={() => handleAddToPlaylist(item)}>
                       <Ionicons name="add-circle" size={24} color="#28a745" />
