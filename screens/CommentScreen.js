@@ -139,100 +139,102 @@ export default function CommentScreen({ route }) {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
-    <PanGestureHandler
-      onGestureEvent={onGestureEvent}
-      onHandlerStateChange={onHandlerStateChange}
-    >
-      <Animated.View style={[styles.container, { transform: [{ translateY }] }]}>
-        <View style={styles.header}>
-          <Image source={
-                    song.song_photo_url 
-                      ? { uri: song.song_photo_url }
-                      : defaultCoverImage
-                  } style={styles.songImage} />
-          <View style={styles.songInfo}>
-            <Text style={styles.songTitle}>{song.title}</Text>
-            <Text style={styles.artistName}>{song.artistName}</Text>
-          </View>
-        </View>
-
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.contentContainer}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 12}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 5 : 20}
+      >
+        <PanGestureHandler
+          onGestureEvent={onGestureEvent}
+          onHandlerStateChange={onHandlerStateChange}
         >
-          {isLoading ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator color="#fff" size="large" />
-              <Text style={styles.loadingText}>Loading comments...</Text>
+          <Animated.View style={[styles.container, { transform: [{ translateY }] }]}>
+            <View style={styles.header}>
+              <Image source={
+                        song.song_photo_url 
+                          ? { uri: song.song_photo_url }
+                          : defaultCoverImage
+                      } style={styles.songImage} />
+              <View style={styles.songInfo}>
+                <Text style={styles.songTitle}>{song.title}</Text>
+                <Text style={styles.artistName}>{song.artistName}</Text>
+              </View>
             </View>
-          ) : (
-            <FlatList
-              data={comments}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
-                <View style={styles.commentItem}>
-                  <View style={styles.commentWrapper}>
-                    <Image 
-                      source={typeof item.profilePic === 'string' ? { uri: item.profilePic } : blankProfilePic}
-                      style={styles.profilePic}
-                    />
-                    <View style={styles.commentContent}>
-                      <View style={styles.commentHeader}>
-                        <Text style={styles.username}>{item.username}</Text>
-                        <Text style={styles.timestamp}>
-                          {formatTimestamp(item.created_at)}
-                        </Text>
-                      </View>
-                      <Text style={styles.commentText}>{item.text}</Text>
-                      
-                      {/* Add delete option for user's own comments */}
-                      {auth.currentUser && item.user_id === auth.currentUser.uid && (
-                        <TouchableOpacity
-                          style={styles.deleteButton}
-                          onPress={() => handleDeleteComment(item.id)}
-                        >
-                          <Text style={styles.deleteText}>Delete</Text>
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                  </View>
-                </View>
-              )}
-              style={styles.commentList}
-              ListEmptyComponent={
-                <Text style={styles.emptyText}>No comments yet. Be the first to comment!</Text>
-              }
-            />
-          )}
 
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              value={comment}
-              onChangeText={setComment}
-              placeholder="Add a comment..."
-              placeholderTextColor="#666"
-              multiline
-            />
-            <TouchableOpacity 
-              style={[
-                styles.submitButton,
-                (isSubmitting || !comment.trim()) && styles.submitButtonDisabled
-              ]}
-              onPress={handleSubmitComment}
-              disabled={isSubmitting || !comment.trim()}
-            >
-              {isSubmitting ? (
-                <ActivityIndicator color="#fff" size="small" />
+            <View style={styles.contentContainer}>
+              {isLoading ? (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator color="#fff" size="large" />
+                  <Text style={styles.loadingText}>Loading comments...</Text>
+                </View>
               ) : (
-                <Text style={styles.submitText}>Post</Text>
+                <FlatList
+                  data={comments}
+                  keyExtractor={(item) => item.id.toString()}
+                  renderItem={({ item }) => (
+                    <View style={styles.commentItem}>
+                      <View style={styles.commentWrapper}>
+                        <Image 
+                          source={typeof item.profilePic === 'string' ? { uri: item.profilePic } : blankProfilePic}
+                          style={styles.profilePic}
+                        />
+                        <View style={styles.commentContent}>
+                          <View style={styles.commentHeader}>
+                            <Text style={styles.username}>{item.username}</Text>
+                            <Text style={styles.timestamp}>
+                              {formatTimestamp(item.created_at)}
+                            </Text>
+                          </View>
+                          <Text style={styles.commentText}>{item.text}</Text>
+                          
+                          {/* Add delete option for user's own comments */}
+                          {auth.currentUser && item.user_id === auth.currentUser.uid && (
+                            <TouchableOpacity
+                              style={styles.deleteButton}
+                              onPress={() => handleDeleteComment(item.id)}
+                            >
+                              <Text style={styles.deleteText}>Delete</Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      </View>
+                    </View>
+                  )}
+                  style={styles.commentList}
+                  ListEmptyComponent={
+                    <Text style={styles.emptyText}>No comments yet. Be the first to comment!</Text>
+                  }
+                />
               )}
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </Animated.View>
-    </PanGestureHandler>
+
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  value={comment}
+                  onChangeText={setComment}
+                  placeholder="Add a comment..."
+                  placeholderTextColor="#666"
+                  multiline
+                />
+                <TouchableOpacity 
+                  style={[
+                    styles.submitButton,
+                    (isSubmitting || !comment.trim()) && styles.submitButtonDisabled
+                  ]}
+                  onPress={handleSubmitComment}
+                  disabled={isSubmitting || !comment.trim()}
+                >
+                  {isSubmitting ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Text style={styles.submitText}>Post</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Animated.View>
+        </PanGestureHandler>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -321,7 +323,6 @@ const styles = StyleSheet.create({
     marginRight: 8,
     color: '#fff',
     fontSize: 16,
-    maxHeight: 100,
   },
   submitButton: {
     backgroundColor: '#007AFF',

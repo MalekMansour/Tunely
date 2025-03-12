@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 const getApiUrl = () => {
+  return 'https://capstone-project-c256.onrender.com/api';
   /*
   if (__DEV__) {
     
