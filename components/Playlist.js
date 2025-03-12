@@ -5,7 +5,7 @@ import { playlistService } from "../services/playlistService";
 
 const defaultCoverImage = require('../assets/note.jpg');
 
-const PlayList = ({ title, playlistId, songs: initialSongs = [], image }) => {
+const PlayList = ({ title, playlistId, songs: initialSongs = [], image, style }) => {
   const navigation = useNavigation();
   const [songs, setSongs] = useState(initialSongs);
   
@@ -65,7 +65,7 @@ const PlayList = ({ title, playlistId, songs: initialSongs = [], image }) => {
   const songCovers = getSongCovers();
   
   return (
-    <TouchableOpacity style={styles.container} onPress={handlePress}>
+    <TouchableOpacity style={[styles.container, style]} onPress={handlePress}>
       <View style={styles.playlistCoverGrid}>
         <View style={styles.playlistCoverRow}>
           <Image source={songCovers[0]} style={styles.playlistCoverQuadrant} />

@@ -141,6 +141,15 @@ function LibraryStack() {
   );
 }
 
+function SearchStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="SearchScreen" component={SearchWithTopBar} />
+      <Stack.Screen name="PlaylistDetail" component={PlaylistDetail} />
+    </Stack.Navigator>
+  );
+}
+
 // Bottom tab navigator
 function TabNavigator() {
   return (
@@ -183,7 +192,7 @@ function TabNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={HomeStack} />
-      <Tab.Screen name="Search" component={SearchWithTopBar} />
+      <Tab.Screen name="Search" component={SearchStack} />
       <Tab.Screen name="Library" component={LibraryStack} />
     </Tab.Navigator>
   );
