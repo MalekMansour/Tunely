@@ -75,14 +75,11 @@ const PlaylistDetail = () => {
 
   const songCovers = getSongCovers();
 
-  // Add songs to the playlist
-
   const handleAddSong = async () => {
     try {
-      // Call the service function to fetch available songs
       const songs = await playlistService.fetchAvailableSongsForModal();
       setAvailableSongs(songs); // Update state with the fetched songs
-      setModalVisible(true); // Show modal after fetching songs
+      setModalVisible(true); 
     } catch (error) {
       console.error("Error fetching available songs:", error);
     }
