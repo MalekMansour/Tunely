@@ -89,7 +89,6 @@ export default function LibraryScreen() {
 
       <View style={styles.headerRow}>
         <View style={styles.titleContainer}>
-          <Text style={styles.musicIcon}>🎵</Text>
           <Text style={styles.headerTitle}>Your Library</Text>
         </View>
 
