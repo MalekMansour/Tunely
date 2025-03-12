@@ -8,7 +8,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AudioProvider } from "./context/AudioContext";
-import { UserProvider } from "./context/userContext";
 import { Provider as PaperProvider } from "react-native-paper";
 import { Audio } from "expo-av";
 
@@ -203,7 +202,6 @@ export default function App() {
   return (
     <PaperProvider>
       <AudioProvider>
-        <UserProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <NavigationContainer>
               <View style={{ flex: 1 }}>
@@ -262,7 +260,6 @@ export default function App() {
               </View>
             </NavigationContainer>
           </GestureHandlerRootView>
-        </UserProvider>
       </AudioProvider>
     </PaperProvider>
   );

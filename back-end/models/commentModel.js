@@ -3,10 +3,10 @@ const db = require("../db");
 const CommentModel = {
   create: async (commentData) => {
     const sql = `
-      INSERT INTO comments (user_id, song_id, text, created_at, updated_at)
+      INSERT INTO comments (user_id, songId, text, created_at, updated_at)
       VALUES (?, ?, ?, NOW(), NOW())
     `;
-    const params = [commentData.user_id, commentData.song_id, commentData.text];
+    const params = [commentData.user_id, commentData.songId, commentData.text];
     return await db.query(sql, params);
   },
 
@@ -15,7 +15,7 @@ const CommentModel = {
       SELECT c.id, c.text, c.created_at, u.username 
       FROM comments c 
       JOIN users u ON c.user_id = u.id
-      WHERE c.song_id = ?
+      WHERE c.songId = ?
       ORDER BY c.created_at DESC
     `;
     return await db.query(sql, [songId]);

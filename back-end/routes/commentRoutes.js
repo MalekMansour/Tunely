@@ -3,8 +3,8 @@ const { addComment, getComments, deleteComment } = require("../controllers/comme
 const { verifyToken } = require('../middleware/auth');
 const router = express.Router();
 
-router.post("/songs/:songId/comments", verifyToken, addComment); // Add a comment to a song
-router.get("/songs/:songId/comments", getComments); // Get comments for a song
-router.delete("/comments/:commentId", deleteComment); // Delete a comment
+router.post("/:songId", verifyToken, addComment);
+router.get("/:songId", getComments);
+router.delete("/:commentId", verifyToken, deleteComment);
 
 module.exports = router;

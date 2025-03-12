@@ -1,42 +1,65 @@
-import React, { useRef, useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  Image,
-  Animated,
+import React, { useRef, useState, useEffect } from 'react';
+import { 
+  View, 
+  Text, 
+  Image, 
+  Animated, 
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
   FlatList,
   TextInput,
   TouchableOpacity,
-} from "react-native";
-import { PanGestureHandler, State } from "react-native-gesture-handler";
-import { useNavigation } from "@react-navigation/native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useUserData } from "../hooks/useUserData";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { commentsService } from "../services/commentService";
-import { useUser } from "../context/userContext";
-import Icon from "react-native-vector-icons/FontAwesome";
-import { Alert } from "react-native";
+  Dimensions,
+  ActivityIndicator,
+  Alert
+} from 'react-native';
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
+import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { auth } from '../Utility/firebaseConfig';
+import { getCurrentUser } from '../Utility/googleAuth';
+import { getUserData } from '../Utility/firebaseConfig';
+import { useUserData } from '../hooks/useUserData';
+import { commentsService } from '../services/commentService';
+import blankProfilePic from '../assets/blank_profile.png';
 
 export default function CommentScreen({ route }) {
   const { song } = route.params;
-  const songId = song?.songId;
-  const { userId } = useUser();
   const navigation = useNavigation();
   const [comments, setComments] = useState([]);
-  const [comment, setComment] = useState("");
+  const [comment, setComment] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { username, profilePic } = useUserData();
   const insets = useSafeAreaInsets();
-  const defaultCoverImage = require("../assets/note.jpg");
+  const defaultCoverImage = require('../assets/note.jpg');
+ 
+  // Load comments from API when screen mounts
+  useEffect(() => {
+    loadComments();
+  }, []);
 
+  // Fetch comments from backend
+  const loadComments = async () => {
+    try {
+      setIsLoading(true);
+      const songId = song.id || song.songId;
+      const fetchedComments = await commentsService.fetchComments(songId);
+      setComments(fetchedComments);
+    } catch (error) {
+      console.error('Error loading comments:', error);
+      Alert.alert('Error', 'Failed to load comments.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   const translateY = useRef(new Animated.Value(0)).current;
   const scale = translateY.interpolate({
     inputRange: [0, 300],
     outputRange: [1, 0.5],
-    extrapolate: "clamp",
+    extrapolate: 'clamp',
   });
 
   const onGestureEvent = Animated.event(
@@ -54,196 +77,181 @@ export default function CommentScreen({ route }) {
           toValue: -insets.top,
           useNativeDriver: true,
           friction: 8,
-          tension: 40,
+          tension: 40
         }).start();
       } else {
         Animated.spring(translateY, {
           toValue: 0,
           useNativeDriver: true,
           friction: 8,
-          tension: 40,
+          tension: 40
         }).start();
       }
     }
   };
 
   const formatTimestamp = (timestamp) => {
+    if (!timestamp) return '';
+    
     const date = new Date(timestamp);
     const now = new Date();
     const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-
-    if (diffInMinutes < 1) return "Just now";
+    
+    if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
     return date.toLocaleDateString();
   };
 
-  // Use effect to fetch songs from the database
-  useEffect(() => {
-    const loadComments = async () => {
-      try {
-        const fetchedComments = await commentsService.fetchComments(songId);
-        setComments(fetchedComments);
-      } catch (error) {
-        console.error("Failed to load comments:", error);
-      }
-    };
-
-    loadComments();
-  }, [songId]);
-
-  // Posting a comment to the backend
+  // Submit comment to backend
   const handleSubmitComment = async () => {
-    console.log("Song ID:", songId);
-    console.log("User Id", userId);
-    if (comment.trim()) {
+    if (comment.trim() && !isSubmitting) {
       try {
-        const newComment = await commentsService.postComment(
-          songId,
-          userId,
-          comment
-        );
-        setComments([newComment, ...comments]);
-        setComment("");
+        setIsSubmitting(true);
+        const songId = song.id || song.songId;
+        
+        // Send comment to backend
+        await commentsService.postComment(songId, comment.trim());
+        
+        // Reload comments from backend to get the latest state with IDs
+        await loadComments();
+        
+        // Clear the input
+        setComment('');
       } catch (error) {
-        console.error("Failed to post comment:", error);
+        console.error('Error posting comment:', error);
+        Alert.alert('Error', 'Failed to post your comment.');
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
 
-  // Handle deleting a comment
-  const handleDeleteComment = (commentId) => {
-    console.log("User ID:", userId);
-    Alert.alert(
-      "Delete Comment",
-      "Are you sure you want to delete this comment?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              // Delete the comment
-              await commentsService.deleteComment(commentId, userId);
-
-              // Update the comment list
-              const updatedComments = await commentsService.getComments(
-                song.songId
-              );
-              setComments(updatedComments);
-            } catch (error) {
-              console.error("Error deleting comment:", error);
-            }
-          },
-        },
-      ]
-    );
+  // Handle comment deletion
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await commentsService.deleteComment(commentId);
+      // Remove from local state
+      setComments(comments.filter(comment => comment.id !== commentId));
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      Alert.alert('Error', 'Failed to delete the comment.');
+    }
   };
 
   return (
-    <SafeAreaView style={styles.mainContainer} edges={["top"]}>
-      <PanGestureHandler
-        onGestureEvent={onGestureEvent}
-        onHandlerStateChange={onHandlerStateChange}
-      >
-        <Animated.View
-          style={[styles.container, { transform: [{ translateY }] }]}
-        >
-          <View style={styles.header}>
-            <Image
-              source={
-                song.song_photo_url
-                  ? { uri: song.song_photo_url }
-                  : defaultCoverImage
-              }
-              style={styles.songImage}
-            />
-            <View style={styles.songInfo}>
-              <Text style={styles.songTitle}>{song.title}</Text>
-              <Text style={styles.artistName}>{song.artistName}</Text>
-            </View>
+    <PanGestureHandler
+      onGestureEvent={onGestureEvent}
+      onHandlerStateChange={onHandlerStateChange}
+    >
+      <Animated.View style={[styles.container, { transform: [{ translateY }] }]}>
+        <View style={styles.header}>
+          <Image source={
+                    song.song_photo_url 
+                      ? { uri: song.song_photo_url }
+                      : defaultCoverImage
+                  } style={styles.songImage} />
+          <View style={styles.songInfo}>
+            <Text style={styles.songTitle}>{song.title}</Text>
+            <Text style={styles.artistName}>{song.artistName}</Text>
           </View>
+        </View>
 
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={styles.contentContainer}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 12}
-          >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.contentContainer}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 12}
+        >
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator color="#fff" size="large" />
+              <Text style={styles.loadingText}>Loading comments...</Text>
+            </View>
+          ) : (
             <FlatList
               data={comments}
-              keyExtractor={(item) => `${songId}-${item.id}`}
+              keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
                 <View style={styles.commentItem}>
                   <View style={styles.commentWrapper}>
-                    <Image
-                      source={
-                        typeof item.profilePic === "string"
-                          ? { uri: item.profilePic }
-                          : item.profilePic
-                      }
+                    <Image 
+                      source={typeof item.profilePic === 'string' ? { uri: item.profilePic } : blankProfilePic}
                       style={styles.profilePic}
                     />
                     <View style={styles.commentContent}>
                       <View style={styles.commentHeader}>
                         <Text style={styles.username}>{item.username}</Text>
                         <Text style={styles.timestamp}>
-                          {formatTimestamp(item.timestamp)}
+                          {formatTimestamp(item.created_at)}
                         </Text>
                       </View>
                       <Text style={styles.commentText}>{item.text}</Text>
+                      
+                      {/* Add delete option for user's own comments */}
+                      {auth.currentUser && item.user_id === auth.currentUser.uid && (
+                        <TouchableOpacity
+                          style={styles.deleteButton}
+                          onPress={() => handleDeleteComment(item.id)}
+                        >
+                          <Text style={styles.deleteText}>Delete</Text>
+                        </TouchableOpacity>
+                      )}
                     </View>
-                    <TouchableOpacity
-                      style={styles.deleteButton}
-                      onPress={() => handleDeleteComment(item.id)}
-                    >
-                      {/* Use Icon component from react-native-vector-icons */}
-                      <Icon name="trash" size={20} color="#d9534f" />
-                    </TouchableOpacity>
                   </View>
                 </View>
               )}
               style={styles.commentList}
+              ListEmptyComponent={
+                <Text style={styles.emptyText}>No comments yet. Be the first to comment!</Text>
+              }
             />
+          )}
 
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                value={comment}
-                onChangeText={setComment}
-                placeholder="Add a comment..."
-                placeholderTextColor="#666"
-                multiline
-              />
-              <TouchableOpacity
-                style={styles.submitButton}
-                onPress={handleSubmitComment}
-              >
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              value={comment}
+              onChangeText={setComment}
+              placeholder="Add a comment..."
+              placeholderTextColor="#666"
+              multiline
+            />
+            <TouchableOpacity 
+              style={[
+                styles.submitButton,
+                (isSubmitting || !comment.trim()) && styles.submitButtonDisabled
+              ]}
+              onPress={handleSubmitComment}
+              disabled={isSubmitting || !comment.trim()}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
                 <Text style={styles.submitText}>Post</Text>
-              </TouchableOpacity>
-            </View>
-          </KeyboardAvoidingView>
-        </Animated.View>
-      </PanGestureHandler>
-    </SafeAreaView>
+              )}
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </Animated.View>
+    </PanGestureHandler>
   );
 }
 
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: '#000',
   },
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: '#000',
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 16,
     borderBottomWidth: 0.5,
-    borderBottomColor: "#333",
+    borderBottomColor: '#333',
   },
   songImage: {
     width: 52,
@@ -255,13 +263,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   songTitle: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 17,
-    fontWeight: "600",
+    fontWeight: '600',
     marginBottom: 2,
   },
   artistName: {
-    color: "#999",
+    color: '#999',
     fontSize: 14,
   },
   contentContainer: {
@@ -272,65 +280,65 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   commentItem: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: '#1a1a1a',
     padding: 16,
     borderRadius: 8,
     marginBottom: 6,
   },
   commentHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 4,
   },
   username: {
-    color: "#fff",
-    fontWeight: "600",
+    color: '#fff',
+    fontWeight: '600',
     fontSize: 14,
   },
   timestamp: {
-    color: "#666",
+    color: '#666',
     fontSize: 12,
   },
   commentText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 14,
     lineHeight: 20,
   },
   inputContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     padding: 14,
     borderTopWidth: 0.5,
-    borderTopColor: "#333",
-    backgroundColor: "#000",
+    borderTopColor: '#333',
+    backgroundColor: '#000',
   },
   input: {
     flex: 1,
-    backgroundColor: "#1a1a1a",
+    backgroundColor: '#1a1a1a',
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 8,
-    color: "#fff",
+    color: '#fff',
     fontSize: 16,
     maxHeight: 100,
   },
   submitButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: '#007AFF',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "flex-end",
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
   },
   submitText: {
-    color: "#fff",
-    fontWeight: "600",
+    color: '#fff',
+    fontWeight: '600',
   },
   userInfo: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   profilePic: {
     width: 30,
@@ -338,18 +346,38 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   commentWrapper: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    flexDirection: 'row',
+    alignItems: 'flex-start',
   },
 
   commentContent: {
     flex: 1,
     marginLeft: 8,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: '#fff',
+    marginTop: 10,
+  },
+  emptyText: {
+    color: '#999',
+    textAlign: 'center',
+    padding: 20,
+  },
   deleteButton: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    padding: 5,
+    alignSelf: 'flex-start',
+    marginTop: 8,
+  },
+  deleteText: {
+    color: '#ff3b30',
+    fontSize: 12,
+  },
+  submitButtonDisabled: {
+    backgroundColor: '#333',
+    opacity: 0.6,
   },
 });

@@ -1,7 +1,6 @@
 import { auth } from '../Utility/firebaseConfig';
 import { API_URL } from '../config/apiConfig';
 
-
 const getAuthHeaders = async () => {
   const user = auth.currentUser;
   if (!user) return {};
@@ -16,56 +15,65 @@ const getAuthHeaders = async () => {
 export const commentsService = {
   // Fetch comments for a specific song
   fetchComments: async (songId) => {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/comments/songs/${songId}/comments`, {
-      method: 'GET',
-      headers
-    });
-    if (!response.ok) {
+    try {
+      const headers = await getAuthHeaders();
+      // Updated to match backend route
+      const response = await fetch(`${API_URL}/comments/${songId}`, {
+        method: 'GET',
+        headers
+      });
+      
+      if (!response.ok) {
         throw new Error(`Error fetching comments: ${response.status} ${response.statusText}`);
       }
-    
-    return response.json();
+      
+      return response.json();
+    } catch (error) {
+      console.error("Error in fetchComments:", error);
+      throw error;
+    }
   },
   
   // Post a new comment for a song
   postComment: async (songId, text) => {
-    const headers = await getAuthHeaders();
-    const response = await fetch(`${API_URL}/comments/songs/${songId}/comments`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ text })
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to post comment');
-    }
+    try {
+      const headers = await getAuthHeaders();
+      // Updated to match backend route
+      const response = await fetch(`${API_URL}/comments/${songId}`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ text })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to post comment');
+      }
 
-    const newComment = await response.json(); 
-    return newComment; 
+      return response.json();
+    } catch (error) {
+      console.error("Error in postComment:", error);
+      throw error;
+    }
   },
   
   // Delete a comment by ID
-  deleteComment: async (commentId, userId) => {
-    const headers = await getAuthHeaders()
-    const response = await fetch(`${API_URL}/comments/${commentId}`, {
+  deleteComment: async (commentId) => {
+    try {
+      const headers = await getAuthHeaders();
+      // Updated to match backend route and removed unnecessary body
+      const response = await fetch(`${API_URL}/comments/${commentId}`, {
         method: 'DELETE',
-        headers: {
-            ...headers,
-            'Content-Type': 'application/json',  
-        },
-        body: JSON.stringify({
-            commentId: commentId,
-            userId: userId,
-        }),
-    });
+        headers
+      });
 
-    // If the deletion was successful, return the response
-    if (response.ok) {
-        console.log("Comment successfully deleted");
-        return response.json();
-    } else {
+      if (!response.ok) {
         throw new Error('Failed to delete comment');
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error("Error in deleteComment:", error);
+      throw error;
     }
   }
 };
