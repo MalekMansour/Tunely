@@ -50,7 +50,6 @@ export default function HomeScreen() {
         data={playlists}
         ListHeaderComponent={
           <>
-            {/* You Might Like Section */}
             <View style={styles.recommendationContainer}>
               <Text style={styles.subtitle}>You Might Like</Text>
               {recommendedSong ? (
@@ -75,7 +74,7 @@ export default function HomeScreen() {
               />
             </View>
 
-{/* Recent Songs (Horizontal Scroll) */}
+{/* Recent Songs */}
 <View style={styles.sectionContainer}>
   <Text style={styles.subtitle}>Recent</Text>
   {recentPlayedLoading ? (
