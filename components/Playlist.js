@@ -24,7 +24,6 @@ const PlayList = ({ title, playlistId, songs: initialSongs = [], image, style })
     loadPlaylist();
   }, [playlistId]);
   
-  // When initialSongs changes externally, update our state
   useEffect(() => {
     if (initialSongs.length > 0) {
       setSongs(initialSongs);
