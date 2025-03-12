@@ -6,6 +6,7 @@ import { useGetSongs } from "../hooks/useGetSongs";
 import { useAudio } from "../context/AudioContext";
 import { playlistService } from "../services/playlistService";
 import SongCard from "../components/SongCard"; 
+import SongCard2 from "../components/SongCard2";
 import PlayList from "../components/Playlist";
 
 export default function HomeScreen() {
@@ -13,7 +14,9 @@ export default function HomeScreen() {
   const {
     songs: recentlyPlayedSongs,
     loading: recentPlayedLoading,
+    refreshSongs: refreshRecentlyPlayedSongs, // Added refresh function
   } = useGetSongs("recently-played");
+  
   const { changePlaylist } = useAudio();
   const [playlists, setPlaylists] = useState([]);
   const [playlistsLoading, setPlaylistsLoading] = useState(true);
@@ -21,6 +24,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       refreshSongs();
+      refreshRecentlyPlayedSongs(); 
 
       const fetchPlaylists = async () => {
         try {
@@ -38,11 +42,23 @@ export default function HomeScreen() {
     }, [])
   );
 
-  const recommendedSong = songs.length > 0 ? songs[0] : null;
-  const newSongs = songs.slice(0, 10);  // Newest songs at the top
-  const trendingSongs = songs.slice(5, 15);
-  const rapSongs = songs.filter((song) => song.genre === "Rap").slice(0, 10);
-  const popSongs = songs.filter((song) => song.genre === "Pop").slice(0, 10);
+  // Get 10 newest songs
+  const newSongs = songs.slice(0, 10);
+
+  // Categorized genres
+  const categorizedSongs = {
+    Pop: songs.filter((song) => song.genre === "Pop").slice(0, 10),
+    Rap: songs.filter((song) => song.genre === "Rap").slice(0, 10),
+    "R&B": songs.filter((song) => song.genre === "R&B").slice(0, 10),
+    Rock: songs.filter((song) => song.genre === "Rock").slice(0, 10),
+    Country: songs.filter((song) => song.genre === "Country").slice(0, 10),
+    Electronic: songs.filter((song) => song.genre === "Electronic").slice(0, 10),
+    Jazz: songs.filter((song) => song.genre === "Jazz").slice(0, 10),
+    Other: songs.filter(
+      (song) =>
+        !["Pop", "Rap", "R&B", "Rock", "Country", "Electronic", "Jazz"].includes(song.genre)
+    ).slice(0, 10),
+  };
 
   return (
     <View style={styles.container}>
@@ -50,34 +66,9 @@ export default function HomeScreen() {
         data={playlists}
         ListHeaderComponent={
           <>
-            {/* New Songs */}
+            {/* Recently Played Songs - Horizontal Scroll */}
             <View style={styles.sectionContainer}>
-              <Text style={styles.subtitle}>New Songs</Text>
-              <FlatList
-                data={newSongs}
-                keyExtractor={(item) => item.songId.toString()}
-                horizontal
-                renderItem={({ item }) => <SongCard song={item} />}
-                showsHorizontalScrollIndicator={false}
-                ListEmptyComponent={
-                  <Text style={styles.emptyText}>No new songs</Text>
-                }
-              />
-            </View>
-
-            {/* You Might Like */}
-            <View style={styles.recommendationContainer}>
-              <Text style={styles.subtitle}>You Might Like</Text>
-              {recommendedSong ? (
-                <SongCard song={recommendedSong} large /> 
-              ) : (
-                <Text style={styles.emptyText}>No recommendations yet</Text>
-              )}
-            </View>
-
-            {/* Recent Songs */}
-            <View style={styles.sectionContainer}>
-              <Text style={styles.subtitle}>Recent</Text>
+              <Text style={styles.subtitle}>Recently Played</Text>
               {recentPlayedLoading ? (
                 <ActivityIndicator size="large" color="#f1f1f1" />
               ) : (
@@ -85,8 +76,10 @@ export default function HomeScreen() {
                   data={recentlyPlayedSongs.slice(0, 8)}
                   keyExtractor={(item) => item.songId.toString()}
                   horizontal
-                  renderItem={({ item }) => <SongCard song={item} />}
+                  renderItem={({ item }) => <SongCard2 song={item} />} 
                   showsHorizontalScrollIndicator={false}
+                  onRefresh={refreshRecentlyPlayedSongs} // Enable pull-to-refresh
+                  refreshing={recentPlayedLoading} // Ensure refreshing state updates
                   ListEmptyComponent={
                     <Text style={styles.emptyText}>No recently played songs</Text>
                   }
@@ -94,48 +87,32 @@ export default function HomeScreen() {
               )}
             </View>
 
-            {/* Other Sections */}
+            {/* New Songs - Vertical Scroll */}
             <View style={styles.sectionContainer}>
-              <Text style={styles.subtitle}>Trending Songs</Text>
+              <Text style={styles.subtitle}>New Songs</Text>
               <FlatList
-                data={trendingSongs}
+                data={newSongs}
                 keyExtractor={(item) => item.songId.toString()}
-                horizontal
-                renderItem={({ item }) => <SongCard song={item} />}
-                showsHorizontalScrollIndicator={false}
-                ListEmptyComponent={
-                  <Text style={styles.emptyText}>No trending songs</Text>
-                }
+                renderItem={({ item }) => <SongCard song={item} />} 
+                showsVerticalScrollIndicator={false}
               />
             </View>
 
-            <View style={styles.sectionContainer}>
-              <Text style={styles.subtitle}>Rap Songs</Text>
-              <FlatList
-                data={rapSongs}
-                keyExtractor={(item) => item.songId.toString()}
-                horizontal
-                renderItem={({ item }) => <SongCard song={item} />}
-                showsHorizontalScrollIndicator={false}
-                ListEmptyComponent={
-                  <Text style={styles.emptyText}>No rap songs</Text>
-                }
-              />
-            </View>
-
-            <View style={styles.sectionContainer}>
-              <Text style={styles.subtitle}>Pop Songs</Text>
-              <FlatList
-                data={popSongs}
-                keyExtractor={(item) => item.songId.toString()}
-                horizontal
-                renderItem={({ item }) => <SongCard song={item} />}
-                showsHorizontalScrollIndicator={false}
-                ListEmptyComponent={
-                  <Text style={styles.emptyText}>No pop songs</Text>
-                }
-              />
-            </View>
+            {/* Genre Sections */}
+            {Object.entries(categorizedSongs).map(([genre, songs]) => (
+              <View key={genre} style={styles.sectionContainer}>
+                <Text style={styles.subtitle}>{genre}</Text>
+                <FlatList
+                  data={songs}
+                  keyExtractor={(item) => item.songId.toString()}
+                  renderItem={({ item }) => <SongCard song={item} />}
+                  showsVerticalScrollIndicator={false}
+                  ListEmptyComponent={
+                    <Text style={styles.emptyText}>No {genre} songs</Text>
+                  }
+                />
+              </View>
+            ))}
 
             {/* Playlists */}
             <Text style={styles.subtitle}>Playlists</Text>
@@ -156,7 +133,10 @@ export default function HomeScreen() {
         )}
         numColumns={2}
         showsVerticalScrollIndicator={false}
-        onRefresh={refreshSongs}
+        onRefresh={() => {
+          refreshSongs();
+          refreshRecentlyPlayedSongs(); 
+        }}
         refreshing={loading}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No playlists available</Text>
