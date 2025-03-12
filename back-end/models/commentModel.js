@@ -12,7 +12,7 @@ const CommentModel = {
 
   getBySongId: async (songId) => {
     const sql = `
-      SELECT c.id, c.text, c.created_at, u.username 
+      SELECT c.id, c.text, c.user_id, c.created_at, u.username 
       FROM comments c 
       JOIN users u ON c.user_id = u.id
       WHERE c.songId = ?
