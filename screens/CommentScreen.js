@@ -1,39 +1,42 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  Image, 
-  Animated, 
+import React, { useRef, useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  Image,
+  Animated,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
   FlatList,
   TextInput,
   TouchableOpacity,
-} from 'react-native';
-import { PanGestureHandler, State } from 'react-native-gesture-handler';
-import { useNavigation } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useUserData } from '../hooks/useUserData';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
+} from "react-native";
+import { PanGestureHandler, State } from "react-native-gesture-handler";
+import { useNavigation } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useUserData } from "../hooks/useUserData";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { commentsService } from "../services/commentService";
+import { useUser } from "../context/userContext";
+import Icon from "react-native-vector-icons/FontAwesome";
+import { Alert } from "react-native";
 
 export default function CommentScreen({ route }) {
   const { song } = route.params;
   const songId = song?.songId;
+  const { userId } = useUser();
   const navigation = useNavigation();
   const [comments, setComments] = useState([]);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
   const { username, profilePic } = useUserData();
   const insets = useSafeAreaInsets();
-  const defaultCoverImage = require('../assets/note.jpg');
- 
+  const defaultCoverImage = require("../assets/note.jpg");
 
   const translateY = useRef(new Animated.Value(0)).current;
   const scale = translateY.interpolate({
     inputRange: [0, 300],
     outputRange: [1, 0.5],
-    extrapolate: 'clamp',
+    extrapolate: "clamp",
   });
 
   const onGestureEvent = Animated.event(
@@ -51,14 +54,14 @@ export default function CommentScreen({ route }) {
           toValue: -insets.top,
           useNativeDriver: true,
           friction: 8,
-          tension: 40
+          tension: 40,
         }).start();
       } else {
         Animated.spring(translateY, {
           toValue: 0,
           useNativeDriver: true,
           friction: 8,
-          tension: 40
+          tension: 40,
         }).start();
       }
     }
@@ -68,8 +71,8 @@ export default function CommentScreen({ route }) {
     const date = new Date(timestamp);
     const now = new Date();
     const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return 'Just now';
+
+    if (diffInMinutes < 1) return "Just now";
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
     return date.toLocaleDateString();
@@ -82,109 +85,126 @@ export default function CommentScreen({ route }) {
         const fetchedComments = await commentsService.fetchComments(songId);
         setComments(fetchedComments);
       } catch (error) {
-        console.error('Failed to load comments:', error);
+        console.error("Failed to load comments:", error);
       }
     };
-  
+
     loadComments();
   }, [songId]);
 
   // Posting a comment to the backend
   const handleSubmitComment = async () => {
+    console.log("Song ID:", songId);
+    console.log("User Id", userId);
     if (comment.trim()) {
       try {
-        const newComment = await commentsService.postComment(song.id, comment);
+        const newComment = await commentsService.postComment(
+          songId,
+          userId,
+          comment
+        );
         setComments([newComment, ...comments]);
-        setComment('');
+        setComment("");
       } catch (error) {
-        console.error('Failed to post comment:', error);
+        console.error("Failed to post comment:", error);
       }
     }
   };
 
   // Handle deleting a comment
   const handleDeleteComment = (commentId) => {
+    console.log("User ID:", userId);
     Alert.alert(
       "Delete Comment",
       "Are you sure you want to delete this comment?",
       [
         { text: "Cancel", style: "cancel" },
-        { 
-          text: "Delete", 
-          style: "destructive", 
+        {
+          text: "Delete",
+          style: "destructive",
           onPress: async () => {
             try {
               // Delete the comment
-              await commentsService.deleteComment(commentId);
-              
+              await commentsService.deleteComment(commentId, userId);
+
               // Update the comment list
-              const updatedComments = await commentsService.getComments(song.songId);
+              const updatedComments = await commentsService.getComments(
+                song.songId
+              );
               setComments(updatedComments);
             } catch (error) {
               console.error("Error deleting comment:", error);
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
 
-
   return (
-    <SafeAreaView style={styles.mainContainer} edges={['top']}>
+    <SafeAreaView style={styles.mainContainer} edges={["top"]}>
       <PanGestureHandler
         onGestureEvent={onGestureEvent}
         onHandlerStateChange={onHandlerStateChange}
       >
-        <Animated.View style={[styles.container, { transform: [{ translateY }] }]}>
+        <Animated.View
+          style={[styles.container, { transform: [{ translateY }] }]}
+        >
           <View style={styles.header}>
-            <Image source={
-                      song.song_photo_url 
-                        ? { uri: song.song_photo_url }
-                        : defaultCoverImage
-                    } style={styles.songImage} />
+            <Image
+              source={
+                song.song_photo_url
+                  ? { uri: song.song_photo_url }
+                  : defaultCoverImage
+              }
+              style={styles.songImage}
+            />
             <View style={styles.songInfo}>
               <Text style={styles.songTitle}>{song.title}</Text>
               <Text style={styles.artistName}>{song.artistName}</Text>
             </View>
           </View>
 
-          <KeyboardAvoidingView 
+          <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.contentContainer}
             keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 12}
           >
-           <FlatList
-            data={comments}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.commentItem}>
-                <View style={styles.commentWrapper}>
-                <Image 
-                  source={typeof item.profilePic === 'string' ? { uri: item.profilePic } : item.profilePic}
-                  style={styles.profilePic}
-                 />
-                  <View style={styles.commentContent}>
-                    <View style={styles.commentHeader}>
-                      <Text style={styles.username}>{item.username}</Text>
-                      <Text style={styles.timestamp}>
-                        {formatTimestamp(item.timestamp)}
-                      </Text>
+            <FlatList
+              data={comments}
+              keyExtractor={(item) => `${songId}-${item.id}`}
+              renderItem={({ item }) => (
+                <View style={styles.commentItem}>
+                  <View style={styles.commentWrapper}>
+                    <Image
+                      source={
+                        typeof item.profilePic === "string"
+                          ? { uri: item.profilePic }
+                          : item.profilePic
+                      }
+                      style={styles.profilePic}
+                    />
+                    <View style={styles.commentContent}>
+                      <View style={styles.commentHeader}>
+                        <Text style={styles.username}>{item.username}</Text>
+                        <Text style={styles.timestamp}>
+                          {formatTimestamp(item.timestamp)}
+                        </Text>
+                      </View>
+                      <Text style={styles.commentText}>{item.text}</Text>
                     </View>
-                    <Text style={styles.commentText}>{item.text}</Text>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => handleDeleteComment(item.id)}
+                    >
+                      {/* Use Icon component from react-native-vector-icons */}
+                      <Icon name="trash" size={20} color="#d9534f" />
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity 
-                    style={styles.deleteButton}
-                    onPress={() => handleDeleteComment(item.id)}
-                  >
-                    <FontAwesomeIcon icon={faTrash} size={20} color="#d9534f" />
-                  </TouchableOpacity>
                 </View>
-              </View>
-            )}
-            style={styles.commentList}
-/>
-            
+              )}
+              style={styles.commentList}
+            />
 
             <View style={styles.inputContainer}>
               <TextInput
@@ -195,7 +215,7 @@ export default function CommentScreen({ route }) {
                 placeholderTextColor="#666"
                 multiline
               />
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.submitButton}
                 onPress={handleSubmitComment}
               >
@@ -212,18 +232,18 @@ export default function CommentScreen({ route }) {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: "#000",
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
     borderBottomWidth: 0.5,
-    borderBottomColor: '#333',
+    borderBottomColor: "#333",
   },
   songImage: {
     width: 52,
@@ -235,13 +255,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   songTitle: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 2,
   },
   artistName: {
-    color: '#999',
+    color: "#999",
     fontSize: 14,
   },
   contentContainer: {
@@ -252,65 +272,65 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   commentItem: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: "#1a1a1a",
     padding: 16,
     borderRadius: 8,
     marginBottom: 6,
   },
   commentHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 4,
   },
   username: {
-    color: '#fff',
-    fontWeight: '600',
+    color: "#fff",
+    fontWeight: "600",
     fontSize: 14,
   },
   timestamp: {
-    color: '#666',
+    color: "#666",
     fontSize: 12,
   },
   commentText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
     lineHeight: 20,
   },
   inputContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 14,
     borderTopWidth: 0.5,
-    borderTopColor: '#333',
-    backgroundColor: '#000',
+    borderTopColor: "#333",
+    backgroundColor: "#000",
   },
   input: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: "#1a1a1a",
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 8,
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
     maxHeight: 100,
   },
   submitButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'flex-end',
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "flex-end",
   },
   submitText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: "#fff",
+    fontWeight: "600",
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   profilePic: {
     width: 30,
@@ -318,18 +338,18 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   commentWrapper: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
   },
 
   commentContent: {
     flex: 1,
     marginLeft: 8,
   },
-  deleteButton: { 
-    position: 'absolute', 
-    top: 10, 
-    right: 10, 
-    padding: 5 
+  deleteButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    padding: 5,
   },
 });

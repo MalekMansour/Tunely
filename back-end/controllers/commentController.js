@@ -5,12 +5,17 @@ const commentController = {
   // Add a comment
   addComment: async (req, res) => {
     try {
-      const songId = req.params.id;
+      console.log("This is the Song ID for the comment:", req.params.songId);
+    console.log("This is the User ID: ", req.user.uid); // Access the user ID correctly
+    console.log("Text:", req.body);
+      const songId = req.params;
       const userId = req.user.uid;
       const { text } = req.body;
 
+     
+
       const sql = `
-        INSERT INTO comments (user_id, song_id, text, created_at, updated_at)
+        INSERT INTO comments (user_id, songId, text, created_at, updated_at)
         VALUES (?, ?, ?, NOW(), NOW())
       `;
       await db.query(sql, [userId, songId, text]);
@@ -25,13 +30,14 @@ const commentController = {
   getComments: async (req, res) => {
     try {
         const { songId } = req.params;
-
+        console.log("Received request for songId:", songId);
+        
 
       const sql = `
         SELECT c.id, c.text, c.created_at, u.username 
         FROM comments c 
         JOIN users u ON c.user_id = u.id
-        WHERE c.song_id = ?
+        WHERE c.songId = ?
         ORDER BY c.created_at DESC
       `;
       const comments = await db.query(sql, [songId]);
@@ -45,8 +51,8 @@ const commentController = {
   // Delete a comment
   deleteComment: async (req, res) => {
     try {
-      const commentId = req.params.id;
-      const userId = req.user.uid;
+      const commentId = req.params.id;  // Extract the comment ID from params
+      const userId = req.user.uid;      // Extract the user ID from the authenticated user
 
       // Check if the comment exists and belongs to the user
       const checkSql = "SELECT * FROM comments WHERE id = ? AND user_id = ?";
@@ -62,6 +68,7 @@ const commentController = {
 
       res.status(200).json({ message: "Comment deleted successfully" });
     } catch (error) {
+      console.error(error);  // Log the error for debugging
       res.status(500).json({ error: error.message });
     }
   }
