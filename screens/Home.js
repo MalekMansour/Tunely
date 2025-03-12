@@ -10,13 +10,16 @@ import SongCard2 from "../components/SongCard2";
 import PlayList from "../components/Playlist";
 
 export default function HomeScreen() {
+  // Fetch all songs
   const { songs, loading, error, refreshSongs } = useGetSongs("all");
+
+  // Fetch recently played songs
   const {
     songs: recentlyPlayedSongs,
     loading: recentPlayedLoading,
-    refreshSongs: refreshRecentlyPlayedSongs, // Added refresh function
+    refreshSongs: refreshRecentlyPlayedSongs, 
   } = useGetSongs("recently-played");
-  
+
   const { changePlaylist } = useAudio();
   const [playlists, setPlaylists] = useState([]);
   const [playlistsLoading, setPlaylistsLoading] = useState(true);
@@ -45,7 +48,7 @@ export default function HomeScreen() {
   // Get 10 newest songs
   const newSongs = songs.slice(0, 10);
 
-  // Categorized genres
+  // Categorize songs by genre (each genre limited to 10 songs)
   const categorizedSongs = {
     Pop: songs.filter((song) => song.genre === "Pop").slice(0, 10),
     Rap: songs.filter((song) => song.genre === "Rap").slice(0, 10),
@@ -66,24 +69,26 @@ export default function HomeScreen() {
         data={playlists}
         ListHeaderComponent={
           <>
-            {/* Recently Played Songs - Horizontal Scroll */}
+            {/* Recently Played - Horizontal Scroll */}
             <View style={styles.sectionContainer}>
               <Text style={styles.subtitle}>Recently Played</Text>
               {recentPlayedLoading ? (
-                <ActivityIndicator size="large" color="#f1f1f1" />
+                <ActivityIndicator size="32" color="#f1f1f1" />
               ) : (
-                <FlatList
-                  data={recentlyPlayedSongs.slice(0, 8)}
-                  keyExtractor={(item) => item.songId.toString()}
-                  horizontal
-                  renderItem={({ item }) => <SongCard2 song={item} />} 
-                  showsHorizontalScrollIndicator={false}
-                  onRefresh={refreshRecentlyPlayedSongs} // Enable pull-to-refresh
-                  refreshing={recentPlayedLoading} // Ensure refreshing state updates
-                  ListEmptyComponent={
-                    <Text style={styles.emptyText}>No recently played songs</Text>
-                  }
-                />
+                <View style={{ height: 180 }}>
+                  <FlatList
+                    data={recentlyPlayedSongs.slice(0, 8)}
+                    keyExtractor={(item) => item.songId.toString()}
+                    horizontal
+                    renderItem={({ item }) => <SongCard2 song={item} />}
+                    showsHorizontalScrollIndicator={false}
+                    onRefresh={refreshRecentlyPlayedSongs}
+                    refreshing={recentPlayedLoading}
+                    ListEmptyComponent={
+                      <Text style={styles.emptyText}>No recently played songs</Text>
+                    }
+                  />
+                </View>
               )}
             </View>
 
@@ -114,7 +119,7 @@ export default function HomeScreen() {
               </View>
             ))}
 
-            {/* Playlists */}
+            {/* Playlists Section */}
             <Text style={styles.subtitle}>Playlists</Text>
           </>
         }
