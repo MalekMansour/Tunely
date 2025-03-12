@@ -7,8 +7,6 @@ import SongCard from "../components/SongCard";
 export default function MyUploads() {
     const { songs, loading, error, refreshSongs } = useGetSongs('my-uploads');
 
-
-
     return (
         <SafeAreaView style={styles.container}>
         <Text style={styles.title}>Your Uploads</Text>
