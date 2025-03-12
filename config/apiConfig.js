@@ -26,7 +26,6 @@ const getApiUrl = () => {
         return 'http://localhost:3000/api';
     }
   } */
-  return 'https://capstone-project-c256.onrender.com/api';
 };
 
 export const API_URL = getApiUrl();
