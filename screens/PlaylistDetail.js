@@ -170,7 +170,7 @@ const PlaylistDetail = () => {
           renderItem={({ item }) => (
             <SongCard
               song={item}
-              playlistId={playlistId} // Pass the playlist ID
+              playlistId={playlistId} 
               showOptions={true}
               onRemove={handleRemoveSong}
             />
