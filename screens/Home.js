@@ -5,7 +5,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useGetSongs } from "../hooks/useGetSongs";
 import { useAudio } from "../context/AudioContext";
 import { playlistService } from "../services/playlistService";
-import SongCard from "../components/SongCard";  // Use SongCard for uniform sizing
+import SongCard from "../components/SongCard"; 
 import PlayList from "../components/Playlist";
 
 export default function HomeScreen() {
