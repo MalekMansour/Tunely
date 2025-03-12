@@ -75,14 +75,11 @@ const PlaylistDetail = () => {
 
   const songCovers = getSongCovers();
 
-  // Add songs to the playlist
-
   const handleAddSong = async () => {
     try {
-      // Call the service function to fetch available songs
       const songs = await playlistService.fetchAvailableSongsForModal();
-      setAvailableSongs(songs); // Update state with the fetched songs
-      setModalVisible(true); // Show modal after fetching songs
+      setAvailableSongs(songs);
+      setModalVisible(true); 
     } catch (error) {
       console.error("Error fetching available songs:", error);
     }
@@ -173,7 +170,7 @@ const PlaylistDetail = () => {
           renderItem={({ item }) => (
             <SongCard
               song={item}
-              playlistId={playlistId} // Pass the playlist ID
+              playlistId={playlistId} 
               showOptions={true}
               onRemove={handleRemoveSong}
             />
@@ -207,7 +204,6 @@ const PlaylistDetail = () => {
                   <Text style={styles.songTitle}>
                     {item.title} - {item.artist}
                   </Text>
-                  {/* Display Add Button if song is not in playlist */}
                   {!isSongInPlaylist(item.id) && (
                     <TouchableOpacity onPress={() => handleAddToPlaylist(item)}>
                       <Ionicons name="add-circle" size={24} color="#28a745" />
