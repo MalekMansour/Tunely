@@ -5,7 +5,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useGetSongs } from "../hooks/useGetSongs";
 import { useAudio } from "../context/AudioContext";
 import { playlistService } from "../services/playlistService";
-import SongCard2 from "../components/SongCard2";
+import SongCard from "../components/SongCard";  // Use SongCard for uniform sizing
 import PlayList from "../components/Playlist";
 
 export default function HomeScreen() {
@@ -39,7 +39,7 @@ export default function HomeScreen() {
   );
 
   const recommendedSong = songs.length > 0 ? songs[0] : null;
-  const madeForYou = songs.slice(0, 10);
+  const newSongs = songs.slice(0, 10);  // Newest songs at the top
   const trendingSongs = songs.slice(5, 15);
   const rapSongs = songs.filter((song) => song.genre === "Rap").slice(0, 10);
   const popSongs = songs.filter((song) => song.genre === "Pop").slice(0, 10);
@@ -50,48 +50,49 @@ export default function HomeScreen() {
         data={playlists}
         ListHeaderComponent={
           <>
-            <View style={styles.recommendationContainer}>
-              <Text style={styles.subtitle}>You Might Like</Text>
-              {recommendedSong ? (
-                <SongCard2 song={recommendedSong} />
-              ) : (
-                <Text style={styles.emptyText}>No recommendations yet</Text>
-              )}
-            </View>
-
-            {/* Made For You */}
+            {/* New Songs */}
             <View style={styles.sectionContainer}>
-              <Text style={styles.subtitle}>Made for You</Text>
+              <Text style={styles.subtitle}>New Songs</Text>
               <FlatList
-                data={madeForYou}
+                data={newSongs}
                 keyExtractor={(item) => item.songId.toString()}
                 horizontal
-                renderItem={({ item }) => <SongCard2 song={item} />}
+                renderItem={({ item }) => <SongCard song={item} />}
                 showsHorizontalScrollIndicator={false}
                 ListEmptyComponent={
-                  <Text style={styles.emptyText}>No songs available</Text>
+                  <Text style={styles.emptyText}>No new songs</Text>
                 }
               />
             </View>
 
-{/* Recent Songs */}
-<View style={styles.sectionContainer}>
-  <Text style={styles.subtitle}>Recent</Text>
-  {recentPlayedLoading ? (
-    <ActivityIndicator size="large" color="#f1f1f1" />
-  ) : (
-    <FlatList
-      data={recentlyPlayedSongs.slice(0, 8)}
-      keyExtractor={(item) => item.songId.toString()}
-      horizontal // Horizontal scroll
-      renderItem={({ item }) => <SongCard2 song={item} />}
-      showsHorizontalScrollIndicator={false} 
-      ListEmptyComponent={
-        <Text style={styles.emptyText}>No recently played songs</Text>
-      }
-    />
-  )}
-</View>
+            {/* You Might Like */}
+            <View style={styles.recommendationContainer}>
+              <Text style={styles.subtitle}>You Might Like</Text>
+              {recommendedSong ? (
+                <SongCard song={recommendedSong} large /> 
+              ) : (
+                <Text style={styles.emptyText}>No recommendations yet</Text>
+              )}X
+            </View>
+
+            {/* Recent Songs */}
+            <View style={styles.sectionContainer}>
+              <Text style={styles.subtitle}>Recent</Text>
+              {recentPlayedLoading ? (
+                <ActivityIndicator size="large" color="#f1f1f1" />
+              ) : (
+                <FlatList
+                  data={recentlyPlayedSongs.slice(0, 8)}
+                  keyExtractor={(item) => item.songId.toString()}
+                  horizontal
+                  renderItem={({ item }) => <SongCard song={item} />}
+                  showsHorizontalScrollIndicator={false}
+                  ListEmptyComponent={
+                    <Text style={styles.emptyText}>No recently played songs</Text>
+                  }
+                />
+              )}
+            </View>
 
             {/* Other Sections */}
             <View style={styles.sectionContainer}>
@@ -100,7 +101,7 @@ export default function HomeScreen() {
                 data={trendingSongs}
                 keyExtractor={(item) => item.songId.toString()}
                 horizontal
-                renderItem={({ item }) => <SongCard2 song={item} />}
+                renderItem={({ item }) => <SongCard song={item} />}
                 showsHorizontalScrollIndicator={false}
                 ListEmptyComponent={
                   <Text style={styles.emptyText}>No trending songs</Text>
@@ -114,7 +115,7 @@ export default function HomeScreen() {
                 data={rapSongs}
                 keyExtractor={(item) => item.songId.toString()}
                 horizontal
-                renderItem={({ item }) => <SongCard2 song={item} />}
+                renderItem={({ item }) => <SongCard song={item} />}
                 showsHorizontalScrollIndicator={false}
                 ListEmptyComponent={
                   <Text style={styles.emptyText}>No rap songs</Text>
@@ -128,7 +129,7 @@ export default function HomeScreen() {
                 data={popSongs}
                 keyExtractor={(item) => item.songId.toString()}
                 horizontal
-                renderItem={({ item }) => <SongCard2 song={item} />}
+                renderItem={({ item }) => <SongCard song={item} />}
                 showsHorizontalScrollIndicator={false}
                 ListEmptyComponent={
                   <Text style={styles.emptyText}>No pop songs</Text>
