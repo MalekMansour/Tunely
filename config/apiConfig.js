@@ -2,7 +2,9 @@ import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
 const getApiUrl = () => {
+  /*
   if (__DEV__) {
+    
     // Handle web platform
     if (Platform.OS === 'web') {
       return 'http://localhost:3000/api';
@@ -22,7 +24,8 @@ const getApiUrl = () => {
       default:
         return 'http://localhost:3000/api';
     }
-  }
+  } */
+  return 'https://capstone-project-c256.onrender.com/api';
 };
 
 export const API_URL = getApiUrl();
