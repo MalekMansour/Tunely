@@ -72,7 +72,7 @@ export default function HomeScreen() {
                 <SongCard song={recommendedSong} large /> 
               ) : (
                 <Text style={styles.emptyText}>No recommendations yet</Text>
-              )}X
+              )}
             </View>
 
             {/* Recent Songs */}
