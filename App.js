@@ -32,6 +32,10 @@ import MyUploads from "./screens/MyUploads";
 import MyUploadButton from "./components/MyUploadButton";
 import AdminPage from "./screens/adminPage";
 import AdminCheck from "./Utility/adminCheck";
+import PrivacySettings from "./screens/PrivacySettings";
+import Notifications from "./screens/Notifications";
+
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -202,64 +206,68 @@ export default function App() {
   return (
     <PaperProvider>
       <AudioProvider>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <NavigationContainer>
-              <View style={{ flex: 1 }}>
-                <Stack.Navigator
-                  initialRouteName="Login"
-                  screenOptions={{ headerShown: false }}
-                >
-                  <Stack.Screen name="Home" component={TabNavigator} />
-                  <Stack.Screen
-                    name="SongDetail"
-                    component={SongDetailScreen}
-                    options={{
-                      presentation: "transparentModal",
-                    }}
-                  />
-                  <Stack.Screen
-                    name="CommentScreen"
-                    component={CommentScreen}
-                    options={{
-                      presentation: "transparentModal",
-                      headerShown: false,
-                      animation: "default",
-                      cardOverlayEnabled: true,
-                      animationEnabled: true,
-                      cardStyleInterpolator: ({ current: { progress } }) => ({
-                        cardStyle: {
-                          opacity: progress,
-                        },
-                        overlayStyle: {
-                          opacity: progress.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, 0.5],
-                          }),
-                        },
-                      }),
-                    }}
-                  />
-                  <Stack.Screen name="Profile" component={ProfileScreen} />
-                  <Stack.Screen name="Settings" component={SettingsScreen} />
-                  <Stack.Screen name="Login" component={LoginScreen} />
-                  <Stack.Screen
-                    name="LoginFormPage"
-                    component={LoginFormPage}
-                  />
-                  <Stack.Screen name="SignUp" component={SignUpScreen} />
-                  <Stack.Screen name="Upload" component={UploadScreen} />
-                  <Stack.Screen name="MyUploads" component={MyUploads} />
-                  <Stack.Screen
-                    name="AdminPage"
-                    component={AdminPage}
-                    options={{ headerShown: false }}
-                  />
-                  <Stack.Screen name="AuthCheck" component={AdminCheck} />
-                </Stack.Navigator>
-                <FloatingPlayer />
-              </View>
-            </NavigationContainer>
-          </GestureHandlerRootView>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <NavigationContainer>
+            <View style={{ flex: 1 }}>
+              <Stack.Navigator
+                initialRouteName="Login"
+                screenOptions={{ headerShown: false }}
+              >
+                <Stack.Screen name="Home" component={TabNavigator} />
+                <Stack.Screen
+                  name="SongDetail"
+                  component={SongDetailScreen}
+                  options={{
+                    presentation: "transparentModal",
+                  }}
+                />
+                <Stack.Screen
+                  name="CommentScreen"
+                  component={CommentScreen}
+                  options={{
+                    presentation: "transparentModal",
+                    headerShown: false,
+                    animation: "default",
+                    cardOverlayEnabled: true,
+                    animationEnabled: true,
+                    cardStyleInterpolator: ({ current: { progress } }) => ({
+                      cardStyle: {
+                        opacity: progress,
+                      },
+                      overlayStyle: {
+                        opacity: progress.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, 0.5],
+                        }),
+                      },
+                    }),
+                  }}
+                />
+                <Stack.Screen name="Profile" component={ProfileScreen} />
+                <Stack.Screen name="Settings" component={SettingsScreen} />
+                <Stack.Screen name="Login" component={LoginScreen} />
+                <Stack.Screen
+                  name="LoginFormPage"
+                  component={LoginFormPage}
+                />
+                <Stack.Screen name="SignUp" component={SignUpScreen} />
+                <Stack.Screen name="Upload" component={UploadScreen} />
+                <Stack.Screen name="MyUploads" component={MyUploads} />
+                <Stack.Screen name="PrivacySettings"component={PrivacySettings}/>
+                <Stack.Screen name="Notifications" component={Notifications}/>
+                
+
+                <Stack.Screen
+                  name="AdminPage"
+                  component={AdminPage}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen name="AuthCheck" component={AdminCheck} />
+              </Stack.Navigator>
+              <FloatingPlayer />
+            </View>
+          </NavigationContainer>
+        </GestureHandlerRootView>
       </AudioProvider>
     </PaperProvider>
   );

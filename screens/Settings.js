@@ -19,11 +19,15 @@ export default function SettingsScreen({ navigation }) {
       <Text style={[styles.title, { marginTop: 100, color: "#f1f1f1" }]}>Settings</Text>
       
       <View style={{ width: "90%", marginTop: 50, alignItems: "center" }}>
-        <TouchableOpacity style={{ backgroundColor: "#182952", padding: 15, borderRadius: 10, marginBottom: 15, width: "80%", alignItems: "center" }}>
+        <TouchableOpacity 
+          style={{ backgroundColor: "#182952", padding: 15, borderRadius: 10, marginBottom: 15, width: "80%", alignItems: "center" }}
+          onPress={() => navigation.navigate("PrivacySettings")}>
           <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>Privacy Settings</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={{ backgroundColor: "#182952", padding: 15, borderRadius: 10, width: "80%", alignItems: "center" }}>
+        <TouchableOpacity 
+          style={{ backgroundColor: "#182952", padding: 15, borderRadius: 10, width: "80%", alignItems: "center" }}
+          onPress={() => navigation.navigate("Notifications")}>
           <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>Notifications</Text>
         </TouchableOpacity>
       </View>
