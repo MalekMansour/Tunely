@@ -21,16 +21,6 @@ export const songService = {
           if (!formData || !formData._parts || formData._parts.length === 0) {
             throw new Error('Invalid form data');
           }
-
-          console.log('Uploading to:', `${API_URL}/songs/upload`);
-          
-          formData._parts.forEach(part => {
-            console.log('Form part:', {
-              name: part[0],
-              type: typeof part[1],
-              value: part[1]?.uri || part[1]
-            });
-          });
     
           const response = await fetch(`${API_URL}/songs/upload`, {
             method: 'POST',
@@ -159,6 +149,27 @@ export const songService = {
     } catch (error) {
       console.error('Error searching songs:', error);
       return [];
+    }
+  },
+  
+  deleteSong: async (songId) => {
+    try {
+      const headers = await getAuthHeaders();
+      
+      const response = await fetch(`${API_URL}/songs/${songId}`, {
+        method: 'DELETE',
+        headers
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete song');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Delete song error:', error);
+      throw error;
     }
   }
 };

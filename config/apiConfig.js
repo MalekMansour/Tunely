@@ -3,7 +3,7 @@ import Constants from 'expo-constants';
 
 const getApiUrl = () => {
   return 'https://capstone-project-c256.onrender.com/api';
-  /*
+  /* 
   if (__DEV__) {
     
     // Handle web platform
@@ -26,7 +26,7 @@ const getApiUrl = () => {
         return 'http://localhost:3000/api';
     }
   } */
-};
+}; 
 
 export const API_URL = getApiUrl();
 

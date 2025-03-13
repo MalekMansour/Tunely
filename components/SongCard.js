@@ -8,7 +8,7 @@ import { useState } from "react";
 
 const defaultCoverImage = require('../assets/note.jpg');
 
-const SongCard = ({ song, isCurrentSong, playlistId, showOptions, onRemove  }) => {
+const SongCard = ({ song, isCurrentSong, playlistId, showOptions, onRemove, isOwnContent }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const navigation = useNavigation();
@@ -43,50 +43,49 @@ const SongCard = ({ song, isCurrentSong, playlistId, showOptions, onRemove  }) =
     setModalVisible(false);
   };
 
-
   return (
     <View>
-
-    <TouchableOpacity
-      style={[styles.songCard, isCurrentSong && styles.activeSongCard]}
-      onPress={handlePress}
+      <TouchableOpacity
+        style={[styles.songCard, isCurrentSong && styles.activeSongCard]}
+        onPress={handlePress}
       >
-      <Image 
-        source={song.song_photo_url ? { uri: song.song_photo_url } : defaultCoverImage}
-        style={styles.songCardImage} 
+        <Image 
+          source={song.song_photo_url ? { uri: song.song_photo_url } : defaultCoverImage}
+          style={styles.songCardImage} 
         />
-      <View style={styles.songCardInfo}>
-        <Text style={styles.songCardTitle}>{song.title}</Text>
-        <Text style={styles.songCardArtist}>{song.artistName}</Text>
-        {isCurrentSong }
-      </View>
-      {/* Three-dot menu */}
-      {showOptions && (
-        <TouchableOpacity onPress={handleRemoveSong} style={styles.optionsIcon}>
-          <Ionicons name="ellipsis-vertical" size={24} color="#333" />
-        </TouchableOpacity>
-      )}
-    </TouchableOpacity>
-
-    {/* Modal for confirming song removal */}
-    <Modal transparent={true} visible={modalVisible} animationType="fade">
-    <View style={styles.modalContainer}>
-      <View style={styles.modalContent}>
-        <Text style={styles.modalText}>
-          Remove "{song.title}" from playlist?
-        </Text>
-        <View style={styles.modalButtons}>
-          <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelButton}>
-            <Text style={styles.buttonText}>Cancel</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={confirmRemove} style={styles.confirmButton}>
-            <Text style={styles.buttonText}>Remove</Text>
-          </TouchableOpacity>
+        <View style={styles.songCardInfo}>
+          <Text style={styles.songCardTitle}>{song.title}</Text>
+          <Text style={styles.songCardArtist}>{song.artistName}</Text>
+          {isCurrentSong }
         </View>
-      </View>
+        
+        {/* Only show options if it's the user's own content */}
+        {isOwnContent && (
+          <TouchableOpacity onPress={handleRemoveSong} style={styles.optionsIcon}>
+            <Ionicons name="ellipsis-vertical" size={24} color="#333" />
+          </TouchableOpacity>
+        )}
+      </TouchableOpacity>
+
+      {/* Modal for confirming song removal */}
+      <Modal transparent={true} visible={modalVisible} animationType="fade">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>
+              {showOptions ? `Remove "${song.title}" from playlist?` : `Delete "${song.title}" permanently?`}
+            </Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.cancelButton}>
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={confirmRemove} style={styles.confirmButton}>
+                <Text style={styles.buttonText}>{showOptions ? "Remove" : "Delete"}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
-  </Modal>
-      </View>
   );
 };
 
