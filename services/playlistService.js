@@ -99,11 +99,11 @@ export const playlistService = {
         return data; // Return the available songs
       } else {
         console.log("Could not fetch songs");
-        return []; // Return an empty array if there's an issue
+        return []; 
       }
     } catch (error) {
       console.error(error);
-      return []; // Return an empty array if an error occurs
+      return []; 
     }
   },
 
