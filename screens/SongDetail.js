@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
+  Image,
   Animated,
   StyleSheet,
   TouchableOpacity,
@@ -19,8 +20,6 @@ import { useAudio } from "../context/AudioContext";
 import { likesService } from "../services/likesService";
 import { auth } from "../Utility/firebaseConfig";
 import { styles } from "../styles";
-import { Canvas, Image as CanvasImage } from "react-native-canvas";
-import FastImage from "react-native-fast-image";
 
 const defaultCoverImage = require("../assets/note.jpg");
 
@@ -37,54 +36,12 @@ export default function SongDetailScreen({ route }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(song.likes || 0);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
-  const [bgColor, setBgColor] = useState("#222"); // Default background color
 
   useEffect(() => {
     if (currentSong && song.songId !== currentSong.songId) {
       navigation.replace("SongDetail", { song: currentSong });
     }
   }, [currentSong]);
-
-  useEffect(() => {
-    if (song.song_photo_url) {
-      getDominantColor(song.song_photo_url)
-        .then((color) => setBgColor(color))
-        .catch((error) => console.error("Error extracting color:", error));
-    }
-  }, [song.song_photo_url]);
-
-  const getDominantColor = async (imageUri) => {
-    return new Promise((resolve, reject) => {
-      const canvas = new Canvas();
-      const context = canvas.getContext("2d");
-      const img = new CanvasImage(canvas);
-
-      img.src = imageUri;
-      img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        context.drawImage(img, 0, 0, img.width, img.height);
-
-        const imageData = context.getImageData(0, 0, img.width, img.height).data;
-        let r = 0, g = 0, b = 0, count = 0;
-
-        for (let i = 0; i < imageData.length; i += 4 * 10) { // Sample every 10th pixel
-          r += imageData[i];
-          g += imageData[i + 1];
-          b += imageData[i + 2];
-          count++;
-        }
-
-        r = Math.floor(r / count);
-        g = Math.floor(g / count);
-        b = Math.floor(b / count);
-
-        resolve(`rgb(${r}, ${g}, ${b})`);
-      };
-
-      img.onerror = (error) => reject(error);
-    });
-  };
 
   const handleNext = async () => {
     const currentIndex = playlist.findIndex((s) => s.songId === song.songId);
@@ -172,20 +129,39 @@ export default function SongDetailScreen({ route }) {
     return unsubscribe;
   }, [navigation]);
 
+  useEffect(() => {
+    const checkLikeStatus = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        const result = await likesService.checkLiked(song.songId);
+        setIsLiked(result.liked);
+
+        if (result.likeCount) {
+          setLikeCount(result.likeCount);
+        }
+      } catch (error) {
+        console.error("Error checking like status:", error);
+      }
+    };
+
+    checkLikeStatus();
+  }, [song.songId]);
+
   return (
     <PanGestureHandler
       onGestureEvent={onGestureEvent}
       onHandlerStateChange={onHandlerStateChange}
     >
       <Animated.View
-        style={[
-          styles.songDetailsContainer,
-          { backgroundColor: bgColor, transform: [{ translateY }] },
-        ]}
+        style={[styles.songDetailsContainer, { transform: [{ translateY }] }]}
       >
         <View style={styles.imageTitleContainer}>
           <Animated.Image
-            source={song.song_photo_url ? { uri: song.song_photo_url } : defaultCoverImage}
+            source={
+              song.song_photo_url ? { uri: song.song_photo_url } : defaultCoverImage
+            }
             style={[
               styles.songImage,
               {
@@ -210,9 +186,22 @@ export default function SongDetailScreen({ route }) {
           <SkipButton direction="forward" onPress={handleNext} />
         </View>
 
-        <LinearGradient colors={["#111", "#3333"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.likeContainer}>
-          <TouchableOpacity onPress={toggleLike} disabled={isLikeLoading} style={styles.likeButton}>
-            <Ionicons name={isLiked ? "heart" : "heart-outline"} size={30} color={isLiked ? "#ff375f" : "#ffffff"} />
+        <LinearGradient
+          colors={["#111", "#3333"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.likeContainer}
+        >
+          <TouchableOpacity
+            onPress={toggleLike}
+            disabled={isLikeLoading}
+            style={styles.likeButton}
+          >
+            <Ionicons
+              name={isLiked ? "heart" : "heart-outline"}
+              size={30}
+              color={isLiked ? "#ff375f" : "#ffffff"}
+            />
           </TouchableOpacity>
           <Text style={styles.likeCount}>{likeCount}</Text>
         </LinearGradient>
