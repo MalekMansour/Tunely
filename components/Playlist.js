@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import { playlistService } from "../services/playlistService";
 
 const defaultCoverImage = require('../assets/note.jpg');
 
-const PlayList = ({ title, playlistId, songs: initialSongs = [], image, style }) => {
+const PlayList = ({ title, playlistId, songs: initialSongs = [], image, style, onDelete }) => {
   const navigation = useNavigation();
   const [songs, setSongs] = useState(initialSongs);
   
@@ -39,6 +39,23 @@ const PlayList = ({ title, playlistId, songs: initialSongs = [], image, style })
     });
   };
   
+  const handleLongPress = () => {
+    if (onDelete) {
+      Alert.alert(
+        'Delete Playlist',
+        `Are you sure you want to delete "${title}"?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Delete', 
+            style: 'destructive', 
+            onPress: () => onDelete(playlistId) 
+          }
+        ]
+      );
+    }
+  };
+  
   const getSongCovers = () => {
     const songCovers = [];
     
@@ -64,7 +81,12 @@ const PlayList = ({ title, playlistId, songs: initialSongs = [], image, style })
   const songCovers = getSongCovers();
   
   return (
-    <TouchableOpacity style={[styles.container, style]} onPress={handlePress}>
+    <TouchableOpacity 
+      style={[styles.container, style]} 
+      onPress={handlePress}
+      onLongPress={handleLongPress}
+      delayLongPress={500} // Half second hold to trigger
+    >
       <View style={styles.playlistCoverGrid}>
         <View style={styles.playlistCoverRow}>
           <Image source={songCovers[0]} style={styles.playlistCoverQuadrant} />
@@ -76,9 +98,7 @@ const PlayList = ({ title, playlistId, songs: initialSongs = [], image, style })
         </View>
       </View>
       
-      
-        <Text style={styles.titleText} numberOfLines={1}>{title}</Text>
-     
+      <Text style={styles.titleText} numberOfLines={1}>{title}</Text>
     </TouchableOpacity>
   );
 };

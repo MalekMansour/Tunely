@@ -57,8 +57,14 @@ export const playlistService = {
   },
 
   getPlaylistById: async (id) => {
+    const headers = await getAuthHeaders();
     try {
-      const response = await fetch(`${API_URL}/playlists/${id}`);
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${API_URL}/playlists/${id}`, {
+        method: 'GET',
+        headers
+      });
+      
       if (!response.ok) throw new Error('Failed to fetch playlist');
       return await response.json();
     } catch (error) {
@@ -93,11 +99,11 @@ export const playlistService = {
         return data; // Return the available songs
       } else {
         console.log("Could not fetch songs");
-        return []; // Return an empty array if there's an issue
+        return []; 
       }
     } catch (error) {
       console.error(error);
-      return []; // Return an empty array if an error occurs
+      return []; 
     }
   },
 

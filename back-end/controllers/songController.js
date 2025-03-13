@@ -144,6 +144,32 @@ searchSongs: async (req, res) => {
     console.error('Error searching songs:', error);
     res.status(500).json({ error: error.message });
   }
+},
+deleteSong: async (req, res) => {
+  try {
+    const songId = req.params.id;
+    const userId = req.user.uid;
+    
+    // First check if the song exists and belongs to the user
+    const song = await SongModel.getById(songId);
+    
+    if (!song) {
+      return res.status(404).json({ error: 'Song not found' });
+    }
+    
+    if (song.user_id !== userId) {
+      return res.status(403).json({ error: 'Not authorized to delete this song' });
+    }
+    
+    // Delete the song
+    await SongModel.delete(songId);
+    
+    
+    res.status(200).json({ message: 'Song deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting song:', error);
+    res.status(500).json({ error: 'Failed to delete song' });
+  }
 }
 };
 

@@ -37,7 +37,25 @@ const SongModel = {
       console.error('Error fetching user songs:', error);
       throw error;
     }
+  },
+  delete: async (songId) => {
+    try {
+      // delete related records from other tables
+      await db.query('DELETE FROM song_plays WHERE song_id = ?', [songId]);
+      await db.query('DELETE FROM comments WHERE songId = ?', [songId]);
+      await db.query('DELETE FROM song_likes WHERE song_id = ?', [songId]);
+      await db.query('DELETE FROM playlist_songs WHERE song_id = ?', [songId]);
+      
+      // Then delete the song itself
+      const sql = 'DELETE FROM songs WHERE songId = ?';
+      return await db.query(sql, [songId]);
+    } catch (error) {
+      console.error('Error deleting song:', error);
+      throw error;
+    }
   }
+
 };
+
 
 module.exports = SongModel;

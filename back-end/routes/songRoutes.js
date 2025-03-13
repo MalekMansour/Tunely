@@ -15,6 +15,7 @@ router.get('/myUploads', verifyToken, songController.getMyUploads);
 router.get('/search', songController.searchSongs);
 router.post('/:id/play', verifyToken, songController.recordSongPlay);
 router.get('/:id', songController.getSongById);
+router.delete('/:id', verifyToken, songController.deleteSong);
 
 
 

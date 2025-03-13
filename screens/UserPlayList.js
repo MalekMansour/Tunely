@@ -91,29 +91,17 @@ export default function UserPlayList({ navigation }) {
 
   // Delete playlist
   const handleDeletePlaylist = async (playlistId) => {
-    Alert.alert(
-      'Confirm Delete',
-      'Are you sure you want to delete this playlist?',
-      [
-        { text: 'Cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setLoading(true);
-              await playlistService.deletePlaylist(playlistId);
-              fetchPlaylists();
-            } catch (error) {
-              console.error('Error deleting playlist:', error);
-              Alert.alert('Error', 'Failed to delete playlist');
-            } finally {
-              setLoading(false);
-            }
-          }
-        }
-      ]
-    );
+    try {
+      setLoading(true);
+      await playlistService.deletePlaylist(playlistId);
+      // Refresh the playlists after deletion
+      fetchPlaylists();
+    } catch (error) {
+      console.error('Error deleting playlist:', error);
+      Alert.alert('Error', 'Failed to delete playlist');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -129,7 +117,7 @@ export default function UserPlayList({ navigation }) {
           <PlayList
             title={item.title}
             playlistId={item.id}
-            onDelete={() => handleDeletePlaylist(item.id)}
+            onDelete={handleDeletePlaylist}
           />
         )}
         numColumns={2}

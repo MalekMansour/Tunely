@@ -6,7 +6,12 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/9b99dc7a-5170-47c5-93f1-d7acaaf6146e"
+    },
     "newArchEnabled": true,
+    "runtimeVersion": "1.0.0",
     "plugins": [
       "expo-image-picker",
       "@react-native-google-signin/google-signin",
@@ -26,8 +31,12 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.tunely.app",
       "googleServicesFile": "./GoogleService-Info.plist",
+      "buildNumber": "1.0.0",
       "infoPlist": {
-        "UIBackgroundModes": ["audio"]
+        "UIBackgroundModes": [
+          "audio",
+          "audio"
+        ]
       }
     },
     "android": {
@@ -37,8 +46,12 @@
       },
       "package": "com.tunely.app",
       "googleServicesFile": "./google-services.json",
+      "versionCode": 1,
       "permissions": [
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
     "web": {

@@ -39,6 +39,7 @@ const PlaylistDetail = () => {
   const [userSongs, setUserSongs] = useState();
   const [availableSongs, setAvailableSongs] = useState([]);
   const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
+  const [isOwnPlaylist, setIsOwnPlaylist] = useState(false);
 
   // Fetch playlist with its songs
   useEffect(() => {
@@ -49,6 +50,26 @@ const PlaylistDetail = () => {
     };
 
     loadPlaylist();
+  }, [playlistId]);
+
+  useEffect(() => {
+    const checkPlaylistOwnership = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          setIsOwnPlaylist(false);
+          return;
+        }
+        
+        const playlistDetails = await playlistService.getPlaylistById(playlistId);
+        setIsOwnPlaylist(playlistDetails.user_id === user.uid);
+      } catch (error) {
+        console.error("Error checking playlist ownership:", error);
+        setIsOwnPlaylist(false);
+      }
+    };
+    
+    checkPlaylistOwnership();
   }, [playlistId]);
 
   const getSongCovers = () => {
@@ -143,17 +164,21 @@ const PlaylistDetail = () => {
 
       <View style={styles.headerContainer}>
         <Text style={styles.playlistTitle}>{title}</Text>
-        <TouchableOpacity onPress={handleAddSong}>
-          <LinearGradient
-            colors={["#111", "#333"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.addButton}
-          >
-            <Ionicons name="add-circle-outline" size={24} color="#f1f1f1" />
-            <Text style={styles.addButtonText}>Add Songs</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+        
+        {/* Only show Add Songs button if it's the user's playlist */}
+        {isOwnPlaylist && (
+          <TouchableOpacity onPress={handleAddSong}>
+            <LinearGradient
+              colors={["#111", "#333"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.addButton}
+            >
+              <Ionicons name="add-circle-outline" size={24} color="#f1f1f1" />
+              <Text style={styles.addButtonText}>Add Songs</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        )}
       </View>
     </>
   );
@@ -173,6 +198,7 @@ const PlaylistDetail = () => {
               playlistId={playlistId} 
               showOptions={true}
               onRemove={handleRemoveSong}
+              isOwnContent={isOwnPlaylist} // Pass ownership status to SongCard
             />
           )}
           contentContainerStyle={styles.contentContainer}
