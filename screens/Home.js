@@ -57,10 +57,26 @@ export default function HomeScreen() {
     Country: songs.filter((song) => song.genre === "Country").slice(0, 10),
     Electronic: songs.filter((song) => song.genre === "Electronic").slice(0, 10),
     Jazz: songs.filter((song) => song.genre === "Jazz").slice(0, 10),
-    Other: songs.filter(
-      (song) =>
-        !["Pop", "Rap", "R&B", "Rock", "Country", "Electronic", "Jazz"].includes(song.genre)
-    ).slice(0, 10),
+    Alternative: songs.filter((song) => song.genre === "Alternative").slice(0, 10),
+    Lofi: songs.filter((song) => song.genre === "Lofi").slice(0, 10),
+    Trap: songs.filter((song) => song.genre === "Trap").slice(0, 10),
+    Other: songs
+      .filter(
+        (song) =>
+          ![
+            "Pop",
+            "Rap",
+            "R&B",
+            "Rock",
+            "Country",
+            "Electronic",
+            "Jazz",
+            "Alternative",
+            "Lofi",
+            "Trap",
+          ].includes(song.genre)
+      )
+      .slice(0, 10),
   };
 
   return (
