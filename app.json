@@ -5,7 +5,9 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "owner": "capstone-project",
     "userInterfaceStyle": "light",
+    "privacy": "public",
     "updates": {
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/9b99dc7a-5170-47c5-93f1-d7acaaf6146e"

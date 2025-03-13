@@ -27,26 +27,17 @@ const SongCard2 = ({ song }) => {
 
   return (
     <TouchableOpacity
-      style={[styles.songCard2, isCurrentSong]}
+      style={[styles.songCard2, isCurrentSong && styles.activeSongCard2]}
       onPress={handlePress}
     >
       <ImageBackground 
         source={song.song_photo_url ? { uri: song.song_photo_url } : defaultCoverImage}
-        style={styles.songCard2Image}
+        style={isCurrentSong ? styles.activeSongCard2Image : styles.songCard2Image}
         imageStyle={{ borderRadius: 8 }}
       >
         <View style={styles.songCard2TitleContainer}>
           <Text style={styles.songCard2Title}>{song.title}</Text>
           <Text style={styles.songCard2Artist}>{song.artistName}</Text>
-          {isCurrentSong && (
-            <View style={styles.playingIndicator}>
-              <Ionicons 
-                name={isPlaying ? "pause-circle" : "play-circle"} 
-                size={32} 
-                color="#1DB954"
-              />
-            </View>
-          )}
         </View>
       </ImageBackground>
     </TouchableOpacity>

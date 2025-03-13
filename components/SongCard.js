@@ -8,11 +8,14 @@ import { useState } from "react";
 
 const defaultCoverImage = require('../assets/note.jpg');
 
-const SongCard = ({ song, isCurrentSong, playlistId, showOptions, onRemove, isOwnContent }) => {
+const SongCard = ({ song, playlistId, showOptions, onRemove, isOwnContent }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
   const navigation = useNavigation();
   const { playSound, pauseSound, resumeSound, currentSong, isPlaying } = useAudio();
+
+  // Determine if this is the current song - same approach as SongCard2
+  const isCurrentSong = currentSong?.songId === song.songId;
 
   const handlePress = async () => {
     if (currentSong?.songId === song.songId) {
@@ -56,7 +59,6 @@ const SongCard = ({ song, isCurrentSong, playlistId, showOptions, onRemove, isOw
         <View style={styles.songCardInfo}>
           <Text style={styles.songCardTitle}>{song.title}</Text>
           <Text style={styles.songCardArtist}>{song.artistName}</Text>
-          {isCurrentSong }
         </View>
         
         {/* Only show options if it's the user's own content */}

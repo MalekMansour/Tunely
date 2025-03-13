@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
 
 
   songCard: {
-    backgroundColor: "#182952", // Purple for song cards
+    backgroundColor: "#182952", 
     padding: 15,
     borderRadius: 8,
     marginBottom: 10,
@@ -216,27 +216,30 @@ export const styles = StyleSheet.create({
   songCardTitle: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#666"
+    color: "#f1f1f1"
   },
   songCardArtist: {
     fontSize: 12,
-    color: "#666",
+    color: "#d1d1d1",
   },
 
   songCard2: {
     marginVertical: 5,
     marginRight: 10,
-    borderRadius: 5,
+    borderRadius: 8,
     overflow: "hidden",
   },
   songCard2Image: {
     width: 150,
     height: 150,
     justifyContent: "flex-end",
+    borderRadius: 8,
   },
   songCard2TitleContainer: {
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     padding: 2,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
   },
   songCard2Title: {
     fontSize: 14,
@@ -290,8 +293,47 @@ export const styles = StyleSheet.create({
     padding: 10,
   },
   activeSongCard: {
-    backgroundColor: 'rgba(29, 185, 84, 0.1)', 
+    backgroundColor: 'rgba(112, 128, 144, 0.15)',  
+    borderWidth: 1.5,  
+    borderColor: '#99a9b9',  
+    shadowColor: '#99a9b9',  
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.9,  
+    shadowRadius: 12,    
+    elevation: 8,        
+    marginVertical: 4,   
   },
+
+  activeSongCard2: {
+    backgroundColor: 'transparent',
+    borderWidth: 0, 
+    shadowColor: '#99a9b9',
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.7,
+    shadowRadius: 8,
+    elevation: 10,
+    overflow: 'visible', 
+    margin: '2'
+  },
+  activeSongCard2Image: {
+    width: 148,
+    height: 148,
+    justifyContent: "flex-end",
+    borderRadius: 8,
+    borderWidth: 1.5, // Apply border directly to image
+    borderColor: '#99a9b9', // Slate gray border
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  // Playlist styles
   playIcon: {
     position: 'absolute',
     right: 10,
