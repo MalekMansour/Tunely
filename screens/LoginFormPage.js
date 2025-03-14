@@ -7,10 +7,12 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { authService } from "../services/authService"; 
 import { auth } from "../Utility/firebaseConfig";
 import { Button } from "react-native-paper";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons"; // Import Icon
 
 export default function LoginFormPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // Track password visibility
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigation(); 
 
@@ -66,6 +68,7 @@ export default function LoginFormPage() {
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.loginBox, { opacity: fadeAnim }]}>
+
         {/* Back Button */}
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Text style={styles.backButtonText}>← Back</Text>
@@ -82,15 +85,20 @@ export default function LoginFormPage() {
           onChangeText={setEmail}
         />
 
-        {/* Password Input */}
-        <TextInput
-          placeholder="Password"
-          placeholderTextColor="#aaa"
-          secureTextEntry
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-        />
+        {/* Password Input with Eye Icon */}
+        <View style={styles.passwordContainer}>
+          <TextInput
+            placeholder="Password"
+            placeholderTextColor="#aaa"
+            secureTextEntry={!showPassword}
+            style={styles.passwordInput}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+            <Icon name={showPassword ? "eye-off" : "eye"} size={24} color="#aaa" />
+          </TouchableOpacity>
+        </View>
 
         {/* Log In Button */}
         <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
@@ -111,7 +119,7 @@ export default function LoginFormPage() {
         </Animated.View>
 
         <Text style={styles.orText}>Or</Text>
-        
+
         {/* Google Button with Logo */}
         <TouchableOpacity onPress={handleGoogleSignIn} style={styles.googleButton}>
           <Image 
@@ -119,6 +127,7 @@ export default function LoginFormPage() {
             style={styles.googleLogo}
           />
         </TouchableOpacity>
+
       </Animated.View>
     </View>
   );
@@ -160,6 +169,24 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 12,
     fontSize: 16,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F1F1F1",
+    borderRadius: 8,
+    width: "100%",
+    paddingRight: 15,
+    marginBottom: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    padding: 15,
+    fontSize: 16,
+    color: "#000",
+  },
+  eyeIcon: {
+    padding: 10,
   },
   paperButton: {
     width: "100%", 
