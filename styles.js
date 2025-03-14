@@ -105,6 +105,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 20,
     width: "80%",
+    marginTop: 80, 
+    paddingTop: 20, 
   },
   sliderContainer: {
     width: "80%",
@@ -472,6 +474,15 @@ export const styles = StyleSheet.create({
   marginBottom: 20,
   paddingHorizontal: 16,
   paddingTop: 10,
+},
+arrowButton: {
+  position: "absolute",
+  top: 25, // Adjust this value if needed
+  left: "50%",
+  transform: [{ translateX: -16 }],
+  zIndex: 10,
+  padding: 8,
+  marginTop: 15, 
 },
 
 });
