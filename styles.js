@@ -88,6 +88,7 @@ export const styles = StyleSheet.create({
     width: 350,
     height: 350,
     marginVertical: 20,
+    borderRadius: 6,
   },
   songArtist: {
     fontSize: 14,
@@ -105,7 +106,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 20,
     width: "80%",
-    marginTop: 80, 
+    marginTop: 70, 
     paddingTop: 20, 
   },
   sliderContainer: {
@@ -477,12 +478,11 @@ export const styles = StyleSheet.create({
 },
 arrowButton: {
   position: "absolute",
-  top: 25, // Adjust this value if needed
-  left: "50%",
+  top: 25, 
+  left: "10%",
   transform: [{ translateX: -16 }],
   zIndex: 10,
   padding: 8,
-  marginTop: 15, 
+  marginTop: 30, 
 },
-
 });
