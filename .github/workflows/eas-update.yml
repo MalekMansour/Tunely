@@ -3,7 +3,7 @@ name: EAS Update Deployment
 on:
   push:
     branches:
-      - main  # Change this to your deployment branch
+      - main  # GitHub branch to trigger this workflow
 
 jobs:
   eas_update:
@@ -13,17 +13,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Install EAS CLI
         run: npm install -g eas-cli
 
       - name: Authenticate with EAS
-        run: eas login --token ${{ secrets.EAS_ACCESS_TOKEN }}
+        run: echo ${{ secrets.EAS_ACCESS_TOKEN }} | eas login
 
       - name: Get latest commit message
         id: commit_message
