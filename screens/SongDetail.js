@@ -129,8 +129,10 @@ export default function SongDetailScreen({ route }) {
             shadowOffset: { width: 0, height: 0 },
             shadowOpacity: 1,
             shadowRadius: 10,
+            marginTop: 0, 
           },
         ]}
+        
       >
         {/* Down Arrow Button */}
         <TouchableOpacity onPress={handleDismiss} style={styles.arrowButton}>
