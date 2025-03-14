@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Alert, TextInput, Image, StyleSheet } fro
 import { Picker } from "@react-native-picker/picker";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
-import * as Haptics from "expo-haptics"; // Import Haptics
+import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { songService } from "../services/songService";
 
@@ -15,6 +15,7 @@ export default function Upload({ navigation }) {
   const [songFile, setSongFile] = useState(null);
   const [coverImage, setCoverImage] = useState(null);
   const [uploadTimeout, setUploadTimeout] = useState(null);
+  const [buttonColor, setButtonColor] = useState("#182952");
 
   const pickSong = async () => {
     try {
@@ -71,24 +72,29 @@ export default function Upload({ navigation }) {
   const startUploadHold = () => {
     if (loading) return;
 
-    // Start vibration feedback
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-    // Set a timeout to trigger the upload after 3 seconds
+    let colorChangeInterval = setInterval(() => {
+      setButtonColor(prevColor => (prevColor === "#007bff" ? "#0056b3" : "#007bff")); // Alternate colors
+    }, 100);
+
     const timeout = setTimeout(() => {
+      clearInterval(colorChangeInterval);
       handleUpload();
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); // Confirm upload with a vibration
+      setButtonColor("#182952"); 
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }, 3000);
 
-    setUploadTimeout(timeout);
+    setUploadTimeout({ timeout, colorChangeInterval });
   };
 
   const cancelUploadHold = () => {
-    // If the user releases early, cancel the upload
     if (uploadTimeout) {
-      clearTimeout(uploadTimeout);
+      clearTimeout(uploadTimeout.timeout);
+      clearInterval(uploadTimeout.colorChangeInterval);
       setUploadTimeout(null);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning); // Warn user with a short vibration
+      setButtonColor("#182952"); // Reset color
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     }
   };
 
@@ -146,7 +152,7 @@ export default function Upload({ navigation }) {
         </View>
 
         <TouchableOpacity
-          style={[styles.holdButton, loading && styles.buttonDisabled]}
+          style={[styles.holdButton, { backgroundColor: buttonColor }, loading && styles.buttonDisabled]}
           onPressIn={startUploadHold}
           onPressOut={cancelUploadHold}
         >
@@ -162,7 +168,7 @@ const styles = StyleSheet.create({
   form: { marginTop: 60 },
   backButton: { position: "absolute", top: 40, left: 10, padding: 10 },
   button: { backgroundColor: "#213555", padding: 15, borderRadius: 8, alignItems: "center", marginVertical: 10 },
-  holdButton: { backgroundColor: "#FF5733", padding: 15, borderRadius: 8, alignItems: "center", marginVertical: 10 },
+  holdButton: { padding: 15, borderRadius: 8, alignItems: "center", marginVertical: 10 },
   buttonDisabled: { opacity: 0.5 },
   buttonText: { color: "#f1f1f1", fontWeight: "bold", fontSize: 16 },
   input: { backgroundColor: "#2a2a2a", color: "#f1f1f1", padding: 15, borderRadius: 8, marginVertical: 10, fontSize: 16 },
@@ -171,4 +177,3 @@ const styles = StyleSheet.create({
   pickerLabel: { color: "#aaa", fontSize: 14, paddingLeft: 15, paddingTop: 5 },
   picker: { color: "#f1f1f1", backgroundColor: "transparent" },
 });
-
