@@ -43,6 +43,14 @@ export default function SongDetailScreen({ route }) {
     }
   }, [currentSong]);
 
+  const handleDismiss = () => {
+    Animated.timing(translateY, {
+      toValue: SCREEN_HEIGHT,
+      duration: 300,
+      useNativeDriver: false,
+    }).start(() => navigation.goBack());
+  };
+
   const handleNext = async () => {
     const currentIndex = playlist.findIndex((s) => s.songId === song.songId);
     if (currentIndex < playlist.length - 1) {
@@ -83,18 +91,6 @@ export default function SongDetailScreen({ route }) {
     }
   };
 
-  const scale = translateY.interpolate({
-    inputRange: [-150, 0, 400],
-    outputRange: [1.1, 1, 0.8],
-    extrapolate: "clamp",
-  });
-
-  const imageTranslateY = translateY.interpolate({
-    inputRange: [-200, 0, 200],
-    outputRange: [-80, 0, 80],
-    extrapolate: "clamp",
-  });
-
   const onGestureEvent = Animated.event(
     [{ nativeEvent: { translationY: translateY } }],
     { useNativeDriver: false }
@@ -103,13 +99,7 @@ export default function SongDetailScreen({ route }) {
   const onHandlerStateChange = (event) => {
     if (event.nativeEvent.state === State.END) {
       if (event.nativeEvent.translationY > 100) {
-        Animated.timing(translateY, {
-          toValue: SCREEN_HEIGHT,
-          duration: 300,
-          useNativeDriver: false,
-        }).start(() => navigation.goBack());
-      } else if (event.nativeEvent.translationY < -100) {
-        navigation.navigate("CommentScreen", { song: song });
+        handleDismiss();
       } else {
         Animated.spring(translateY, {
           toValue: 0,
@@ -121,70 +111,40 @@ export default function SongDetailScreen({ route }) {
     }
   };
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      translateY.setValue(0);
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  useEffect(() => {
-    const checkLikeStatus = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
-
-        const result = await likesService.checkLiked(song.songId);
-        setIsLiked(result.liked);
-
-        if (result.likeCount) {
-          setLikeCount(result.likeCount);
-        }
-      } catch (error) {
-        console.error("Error checking like status:", error);
-      }
-    };
-
-    checkLikeStatus();
-  }, [song.songId]);
-
   return (
     <PanGestureHandler
       onGestureEvent={onGestureEvent}
       onHandlerStateChange={onHandlerStateChange}
     >
       <Animated.View
-  style={[
-    styles.songDetailsContainer,
-    {
-      transform: [{ translateY }],
-      backgroundColor: "rgba(25, 26, 27, 0.80)",
-      borderWidth: 1.5,
-      borderRadius: 16,
-      borderColor: "#99a9b9",
-      shadowColor: "#99a9b9",
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 1,
-      shadowRadius: 10,
-      marginTop: 75,
-    },
-  ]}
->
+        style={[
+          styles.songDetailsContainer,
+          {
+            transform: [{ translateY }],
+            backgroundColor: "rgb(25, 26, 27)",
+            borderWidth: 1.5,
+            borderRadius: 16,
+            borderColor: "#99a9b9",
+            shadowColor: "#99a9b9",
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 1,
+            shadowRadius: 10,
+          },
+        ]}
+      >
+        {/* Down Arrow Button */}
+        <TouchableOpacity onPress={handleDismiss} style={styles.arrowButton}>
+          <Ionicons name="chevron-down" size={32} color="#ffffff"/>
+        </TouchableOpacity>
 
         <View style={styles.imageTitleContainer}>
-          <Animated.Image
+          <Image
             source={
               song.song_photo_url ? { uri: song.song_photo_url } : defaultCoverImage
             }
             style={[
               styles.songImage,
-              {
-                transform: [{ scale }, { translateY: imageTranslateY }],
-                width: IMAGE_SIZE,
-                height: IMAGE_SIZE,
-                alignSelf: "center",
-              },
+              { width: IMAGE_SIZE, height: IMAGE_SIZE, alignSelf: "center" },
             ]}
           />
           <Text style={styles.songTitle}>{song.title}</Text>
