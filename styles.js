@@ -45,6 +45,7 @@ export const styles = StyleSheet.create({
     backgroundColor: "rgb(4, 4, 4)", 
     padding: 15,
     paddingTop: 40, // For status bar spacing
+    height: 140,
   },
   profileButton: {
     padding: 2,
