@@ -159,7 +159,7 @@ export default function SongDetailScreen({ route }) {
     styles.songDetailsContainer,
     {
       transform: [{ translateY }],
-      backgroundColor: "rgba(25, 26, 27, 0.84)",
+      backgroundColor: "rgba(25, 26, 27, 0.80)",
       borderWidth: 1.5,
       borderRadius: 16,
       borderColor: "#99a9b9",
