@@ -3,33 +3,41 @@ name: EAS Update Deployment
 on:
   push:
     branches:
-      - main
+      - main  
 
 jobs:
-  eas_update:
+  update:
+    name: EAS Update
     runs-on: ubuntu-latest
-
     steps:
+      - name: Check for EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EAS_ACCESS_TOKEN }}" ]; then
+            echo "You must provide an EXPO_TOKEN secret linked to this project's Expo account in this repo's secrets. Learn more: https://docs.expo.dev/eas-update/github-actions"
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 18.x
+          cache: npm  # Change to 'yarn' if you use yarn
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EAS_ACCESS_TOKEN }}
 
       - name: Install dependencies
-        run: npm install
-
-      - name: Install EAS CLI
-        run: npm install -g eas-cli
-
-      - name: Authenticate with EAS
-        run: npx eas-cli login --non-interactive --token ${{ secrets.EAS_ACCESS_TOKEN }}
+        run: npm install 
 
       - name: Get latest commit message
         id: commit_message
         run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
 
-      - name: Run EAS Update
+      - name: Publish update
         run: eas update --branch preview --message "${{ env.message }}"
