@@ -45,25 +45,23 @@ export default function LoginFormPage() {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      Alert.alert("Success", "Logged in successfully!");
-      navigation.navigate("AuthCheck"); 
+      navigation.navigate("AuthCheck");  
     } catch (error) {
       Alert.alert("Error", error.message);
     }
   };
-
+  
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
       const userInfo = await authService.signInWithGoogleAuth();
-      Alert.alert("Success", "Logged in with Google successfully!");
-      navigation.navigate("AuthCheck");
+      navigation.navigate("AuthCheck");  
     } catch (error) {
       Alert.alert("Error", error.message || "Failed to sign in with Google");
     } finally {
       setIsLoading(false);
     }
-  };
+  };  
 
   return (
     <View style={styles.container}>
@@ -123,7 +121,7 @@ export default function LoginFormPage() {
         {/* Google Button with Logo */}
         <TouchableOpacity onPress={handleGoogleSignIn} style={styles.googleButton}>
           <Image 
-            source={require('../assets/google-logo.png')} // Add your Google logo image here
+            source={require('../assets/google-logo.png')} 
             style={styles.googleLogo}
           />
         </TouchableOpacity>
