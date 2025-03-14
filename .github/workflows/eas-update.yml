@@ -3,7 +3,7 @@ name: EAS Update Deployment
 on:
   push:
     branches:
-      - preview  # Changed to preview branch
+      - main
 
 jobs:
   eas_update:
