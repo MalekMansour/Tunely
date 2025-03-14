@@ -167,7 +167,7 @@ export default function SongDetailScreen({ route }) {
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 1,
       shadowRadius: 10,
-      marginTop: 70,
+      marginTop: 75,
     },
   ]}
 >
