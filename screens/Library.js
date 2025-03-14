@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: "row",
     alignItems: "center",
-  },X
+  },
   musicIcon: {
     fontSize: 30,
     color: COLORS.PRIMARY,
