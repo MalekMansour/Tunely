@@ -16,8 +16,20 @@ export default function FloatingPlayer() {
   const currentRoute = routes?.[routes.length - 1];
 
 
-  if (!currentSong || currentRoute?.name === 'SongDetail' || currentRoute?.name === 'CommentScreen' || 
-    currentRoute?.name === 'Profile' || currentRoute?.name === 'Upload') return null;
+  if (!currentSong || 
+    currentRoute?.name === 'SongDetail' || 
+    currentRoute?.name === 'CommentScreen' || 
+    currentRoute?.name === 'Profile' || 
+    currentRoute?.name === 'Upload' ||
+    currentRoute?.name === 'Login' ||
+    currentRoute?.name === 'LoginFormPage' ||
+    currentRoute?.name === 'SignUp' ||
+    currentRoute?.name === 'Settings' ||
+    currentRoute?.name === 'PrivacySettings' ||
+    currentRoute?.name === 'Notifications' ||
+    currentRoute?.name === 'AdminPage' ||
+    currentRoute?.name === 'AuthCheck'
+) return null;
 
   const handlePress = () => {
     navigation.navigate('SongDetail', { song: currentSong });

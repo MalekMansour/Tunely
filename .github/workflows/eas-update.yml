@@ -1,0 +1,20 @@
+name: EAS Update Deployment
+
+on:
+  push:
+    branches:
+      - main  # Change this if needed
+
+jobs:
+  eas-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate with EAS
+        run: npx eas login --token ${{ secrets.EAS_ACCESS_TOKEN }}
+
+      - name: Publish update to EAS
+        run: npx eas update --branch preview --auto

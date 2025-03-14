@@ -96,7 +96,7 @@ export default function LibraryScreen() {
           style={styles.profileButton}
           onPress={handleProfilePress}
         >
-          <TopBarProfileIcon size={30} />
+          <TopBarProfileIcon size={30}/>
         </TouchableOpacity>
       </View>
 
@@ -157,8 +157,8 @@ export default function LibraryScreen() {
           <ScrollView style={styles.scrollContainer}>
             <ActionButton
               icon="+"
-              title="Create New Playlist"
-              onPress={() => navigation.navigate("UserPlayList", { showCreateModal: true })}
+              title="Upload a Song"
+              onPress={() => navigation.navigate("Upload")}
             />
            
             <ActionButton
@@ -217,6 +217,7 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 10,
   },
   musicIcon: {
     fontSize: 30,
@@ -230,6 +231,7 @@ const styles = StyleSheet.create({
   },
   profileButton: {
     padding: 4,
+    marginTop: 10,
   },
   tabContainer: {
     flexDirection: "row",

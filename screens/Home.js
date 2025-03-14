@@ -27,7 +27,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       refreshSongs();
-      refreshRecentlyPlayedSongs(); 
+      refreshRecentlyPlayedSongs();
 
       const fetchPlaylists = async () => {
         try {
