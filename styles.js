@@ -106,7 +106,7 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 20,
     width: "80%",
-    marginTop: 70, 
+    marginTop: 40, 
     paddingTop: 20, 
   },
   sliderContainer: {
