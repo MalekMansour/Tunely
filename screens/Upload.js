@@ -75,7 +75,7 @@ export default function Upload({ navigation }) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     let colorChangeInterval = setInterval(() => {
-      setButtonColor(prevColor => (prevColor === "#007bff" ? "#0056b3" : "#007bff")); // Alternate colors
+      setButtonColor(prevColor => (prevColor === "#007bff" ? "#0056b3" : "#007bff")); 
     }, 100);
 
     const timeout = setTimeout(() => {
