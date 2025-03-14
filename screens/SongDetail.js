@@ -155,8 +155,22 @@ export default function SongDetailScreen({ route }) {
       onHandlerStateChange={onHandlerStateChange}
     >
       <Animated.View
-        style={[styles.songDetailsContainer, { transform: [{ translateY }] }]}
-      >
+  style={[
+    styles.songDetailsContainer,
+    {
+      transform: [{ translateY }],
+      backgroundColor: "rgba(25, 26, 27, 0.84)",
+      borderWidth: 1.5,
+      borderRadius: 16,
+      borderColor: "#99a9b9",
+      shadowColor: "#99a9b9",
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 1,
+      shadowRadius: 10,
+    },
+  ]}
+>
+
         <View style={styles.imageTitleContainer}>
           <Animated.Image
             source={
