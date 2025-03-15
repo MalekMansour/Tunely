@@ -138,16 +138,16 @@ export default function Upload({ navigation }) {
           <Picker selectedValue={genre} onValueChange={setGenre} enabled={!loading} style={styles.picker}>
             <Picker.Item label="Select a genre" value="" color="#aaa" />
             <Picker.Item label="Pop" value="Pop" color="#fff" />
-            <Picker.Item label="HipHop/Rap" value="Rap" color="#fff" />
+            <Picker.Item label="Rap" value="Rap" color="#fff" />
+            <Picker.Item label="Acoustic" value="Acoustic" color="#fff" />
+            <Picker.Item label="Lofi" value="Lofi" color="#fff" />
             <Picker.Item label="R&B" value="R&B" color="#fff" />
             <Picker.Item label="Rock" value="Rock" color="#fff" />
-            <Picker.Item label="Country" value="Country" color="#fff" />
             <Picker.Item label="Electronic" value="Electronic" color="#fff" />
-            <Picker.Item label="Jazz" value="Jazz" color="#fff" />
             <Picker.Item label="Alternative" value="Alternative" color="#fff" />
-            <Picker.Item label="Lofi" value="Lofi" color="#fff" />
+            <Picker.Item label="Jazz" value="Jazz" color="#fff" />
             <Picker.Item label="Trap" value="Trap" color="#fff" />
-            <Picker.Item label="Acoustic" value="Acoustic" color="#fff" />
+            <Picker.Item label="Country" value="Country" color="#fff" />
             <Picker.Item label="Other" value="Other" color="#fff" />
           </Picker>
         </View>
