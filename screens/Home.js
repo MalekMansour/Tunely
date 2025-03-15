@@ -52,14 +52,15 @@ export default function HomeScreen() {
   const categorizedSongs = {
     Pop: songs.filter((song) => song.genre === "Pop").slice(0, 10),
     Rap: songs.filter((song) => song.genre === "Rap").slice(0, 10),
+    Acoustic: songs.filter((song) => song.genre === "Acoustic").slice(0, 10),
+    Lofi: songs.filter((song) => song.genre === "Lofi").slice(0, 10),
     "R&B": songs.filter((song) => song.genre === "R&B").slice(0, 10),
     Rock: songs.filter((song) => song.genre === "Rock").slice(0, 10),
-    Country: songs.filter((song) => song.genre === "Country").slice(0, 10),
     Electronic: songs.filter((song) => song.genre === "Electronic").slice(0, 10),
-    Jazz: songs.filter((song) => song.genre === "Jazz").slice(0, 10),
     Alternative: songs.filter((song) => song.genre === "Alternative").slice(0, 10),
-    Lofi: songs.filter((song) => song.genre === "Lofi").slice(0, 10),
+    Jazz: songs.filter((song) => song.genre === "Jazz").slice(0, 10),
     Trap: songs.filter((song) => song.genre === "Trap").slice(0, 10),
+    Country: songs.filter((song) => song.genre === "Country").slice(0, 10),
     Other: songs
       .filter(
         (song) =>
@@ -74,6 +75,7 @@ export default function HomeScreen() {
             "Alternative",
             "Lofi",
             "Trap",
+            "Acoustic",
           ].includes(song.genre)
       )
       .slice(0, 10),
