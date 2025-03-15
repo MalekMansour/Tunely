@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { API_URL } from "../config/apiConfig";
 import {
   View,
   Text,
@@ -9,72 +8,83 @@ import {
   TouchableOpacity,
   Modal,
   Pressable,
+  TextInput,
+  ScrollView,
+  ActivityIndicator,
+  SafeAreaView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SongCard from "../components/SongCard";
-import { SafeAreaView } from "react-native";
-import { styles as globalStyles } from "../styles";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRoute } from "@react-navigation/native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import { auth } from "../Utility/firebaseConfig";
 import { playlistService } from "../services/playlistService";
-
-const getAuthHeaders = async () => {
-  const user = auth.currentUser;
-  if (!user) return {};
-
-  const token = await user.getIdToken();
-  return {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
-};
+import { songService } from "../services/songService";
+import { useAudio } from "../context/AudioContext";
 
 const defaultCoverImage = require("../assets/note.jpg");
 
 const PlaylistDetail = () => {
   const route = useRoute();
-  const { playlistId, title, image } = route.params;
+  const navigation = useNavigation();
+  const { playlistId, title } = route.params;
+
+  // Playlist songs state
   const [playlistSongs, setPlaylistSongs] = useState([]);
-  const [userSongs, setUserSongs] = useState();
-  const [availableSongs, setAvailableSongs] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
+  const [userSongs, setUserSongs] = useState([]);
   const [isOwnPlaylist, setIsOwnPlaylist] = useState(false);
 
-  // Fetch playlist with its songs
+  // Modal & search state for adding songs
+  const [modalVisible, setModalVisible] = useState(false);
+  const [query, setQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [loadingSearch, setLoadingSearch] = useState(false);
+
+  // Audio context (assumes playSound is implemented)
+  const { playSound } = useAudio();
+
+  // Fetch playlist songs
   useEffect(() => {
     const loadPlaylist = async () => {
-      const songs = await playlistService.fetchPlaylist(playlistId); // Call the service function to fetch songs
-      setUserSongs(songs); // Set the songs fetched from the service
-      setPlaylistSongs(songs);
+      try {
+        const songs = await playlistService.fetchPlaylist(playlistId);
+        setUserSongs(songs);
+        setPlaylistSongs(songs);
+      } catch (error) {
+        console.error("Error loading playlist:", error);
+      }
     };
-
     loadPlaylist();
   }, [playlistId]);
 
+  // Check if current user owns the playlist
   useEffect(() => {
-    const checkPlaylistOwnership = async () => {
+    const checkOwnership = async () => {
       try {
         const user = auth.currentUser;
         if (!user) {
           setIsOwnPlaylist(false);
           return;
         }
-        
-        const playlistDetails = await playlistService.getPlaylistById(playlistId);
-        setIsOwnPlaylist(playlistDetails.user_id === user.uid);
+        const details = await playlistService.getPlaylistById(playlistId);
+        setIsOwnPlaylist(details.user_id === user.uid);
       } catch (error) {
         console.error("Error checking playlist ownership:", error);
         setIsOwnPlaylist(false);
       }
     };
-    
-    checkPlaylistOwnership();
+    checkOwnership();
   }, [playlistId]);
 
+  // Back button handler: navigate to Library screen
+  const handleBack = () => {
+    navigation.navigate("Library");
+  };
+
+  // Get playlist cover image using the same logic as in your PlayList component
   const getSongCovers = () => {
     const songCovers = [];
-
     if (userSongs && userSongs.length > 0) {
       for (let i = 0; i < Math.min(userSongs.length, 4); i++) {
         if (userSongs[i]?.song_photo_url) {
@@ -86,97 +96,114 @@ const PlaylistDetail = () => {
         }
       }
     }
-
     while (songCovers.length < 4) {
       songCovers.push(defaultCoverImage);
     }
-
     return songCovers;
   };
 
   const songCovers = getSongCovers();
+  const playlistCover = songCovers[0];
 
-  const handleAddSong = async () => {
-    try {
-      const songs = await playlistService.fetchAvailableSongsForModal();
-      setAvailableSongs(songs);
-      setModalVisible(true); 
-    } catch (error) {
-      console.error("Error fetching available songs:", error);
+  // Control button handlers
+  const handlePlay = () => {
+    if (userSongs && userSongs.length > 0) {
+      const firstSong = userSongs[0];
+      playSound(firstSong);
+      // Optionally navigate to SongDetail if desired:
+      // navigation.navigate("SongDetail", { song: firstSong });
     }
   };
 
-  // Function to remove a song from the playlist
-  const handleRemoveSong = async (playlistId, songId) => {
+  const handleShuffle = () => {
+    if (userSongs && userSongs.length > 0) {
+      const randomIndex = Math.floor(Math.random() * userSongs.length);
+      const randomSong = userSongs[randomIndex];
+      playSound(randomSong);
+      // Optionally navigate to SongDetail if desired:
+      // navigation.navigate("SongDetail", { song: randomSong });
+    }
+  };
+
+  // Search functionality in the add songs modal
+  const handleSearch = async (text) => {
+    setQuery(text);
+    if (text.length > 2) {
+      setIsSearching(true);
+      setLoadingSearch(true);
+      try {
+        const results = await songService.searchSongs(text);
+        // Filter out songs already in the playlist
+        const filtered = results.filter(
+          (song) =>
+            !playlistSongs.some(
+              (ps) => (ps.id || ps.songId) === song.id
+            )
+        );
+        setSearchResults(filtered);
+      } catch (error) {
+        console.error("Error searching songs:", error);
+        setSearchResults([]);
+      } finally {
+        setLoadingSearch(false);
+      }
+    } else {
+      setIsSearching(false);
+      setSearchResults([]);
+    }
+  };
+
+  // Add a song to the playlist from search results
+  const handleAddToPlaylist = async (song) => {
     try {
-      console.log("Removing song with ID:", songId);
+      await playlistService.addSongToPlaylist(playlistId, song);
+      setUserSongs([...userSongs, song]);
+      setPlaylistSongs([...playlistSongs, song]);
+      setSearchResults(searchResults.filter((s) => s.id !== song.id));
+    } catch (error) {
+      console.error("Error adding song:", error);
+    }
+  };
+
+  // Remove a song from the playlist (used inside SongCard)
+  const handleRemoveSong = async (songId) => {
+    try {
       await playlistService.removeSongFromPlaylist(playlistId, songId);
-      
-      // Update userSongs - this is what the FlatList displays
-      setUserSongs((prevSongs) => 
-        prevSongs.filter((song) => {
-          const songIdentifier = song.id || song.songId;
-          return songIdentifier !== songId;
-        })
+      setUserSongs((prev) =>
+        prev.filter((song) => (song.id || song.songId) !== songId)
       );
-      
-      setPlaylistSongs((prevSongs) => 
-        prevSongs.filter((song) => {
-          const songIdentifier = song.id || song.songId;
-          return songIdentifier !== songId;
-        })
+      setPlaylistSongs((prev) =>
+        prev.filter((song) => (song.id || song.songId) !== songId)
       );
     } catch (error) {
       console.error("Error removing song:", error);
     }
   };
 
-  // Function to check if a song is already in the playlist
-  const isSongInPlaylist = (songId) => {
-    return playlistSongs.some((song) => {
-      // Check both possible ID properties
-      const playlistSongId = song.id || song.songId;
-      return playlistSongId === songId;
-    });
-  };
-
-  const handleAddToPlaylist = (song) => {
-    playlistService.addSongToPlaylist(
-      playlistId,
-      song,
-      setUserSongs,
-      setModalVisible
-    );
-  };
-
   const renderHeader = () => (
     <>
-      <View style={styles.artworkContainer}>
-        <View style={styles.artworkRow}>
-          <Image source={songCovers[0]} style={styles.artworkQuadrant} />
-          <Image source={songCovers[1]} style={styles.artworkQuadrant} />
-        </View>
-        <View style={styles.artworkRow}>
-          <Image source={songCovers[2]} style={styles.artworkQuadrant} />
-          <Image source={songCovers[3]} style={styles.artworkQuadrant} />
-        </View>
+      <View style={styles.topBar}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color="#f1f1f1" />
+        </TouchableOpacity>
+        <Text style={styles.playlistTitleHeader}>{title}</Text>
       </View>
-
-      <View style={styles.headerContainer}>
-        <Text style={styles.playlistTitle}>{title}</Text>
-        
-        {/* Only show Add Songs button if it's the user's playlist */}
+      <View style={styles.coverContainer}>
+        <Image source={playlistCover} style={styles.coverImage} />
+      </View>
+      <View style={styles.controlsContainer}>
+        <TouchableOpacity style={styles.controlButton} onPress={handlePlay}>
+          <Ionicons name="play-circle" size={32} color="#fff" />
+          <Text style={styles.controlText}>Play</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.controlButton} onPress={handleShuffle}>
+          <Ionicons name="shuffle" size={32} color="#fff" />
+          <Text style={styles.controlText}>Shuffle</Text>
+        </TouchableOpacity>
         {isOwnPlaylist && (
-          <TouchableOpacity onPress={handleAddSong}>
-            <LinearGradient
-              colors={["#111", "#333"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.addButton}
-            >
-              <Ionicons name="add-circle-outline" size={24} color="#f1f1f1" />
-              <Text style={styles.addButtonText}>Add Songs</Text>
-            </LinearGradient>
+          <TouchableOpacity style={styles.controlButton} onPress={() => setModalVisible(true)}>
+            <Ionicons name="add-circle-outline" size={32} color="#fff" />
+            <Text style={styles.controlText}>Add Songs</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -190,22 +217,20 @@ const PlaylistDetail = () => {
           data={userSongs}
           ListHeaderComponent={renderHeader}
           keyExtractor={(item, index) =>
-            item.id?.toString() || `playlist-song-${index}`
+            item.id ? item.id.toString() : `fallback-${index}`
           }
           renderItem={({ item }) => (
             <SongCard
               song={item}
-              playlistId={playlistId} 
-              showOptions={true}
               onRemove={handleRemoveSong}
-              isOwnContent={isOwnPlaylist} // Pass ownership status to SongCard
+              isOwnContent={isOwnPlaylist}
             />
           )}
           contentContainerStyle={styles.contentContainer}
         />
       </View>
 
-      {/* Modal for adding songs */}
+      {/* Modal for adding songs with search */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -214,49 +239,47 @@ const PlaylistDetail = () => {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalHeader}>Select Songs to Add</Text>
-            <FlatList
-              data={availableSongs}
-              keyExtractor={(item, index) =>
-                item?.id?.toString() || `fallback-id-${index}`
-              }
-              renderItem={({ item }) => (
-                <View
-                  style={[
-                    styles.songItem,
-                    isSongInPlaylist(item.id) && styles.greyedOut, // Apply greyed-out style for songs already in the playlist
-                  ]}
-                >
-                  <Text style={styles.songTitle}>
-                    {item.title} - {item.artist}
-                  </Text>
-                  {!isSongInPlaylist(item.id) && (
-                    <TouchableOpacity onPress={() => handleAddToPlaylist(item)}>
-                      <Ionicons name="add-circle" size={24} color="#28a745" />
-                    </TouchableOpacity>
-                  )}
-                </View>
+            <Text style={styles.modalHeader}>Search for Songs to Add</Text>
+            {/* Search Bar */}
+            <View style={styles.searchBarContainer}>
+              <TextInput
+                style={styles.searchBar}
+                placeholder="Search by title or artist..."
+                placeholderTextColor="#aaa"
+                value={query}
+                onChangeText={handleSearch}
+              />
+              {query ? (
+                <TouchableOpacity style={styles.searchIcon} onPress={() => setQuery("")}>
+                  <Text style={styles.searchIconText}>✕</Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={styles.searchIcon}>
+                  <Text style={styles.searchIconText}>🔍</Text>
+                </TouchableOpacity>
               )}
-            />
-
+            </View>
+            {loadingSearch && <ActivityIndicator size="large" color="#f1f1f1" />}
             <FlatList
-              data={playlistSongs}
+              data={searchResults}
               keyExtractor={(item, index) =>
-                item?.id?.toString() || `fallback-id-${index}`
+                item.id ? item.id.toString() : `fallback-${index}`
               }
               renderItem={({ item }) => (
                 <View style={styles.songItem}>
-                  <Text style={styles.songTitle}>
-                    {item.title} - {item.artist}
-                  </Text>
+                  <Text style={styles.songTitle}>{item.title} - {item.artist}</Text>
+                  <TouchableOpacity onPress={() => handleAddToPlaylist(item)}>
+                    <Ionicons name="add-circle" size={24} color="#28a745" />
+                  </TouchableOpacity>
                 </View>
               )}
+              ListEmptyComponent={
+                !loadingSearch && (
+                  <Text style={styles.emptyText}>No results found</Text>
+                )
+              }
             />
-
-            <Pressable
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
+            <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)}>
               <Text style={styles.closeButtonText}>Close</Text>
             </Pressable>
           </View>
@@ -266,57 +289,61 @@ const PlaylistDetail = () => {
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "rgb(4,4,4)",
   },
-  artworkContainer: {
-    width: 200,
-    height: 200,
-    alignSelf: "center",
-    marginVertical: 20,
-    overflow: "hidden",
-  },
-  artworkRow: {
-    flexDirection: "row",
-    height: "50%",
-  },
-  artworkQuadrant: {
-    width: "50%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-  headerContainer: {
-    padding: 20,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  playlistTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#f1f1f1",
-  },
-  addButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    padding: 10,
-    borderRadius: 20,
-  },
-  addButtonText: {
-    color: "#f1f1f1",
-    marginLeft: 5,
+  safeArea: {
+    flex: 1,
+    backgroundColor: "rgb(4,4,4)",
   },
   contentContainer: {
     paddingTop: 20,
   },
-  safeArea: {
-    flex: 1,
-    backgroundColor: "rgb(4, 4, 4)",
+  // Top Bar
+  topBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
+  backButton: {
+    position: "absolute",
+    left: 20,
+  },
+  playlistTitleHeader: {
+    flex: 1,
+    textAlign: "center",
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#f1f1f1",
+  },
+  // Cover Image
+  coverContainer: {
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  coverImage: {
+    width: 200,
+    height: 200,
+    borderRadius: 10,
+  },
+  // Control Buttons
+  controlsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    marginVertical: 10,
+  },
+  controlButton: {
+    alignItems: "center",
+  },
+  controlText: {
+    color: "#f1f1f1",
+    fontSize: 14,
+    marginTop: 4,
+  },
+  // Modal styles
   modalContainer: {
     flex: 1,
     justifyContent: "flex-end",
@@ -327,6 +354,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    maxHeight: "70%",
   },
   modalHeader: {
     fontSize: 20,
@@ -334,15 +362,42 @@ const styles = StyleSheet.create({
     color: "#f1f1f1",
     marginBottom: 15,
   },
+  searchBarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  searchBar: {
+    flex: 1,
+    height: 40,
+    backgroundColor: "#333",
+    borderRadius: 20,
+    color: "#fff",
+    paddingHorizontal: 16,
+  },
+  searchIcon: {
+    position: "absolute",
+    right: 15,
+  },
+  searchIconText: {
+    fontSize: 18,
+    color: "#aaa",
+  },
   songItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
     alignItems: "center",
+    paddingVertical: 10,
   },
   songTitle: {
     color: "#f1f1f1",
     fontSize: 16,
+  },
+  emptyText: {
+    color: "#888",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 10,
   },
   closeButton: {
     marginTop: 15,
