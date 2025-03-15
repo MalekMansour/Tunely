@@ -279,7 +279,7 @@ const PlaylistDetail = () => {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "rgb(4,4,4)" },
   topBar: { flexDirection: "row", alignItems: "center", padding: 20 },
-  playlistTitleHeader: { flex: 1, textAlign: "center", fontSize: 24, color: "#fff" },
+  playlistTitleHeader: { flex: 1, textAlign: "center", fontSize: 24, color: "#fff", marginRight: 30 },
   coverGrid: { flexDirection: "row", flexWrap: "wrap", width: 200, height: 200, alignSelf: "center" },
   coverQuadrant: { width: "50%", height: "50%", resizeMode: "cover" },
   controlsContainer: { flexDirection: "row", justifyContent: "space-evenly", marginVertical: 10 },
