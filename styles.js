@@ -21,7 +21,6 @@ export const styles = StyleSheet.create({
     color:"#f1f1f1",
   },
 
-
   songCard: {
     backgroundColor: "#182952", 
     padding: 15,
