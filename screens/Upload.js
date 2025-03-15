@@ -147,6 +147,7 @@ export default function Upload({ navigation }) {
             <Picker.Item label="Alternative" value="Alternative" color="#fff" />
             <Picker.Item label="Lofi" value="Lofi" color="#fff" />
             <Picker.Item label="Trap" value="Trap" color="#fff" />
+            <Picker.Item label="Acoustic" value="Acoustic" color="#fff" />
             <Picker.Item label="Other" value="Other" color="#fff" />
           </Picker>
         </View>
