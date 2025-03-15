@@ -203,25 +203,35 @@ export default function SongDetailScreen({ route }) {
           <SkipButton direction="forward" onPress={handleNext} />
         </View>
 
-        <LinearGradient
-          colors={["#111", "#3333"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={styles.likeContainer}
+         {/* Control buttons for like and comment */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 20 }}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("CommentScreen", { song: song })}
+          style={{ alignSelf: 'flex-end' }} // Align to bottom left
         >
-          <TouchableOpacity
-            onPress={toggleLike}
-            disabled={isLikeLoading}
-            style={styles.likeButton}
-          >
-            <Ionicons
-              name={isLiked ? "heart" : "heart-outline"}
-              size={30}
-              color={isLiked ? "#ff375f" : "#ffffff"}
-            />
-          </TouchableOpacity>
-          <Text style={styles.likeCount}>{likeCount}</Text>
-        </LinearGradient>
+          <Ionicons
+            name="chatbubble-outline"
+            size={40}
+            marginTop={60}
+            marginLeft={30}
+            color="#ffffff"
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={toggleLike}
+          disabled={isLikeLoading}
+          style={{ alignSelf: 'flex-end' }} // Align to bottom right
+        >
+          <Ionicons
+            name={isLiked ? "heart" : "heart-outline"}
+            size={40}
+            marginTop={60}
+            marginRight={30}
+            color={isLiked ? "#ff375f" : "#ffffff"}
+          />
+        </TouchableOpacity>
+      </View>
 
         {/* Down Arrow Button */}
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.arrowButton}>
