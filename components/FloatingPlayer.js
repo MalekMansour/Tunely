@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Animated } from 'react
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { useAudio } from '../context/AudioContext';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from 'expo-blur'; 
 
 // import { LinearGradient } from 'expo-linear-gradient'; 
@@ -82,7 +83,7 @@ export default function FloatingPlayer() {
             onPress={handleCommentPress}
             style={styles.commentButton}
           >
-            <Icon name="comment" size={24} color="#fff" />
+            <Ionicons name="chatbubble-ellipses-outline" size={24} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={() => isPlaying ? pauseSound() : playSound(currentSong)}
