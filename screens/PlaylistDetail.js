@@ -312,7 +312,7 @@ const PlaylistDetail = () => {
             <Pressable style={styles.button} onPress={handleChangeCover}>
               <Text style={styles.buttonText}>Change Cover</Text>
             </Pressable>
-            <Pressable style={styles.button} onPress={handleDeletePlaylist}>
+            <Pressable style={styles.deleteButton} onPress={handleDeletePlaylist}>
               <Text style={styles.buttonText}>Delete Playlist</Text>
             </Pressable>
             <Pressable style={styles.closeButton} onPress={() => setEditModalVisible(false)}>
@@ -406,6 +406,7 @@ const styles = StyleSheet.create({
   editButton: { padding: 10 },
   button: { padding: 10, marginTop: 10, backgroundColor: "#555", borderRadius: 5, alignItems: "center" },
   buttonText: { color: "#fff", fontSize: 16 },
+  deleteButton: { padding: 10, marginTop: 10, backgroundColor: "#BF3131", borderRadius: 5, alignItems: "center" },
   textInput: { backgroundColor: "#222", color: "#fff", padding: 10, borderRadius: 5, marginBottom: 10 }
 });
 
