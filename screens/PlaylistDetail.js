@@ -31,6 +31,8 @@ const PlaylistDetail = () => {
   const [playlistSongs, setPlaylistSongs] = useState([]);
   const [userSongs, setUserSongs] = useState([]);
   const [isOwnPlaylist, setIsOwnPlaylist] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [newTitle, setNewTitle] = useState(title);
 
   // Modal & search state for adding songs
   const [modalVisible, setModalVisible] = useState(false);
@@ -114,7 +116,6 @@ const PlaylistDetail = () => {
       setLoadingSearch(true);
       try {
         const results = await songService.searchSongs(text);
-        // Filter out songs already in the playlist
         const filtered = results.filter(
           (song) =>
             !playlistSongs.some(
@@ -173,6 +174,49 @@ const PlaylistDetail = () => {
     );
   };
 
+  const handleEditPlaylist = () => {
+    setEditModalVisible(true);
+  };
+
+  const handleRenamePlaylist = async () => {
+    if (newTitle !== title) {
+      try {
+        await playlistService.updatePlaylistTitle(playlistId, newTitle);
+        Alert.alert("Success", "Playlist name updated successfully.");
+      } catch (error) {
+        Alert.alert("Error", "Failed to update playlist name.");
+      }
+    }
+    setEditModalVisible(false);
+  };
+
+  const handleChangeCover = async () => {
+    // Implementation for changing cover goes here
+  };
+
+  const handleDeletePlaylist = async () => {
+    Alert.alert(
+      "Delete Playlist",
+      "Are you sure you want to delete this playlist?",
+      [
+        { text: "No", style: "cancel" },
+        {
+          text: "Yes, Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await playlistService.deletePlaylist(playlistId);
+              navigation.goBack();
+            } catch (error) {
+              Alert.alert("Error", "Failed to delete playlist.");
+            }
+          },
+        },
+      ]
+    );
+    setEditModalVisible(false);
+  };
+
   const renderHeader = () => (
     <>
       <View style={styles.topBar}>
@@ -180,6 +224,11 @@ const PlaylistDetail = () => {
           <Ionicons name="arrow-back" size={28} color="#f1f1f1" />
         </TouchableOpacity>
         <Text style={styles.playlistTitleHeader}>{title}</Text>
+        {isOwnPlaylist && (
+          <TouchableOpacity onPress={handleEditPlaylist} style={styles.editButton}>
+            <Ionicons name="pencil" size={24} color="#f1f1f1" />
+          </TouchableOpacity>
+        )}
       </View>
       <View style={styles.coverGrid}>
         {songCovers.map((cover, index) => (
@@ -217,6 +266,37 @@ const PlaylistDetail = () => {
           <SongCard song={item} onRemove={() => handleRemoveSong(item.id)} isOwnContent={isOwnPlaylist} />
         )}
       />
+       {/* Modal for editing playlist details */}
+       <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editModalVisible}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalHeader}>Edit Playlist</Text>
+            <TextInput
+              style={styles.textInput}
+              onChangeText={setNewTitle}
+              value={newTitle}
+              placeholder="New playlist name"
+            />
+            <Pressable style={styles.button} onPress={handleRenamePlaylist}>
+              <Text style={styles.buttonText}>Rename</Text>
+            </Pressable>
+            <Pressable style={styles.button} onPress={handleChangeCover}>
+              <Text style={styles.buttonText}>Change Cover</Text>
+            </Pressable>
+            <Pressable style={styles.button} onPress={handleDeletePlaylist}>
+              <Text style={styles.buttonText}>Delete Playlist</Text>
+            </Pressable>
+            <Pressable style={styles.closeButton} onPress={() => setEditModalVisible(false)}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </Pressable>
+          </View>
+          </View>
+      </Modal>
       {/* Modal for adding songs with search */}
       <Modal
         animationType="slide"
@@ -297,6 +377,10 @@ const styles = StyleSheet.create({
   emptyText: { color: "#aaa", textAlign: "center", marginTop: 20 },
   closeButton: { marginTop: 20, padding: 10, backgroundColor: "#555", borderRadius: 5, alignItems: "center" },
   closeButtonText: { color: "#fff", fontSize: 16 },
+  editButton: { padding: 10 },
+  button: { padding: 10, marginTop: 10, backgroundColor: "#555", borderRadius: 5, alignItems: "center" },
+  buttonText: { color: "#fff", fontSize: 16 },
+  textInput: { backgroundColor: "#222", color: "#fff", padding: 10, borderRadius: 5, marginBottom: 10 }
 });
 
 export default PlaylistDetail;
