@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   closeButton: { marginTop: 20, padding: 10, backgroundColor: "#555", borderRadius: 5, alignItems: "center" },
   closeButtonText: { color: "#fff", fontSize: 16 },
   editButton: { padding: 10 },
-  button: { padding: 10, marginTop: 10, backgroundColor: "#555", borderRadius: 5, alignItems: "center" },
+  button: { padding: 10, marginTop: 10, backgroundColor: "#182952", borderRadius: 5, alignItems: "center" },
   buttonText: { color: "#fff", fontSize: 16 },
   deleteButton: { padding: 10, marginTop: 10, backgroundColor: "#BF3131", borderRadius: 5, alignItems: "center" },
   textInput: { backgroundColor: "#222", color: "#fff", padding: 10, borderRadius: 5, marginBottom: 10 }
