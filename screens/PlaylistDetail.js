@@ -20,6 +20,7 @@ import { auth } from "../Utility/firebaseConfig";
 import { playlistService } from "../services/playlistService";
 import { songService } from "../services/songService";
 import { useAudio } from "../context/AudioContext";
+import * as ImagePicker from "expo-image-picker";
 
 const defaultCoverImage = require("../assets/note.jpg");
 
@@ -28,11 +29,10 @@ const PlaylistDetail = () => {
   const navigation = useNavigation();
   const { playlistId, title } = route.params;
 
-  const [playlistSongs, setPlaylistSongs] = useState([]);
-  const [userSongs, setUserSongs] = useState([]);
-  const [isOwnPlaylist, setIsOwnPlaylist] = useState(false);
-  const [editModalVisible, setEditModalVisible] = useState(false);
-  const [newTitle, setNewTitle] = useState(title);
+ // Playlist songs state
+ const [playlistSongs, setPlaylistSongs] = useState([]);
+ const [userSongs, setUserSongs] = useState([]);
+ const [isOwnPlaylist, setIsOwnPlaylist] = useState(false);
 
   // Modal & search state for adding songs
   const [modalVisible, setModalVisible] = useState(false);
@@ -41,6 +41,11 @@ const PlaylistDetail = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
 
+    // Modal state for editing playlist details
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [newTitle, setNewTitle] = useState(title);
+    const [coverImage, setCoverImage] = useState(null);
+  
   const { playSound } = useAudio();
 
   useEffect(() => {
@@ -179,10 +184,12 @@ const PlaylistDetail = () => {
   };
 
   const handleRenamePlaylist = async () => {
-    if (newTitle !== title) {
+    if (newTitle.trim() && newTitle !== title) {
       try {
-        await playlistService.updatePlaylistTitle(playlistId, newTitle);
+        // Send the new title as an object with the key 'title'
+        await playlistService.updatePlaylistTitle(playlistId, { title: newTitle });
         Alert.alert("Success", "Playlist name updated successfully.");
+        navigation.setParams({ title: newTitle });
       } catch (error) {
         Alert.alert("Error", "Failed to update playlist name.");
       }
@@ -191,7 +198,23 @@ const PlaylistDetail = () => {
   };
 
   const handleChangeCover = async () => {
-    // Implementation for changing cover goes here
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: [ImagePicker.MediaType.IMAGE],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      if (!result.canceled) {
+        const imageUrl = result.assets[0].uri;
+        // Send the new cover as an object with the key 'cover'
+        await playlistService.updatePlaylistCover(playlistId, { cover: imageUrl });
+        setCoverImage({ uri: imageUrl });
+        Alert.alert("Success", "Playlist cover updated successfully.");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to update playlist cover.");
+    }
   };
 
   const handleDeletePlaylist = async () => {
@@ -201,7 +224,7 @@ const PlaylistDetail = () => {
       [
         { text: "No", style: "cancel" },
         {
-          text: "Yes, Delete",
+          text: "Delete",
           style: "destructive",
           onPress: async () => {
             try {
@@ -266,6 +289,7 @@ const PlaylistDetail = () => {
           <SongCard song={item} onRemove={() => handleRemoveSong(item.id)} isOwnContent={isOwnPlaylist} />
         )}
       />
+
        {/* Modal for editing playlist details */}
        <Modal
         animationType="slide"
@@ -297,6 +321,7 @@ const PlaylistDetail = () => {
           </View>
           </View>
       </Modal>
+
       {/* Modal for adding songs with search */}
       <Modal
         animationType="slide"
@@ -356,10 +381,11 @@ const PlaylistDetail = () => {
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: "rgb(4,4,4)" },
   topBar: { flexDirection: "row", alignItems: "center", padding: 20 },
-  playlistTitleHeader: { flex: 1, textAlign: "center", fontSize: 24, color: "#fff", marginRight: 30 },
+  playlistTitleHeader: { flex: 1, textAlign: "center", fontSize: 24, color: "#fff"},
   coverGrid: { flexDirection: "row", flexWrap: "wrap", width: 200, height: 200, alignSelf: "center" },
   coverQuadrant: { width: "50%", height: "50%", resizeMode: "cover" },
   controlsContainer: { flexDirection: "row", justifyContent: "space-evenly", marginVertical: 10 },
