@@ -210,7 +210,7 @@ export default function SongDetailScreen({ route }) {
           style={{ alignSelf: 'flex-end' }} // Align to bottom left
         >
           <Ionicons
-            name="chatbubble-outline"
+            name="chatbubble-ellipses-outline"
             size={40}
             marginTop={60}
             marginLeft={30}
@@ -221,7 +221,7 @@ export default function SongDetailScreen({ route }) {
         <TouchableOpacity
           onPress={toggleLike}
           disabled={isLikeLoading}
-          style={{ alignSelf: 'flex-end' }} // Align to bottom right
+          style={{ alignSelf: 'flex-end' }} 
         >
           <Ionicons
             name={isLiked ? "heart" : "heart-outline"}
