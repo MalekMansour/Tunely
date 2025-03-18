@@ -14,7 +14,8 @@ export default function GenreSongs() {
     const fetchSongsByGenre = async () => {
       setLoading(true);
       try {
-        const genreSongs = await songService.getSongsByGenre(genre);
+        const allSongs = await songService.getAllSongs();
+        const genreSongs = allSongs.filter(song => song.genre.toLowerCase() === genre.toLowerCase());
         setSongs(genreSongs);
       } catch (error) {
         console.error("Error fetching songs by genre:", error);
