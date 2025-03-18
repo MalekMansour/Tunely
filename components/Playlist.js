@@ -103,6 +103,7 @@ const PlayList = ({ title, playlistId, songs: initialSongs = [], image, style, o
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'transparent',
