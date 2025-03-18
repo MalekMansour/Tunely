@@ -3,7 +3,6 @@ import {
   View,
   Text,
   TextInput,
-  Image,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
@@ -17,6 +16,21 @@ import { useNavigation } from '@react-navigation/native';
 import PlayList from "../components/Playlist";
 import SongCard from "../components/SongCard";
 
+const musicGenres = [
+  { id: "1", name: "Pop", color: "#E74C3C" },
+  { id: "2", name: "Rap", color: "#9B59B6" },
+  { id: "3", name: "Acoustic", color: "#3498DB" },
+  { id: "4", name: "Lofi", color: "#F39C12" },
+  { id: "5", name: "R&B", color: "#1ABC9C" },
+  { id: "6", name: "Rock", color: "#34495E" },
+  { id: "7", name: "Electronic", color: "#27AE60" },
+  { id: "8", name: "Alternative", color: "#8E44AD" },
+  { id: "9", name: "Jazz", color: "#F1C40F" },
+  { id: "10", name: "Trap", color: "#E67E22" },
+  { id: "11", name: "Country", color: "#D35400" },
+  { id: "12", name: "Other", color: "#7F8C8D" },
+];
+
 export default function Search() {
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,94 +40,40 @@ export default function Search() {
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    const fetchPlaylists = async () => {
-      try {
-        setLoading(true);
-        const playlistData = await playlistService.getAllPlaylists();
-        setPlaylists(playlistData);
-      } catch (error) {
-        console.error("Error fetching playlists:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    async function fetchPlaylists() {
+      setLoading(true);
+      const playlistData = await playlistService.getAllPlaylists();
+      setPlaylists(playlistData);
+      setLoading(false);
+    }
 
     fetchPlaylists();
   }, []);
 
-  // Handle search input
   const handleSearch = async (text) => {
     setQuery(text);
-    
     if (text.length > 2) {
       setIsSearching(true);
-      try {
-        const songs = await songService.searchSongs(text);
-        setResults(songs);
-      } catch (error) {
-        console.error("Error searching songs:", error);
-        setResults([]);
-      }
+      const songs = await songService.searchSongs(text);
+      setResults(songs);
     } else {
       setIsSearching(false);
       setResults([]);
     }
   };
 
-  // Clear search
   const clearSearch = () => {
     setQuery('');
     setResults([]);
     setIsSearching(false);
   };
 
-  // Browse categories 
-  const browseCategories = [
-    // Row 1
-    {
-      id: "1",
-      name: "Made for You",
-      color: "#4A90E2",
-      icon: require("../assets/graduation.jpg"),
-    },
-    {
-      id: "2",
-      name: "Released",
-      subtext: "Top New Songs",
-      color: "#9013FE",
-      icon: require("../assets/graduation.jpg"),
-    },
-    // Row 2
-    {
-      id: "3",
-      name: "Music Charts",
-      color: "#4F52FF",
-      icon: require("../assets/graduation.jpg"),
-    },
-    {
-      id: "4",
-      name: "Rap/Hip-Hop",
-      color: "#D0021B",
-      icon: require("../assets/graduation.jpg"),
-    },
-    // Row 3
-    {
-      id: "5",
-      name: "Jazz",
-      color: "#B8860B",
-      icon: require("../assets/graduation.jpg"),
-    },
-    {
-      id: "6",
-      name: "Pop Fusion",
-      color: "#50E3C2",
-      icon: require("../assets/graduation.jpg"),
-    },
-  ];
+  const openGenrePage = (genre) => {
+    navigation.navigate('GenreSongs', { genre });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Search Bar */}
       <View style={styles.searchBarContainer}>
         <TextInput
           style={styles.searchBar}
@@ -132,48 +92,29 @@ export default function Search() {
           </TouchableOpacity>
         )}
       </View>
-      {/* view if is searching */}
+
       {isSearching ? (
-        // Search Results
         <FlatList
           data={results}
           keyExtractor={(item) => item.songId.toString()}
           renderItem={({ item }) => <SongCard song={item} />}
-          contentContainerStyle={styles.resultsList}
-          ListEmptyComponent={
-            <Text style={styles.emptyText}>No results found</Text>
-          }
+          ListEmptyComponent={<Text style={styles.emptyText}>No results found</Text>}
         />
       ) : (
-        // Regular Content
-        <ScrollView
-          style={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}
-        >
-
-          {/* Playlist Section */}
+        <ScrollView>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Playlists</Text>
             {loading ? (
               <ActivityIndicator size="large" color="#f1f1f1" />
-            ) : playlists.length === 0 ? (
-              <Text style={styles.emptyText}>No playlists available</Text>
             ) : (
-              <ScrollView 
-                horizontal 
-                showsHorizontalScrollIndicator={false}
-              >
+              <ScrollView horizontal>
                 {playlists.slice(0, 10).map((playlist) => (
                   <PlayList
                     key={playlist.id}
                     title={playlist.title || playlist.name}
                     playlistId={playlist.id}
                     songs={playlist.songs || []}
-                    image={
-                      playlist.image
-                        ? { uri: playlist.image }
-                        : require("../assets/graduation.jpg")
-                    }
+                    image={{ uri: playlist.image }}
                     style={{ width: 140, marginRight: 10 }}
                   />
                 ))}
@@ -181,53 +122,25 @@ export default function Search() {
             )}
           </View>
 
-          {/* Browse All Section */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Browse</Text>
+            <Text style={styles.sectionTitle}>Browse by Genre</Text>
             <View style={styles.browseGrid}>
-              {browseCategories.map((category) => (
+              {musicGenres.map((genre) => (
                 <TouchableOpacity
-                  key={category.id}
-                  style={[
-                    styles.categoryCard,
-                    { backgroundColor: category.color },
-                  ]}
+                  key={genre.id}
+                  style={[styles.categoryCard, { backgroundColor: genre.color }]}
+                  onPress={() => openGenrePage(genre.name)}
                 >
-                  <View style={styles.categoryContent}>
-                    <Text style={styles.categoryName}>{category.name}</Text>
-                    {category.subtext && (
-                      <Text style={styles.categorySubtext}>
-                        {category.subtext}
-                      </Text>
-                    )}
-                  </View>
-                  
+                  <Text style={styles.categoryName}>{genre.name}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
         </ScrollView>
       )}
-
-      {/* Bottom nav bar */}
-      <View style={styles.navbar}>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Home")}>
-          <Text style={styles.navIcon}>🏠</Text>
-          <Text style={styles.navText}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.navItem, styles.activeNavItem]}>
-          <Text style={[styles.navIcon, styles.activeNavIcon]}>🔍</Text>
-          <Text style={[styles.navText, styles.activeNavText]}>Search</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Library")}>
-          <Text style={styles.navIcon}>📚</Text>
-          <Text style={styles.navText}>Library</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -269,6 +182,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 12,
+    marginLeft: 18, 
   },
   // Artist styles
   artistCard: {
@@ -307,6 +221,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    width: "90%",
+    margin: "auto",
   },
   categoryCard: {
     width: "48%",
@@ -396,6 +312,6 @@ const styles = StyleSheet.create({
   resultsList: {
     paddingHorizontal: 16,
     paddingTop: 10,
-    paddingBottom: 70, // Space for the bottom navbar
+    paddingBottom: 70, 
   },
 });
