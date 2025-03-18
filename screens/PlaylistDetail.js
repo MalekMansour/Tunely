@@ -186,7 +186,6 @@ const PlaylistDetail = () => {
   const handleRenamePlaylist = async () => {
     if (newTitle.trim() && newTitle !== title) {
       try {
-        // Send the new title as an object with the key 'title'
         await playlistService.updatePlaylistTitle(playlistId, { title: newTitle });
         Alert.alert("Success", "Playlist name updated successfully.");
         navigation.setParams({ title: newTitle });
