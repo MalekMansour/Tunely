@@ -34,8 +34,7 @@ import AdminPage from "./screens/adminPage";
 import AdminCheck from "./Utility/adminCheck";
 import PrivacySettings from "./screens/PrivacySettings";
 import Notifications from "./screens/Notifications";
-
-
+import GenreSongs from './screens/GenreSongs';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -149,6 +148,7 @@ function SearchStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="SearchScreen" component={SearchWithTopBar} />
       <Stack.Screen name="PlaylistDetail" component={PlaylistDetail} />
+      <Stack.Screen name="GenreSongs" component={GenreSongs} />
     </Stack.Navigator>
   );
 }
