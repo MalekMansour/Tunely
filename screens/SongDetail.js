@@ -207,7 +207,7 @@ export default function SongDetailScreen({ route }) {
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 20 }}>
         <TouchableOpacity
           onPress={() => navigation.navigate("CommentScreen", { song: song })}
-          style={{ alignSelf: 'flex-end' }} // Align to bottom left
+          style={{ alignSelf: 'flex-end' }} 
         >
           <Ionicons
             name="chatbubble-ellipses-outline"
