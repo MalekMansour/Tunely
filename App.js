@@ -1,7 +1,7 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigationState } from "@react-navigation/native";
 import { View, Text, TouchableOpacity } from "react-native";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
@@ -9,9 +9,8 @@ import { styles } from "./styles";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AudioProvider } from "./context/AudioContext";
 import { Provider as PaperProvider } from "react-native-paper";
-import { Audio } from "expo-av";
 
-// Import screens
+// Import screens (unchanged)
 import HomeScreen from "./screens/Home";
 import SearchScreen from "./screens/Search";
 import LibraryScreen from "./screens/Library";
@@ -35,11 +34,12 @@ import AdminCheck from "./Utility/adminCheck";
 import PrivacySettings from "./screens/PrivacySettings";
 import Notifications from "./screens/Notifications";
 import GenreSongs from './screens/GenreSongs';
+import CatBot from './components/CatBot';
+import BotChat from './screens/BotCat';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-// Reusable top bar component
 function ScreenWithTopBar({ navigation, children, title }) {
   return (
     <View style={{ flex: 1 }}>
@@ -85,7 +85,6 @@ function UserPlayListWithTopBar({ navigation }) {
           <PlayListButton title="Playlists" />
           <MyUploadButton title="My Uploads" />
         </View>
-
         <UserPlayList />
       </View>
     </ScreenWithTopBar>
@@ -100,24 +99,22 @@ function MyUploadsWithTopBar({ navigation }) {
           <PlayListButton title="Playlists" />
           <MyUploadButton title="My Uploads" />
         </View>
-
         <MyUploads />
       </View>
     </ScreenWithTopBar>
   );
 }
 
-//stack for home screen
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="HomeScreen" component={HomeWithTopBar} />
       <Stack.Screen name="PlaylistDetail" component={PlaylistDetail} />
+      <Stack.Screen name="BotChat" component={BotChat} />
     </Stack.Navigator>
   );
 }
 
-//stack for library screen
 function LibraryStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -125,18 +122,12 @@ function LibraryStack() {
       <Stack.Screen
         name="UserPlayList"
         component={UserPlayListWithTopBar}
-        options={{
-          presentation: "card",
-          animationEnabled: true,
-        }}
+        options={{ presentation: "card", animationEnabled: true }}
       />
       <Stack.Screen
         name="MyUploads"
         component={MyUploadsWithTopBar}
-        options={{
-          presentation: "card",
-          animationEnabled: true,
-        }}
+        options={{ presentation: "card", animationEnabled: true }}
       />
       <Stack.Screen name="PlaylistDetail" component={PlaylistDetail} />
     </Stack.Navigator>
@@ -153,7 +144,6 @@ function SearchStack() {
   );
 }
 
-// Bottom tab navigator
 function TabNavigator() {
   return (
     <Tab.Navigator
@@ -173,13 +163,10 @@ function TabNavigator() {
         ),
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
-          if (route.name === "Home") {
-            iconName = focused ? "home" : "home-outline";
-          } else if (route.name === "Search") {
-            iconName = focused ? "search" : "search-outline";
-          } else if (route.name === "Library") {
-            iconName = focused ? "library" : "library-outline";
-          }
+          if (route.name === "Home") iconName = focused ? "home" : "home-outline";
+          else if (route.name === "Search") iconName = focused ? "search" : "search-outline";
+          else if (route.name === "Library") iconName = focused ? "library" : "library-outline";
+
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: "#f1f1f1",
@@ -201,7 +188,6 @@ function TabNavigator() {
   );
 }
 
-// Main App component
 export default function App() {
   return (
     <PaperProvider>
@@ -209,66 +195,47 @@ export default function App() {
         <GestureHandlerRootView style={{ flex: 1 }}>
           <NavigationContainer>
             <View style={{ flex: 1 }}>
-              <Stack.Navigator
-                initialRouteName="Login"
-                screenOptions={{ headerShown: false }}
-              >
+              <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="Home" component={TabNavigator} />
-                <Stack.Screen
-                  name="SongDetail"
-                  component={SongDetailScreen}
-                  options={{
-                    presentation: "transparentModal",
-                  }}
-                />
-                <Stack.Screen
-                  name="CommentScreen"
-                  component={CommentScreen}
-                  options={{
-                    presentation: "transparentModal",
-                    headerShown: false,
-                    animation: "default",
-                    cardOverlayEnabled: true,
-                    animationEnabled: true,
-                    cardStyleInterpolator: ({ current: { progress } }) => ({
-                      cardStyle: {
-                        opacity: progress,
-                      },
-                      overlayStyle: {
-                        opacity: progress.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0, 0.5],
-                        }),
-                      },
-                    }),
-                  }}
-                />
+                <Stack.Screen name="SongDetail" component={SongDetailScreen} options={{ presentation: "transparentModal" }}/>
+                <Stack.Screen name="CommentScreen" component={CommentScreen} options={{ presentation: "transparentModal" }}/>
                 <Stack.Screen name="Profile" component={ProfileScreen} />
                 <Stack.Screen name="Settings" component={SettingsScreen} />
                 <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen
-                  name="LoginFormPage"
-                  component={LoginFormPage}
-                />
+                <Stack.Screen name="LoginFormPage" component={LoginFormPage} />
                 <Stack.Screen name="SignUp" component={SignUpScreen} />
                 <Stack.Screen name="Upload" component={UploadScreen} />
                 <Stack.Screen name="MyUploads" component={MyUploads} />
-                <Stack.Screen name="PrivacySettings"component={PrivacySettings}/>
+                <Stack.Screen name="PrivacySettings" component={PrivacySettings}/>
                 <Stack.Screen name="Notifications" component={Notifications}/>
-                
-
-                <Stack.Screen
-                  name="AdminPage"
-                  component={AdminPage}
-                  options={{ headerShown: false }}
-                />
+                <Stack.Screen name="AdminPage" component={AdminPage} />
                 <Stack.Screen name="AuthCheck" component={AdminCheck} />
+                <Stack.Screen name="BotCat" component={BotChat} />
               </Stack.Navigator>
               <FloatingPlayer />
+
+              <ConditionalCatBot />
             </View>
           </NavigationContainer>
         </GestureHandlerRootView>
       </AudioProvider>
     </PaperProvider>
   );
+}
+
+// Helper component:
+function ConditionalCatBot() {
+  const routeName = useNavigationState((state) => {
+    if (!state) return null;
+    const route = state.routes[state.index];
+    return route.name;
+  });
+
+  const hiddenScreens = ["Login", "LoginFormPage", "SignUp", "Profile", "BotCat"];
+
+  if (!routeName || hiddenScreens.includes(routeName)) {
+    return null;
+  }
+
+  return <CatBot />;
 }
