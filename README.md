@@ -50,37 +50,6 @@ Tunely helps independent artists by providing a seamless platform to upload musi
 ### Additional Technologies  
 ![JWT](https://img.shields.io/badge/Token_Verification-000000?style=flat&logo=json-web-tokens&logoColor=white)
 ![Dotenv](https://img.shields.io/badge/Dotenv-ECD53F?style=flat&logo=dotenv&logoColor=black)
-![Music Metadata](https://img.shields.io/badge/Music_Metadata-1DB954?style=flat&logo=spotify&logoColor=white)
-### Frontend
-* React Native
-* Expo
-* Javascript
-
-### Backend
-* Node.js
-* Express.js
-* MySql (AWS RDS)
-
-### Cloud & Authentication
-* Firebase
-* Google Sign-In
-* AWS S3
-
-### Core UI & Navigation
-* React Native Navigation
-* Gesture Handler
-* Blur View
-* React Animated
-
-### Media & Content
-* Expo AV
-* Expo Document Picker
-* Media Controls
-
-### Additional Technologies
-* Token Verification
-* .Dotenv
-* Music Metadata
 
 ## Scalability
 Tunely leverages scalable AWS infrastructure, ensuring high performance, reliability, and responsiveness even as user numbers grow significantly.
