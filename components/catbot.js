@@ -42,7 +42,7 @@ export default function CatBot() {
     >
       <Animated.View style={[styles.floatingButton, { transform: [{ translateX }, { translateY }] }] }>
         <TouchableOpacity onPress={openChat} style={styles.button}>
-          <Ionicons name="chatbubble-ellipses" size={32} color="#fff" />
+          <Ionicons name="logo-octocat" size={40} color="#fff" />
         </TouchableOpacity>
       </Animated.View>
     </PanGestureHandler>
@@ -55,9 +55,9 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   button: {
-    borderRadius: 30,
-    width: 60,
-    height: 60,
+    borderRadius: 40,
+    width: 80,
+    height: 80,
     alignItems: "center",
     justifyContent: "center",
     elevation: 5,
@@ -65,6 +65,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
     shadowOffset: { width: 0, height: 2 },
-    backgroundColor: "#007AFF",
+    backgroundColor: "#182952",
   },
 });
