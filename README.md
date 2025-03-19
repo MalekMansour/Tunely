@@ -10,6 +10,9 @@ Tunely helps independent artists by providing a seamless platform to upload musi
 ​* Endless Music ​
 
 ## Features
+- **Home Page:** Recently played section, different genres sections.
+- **Search Page:** Advanced search to find artists and songs, browse category section.
+- **Library Section:** Liked songs, my uploads, playlists management (delete playlists, rename them, change cover art).
 - **User Authentication:** Secure login and sign-up functionality with persistent user sessions.
 - **Seamless Audio Playback:** Continuous playback across screens powered by Expo AV.
 - **Advanced Search:** Find songs, playlists, genres, and explore genre-specific recommendations.
