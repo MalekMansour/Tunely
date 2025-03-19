@@ -1,29 +1,61 @@
 # Tunely 🎵  
-A sleek and modern music app built with **React Native** and **Expo**, featuring:  
-✅ **Home, Search, Library, and Upload pages**  
-✅ **Persistent top navigation bar**  
-✅ **Bottom tab navigation**  
-✅ **User authentication (Login & Signup)**  
-✅ **Music uploading & library management**  
 
-## 🚀 Features  
-- 🎧 **Music Streaming:** Browse and play songs from your library  
-- 🔍 **Search:** Find tracks and artists easily  
-- 📂 **Library Management:** Organize your favorite music  
-- ☁ **Upload Functionality:** Add your own tracks  
-- 👤 **User Profiles:** Manage personal settings  
+## Overview
+Tunely helps independent artists by providing a seamless platform to upload music and get discovered faster through AI-driven recommendations. Tunely creates new opportunities for artists to grow and connect with their audience.
+​
+## Our Purpose
+* Empowering Independent Artists ​
+​* Seamless Music Distribution ​
+​* Community-Driven Exposure ​
+​* Endless Music ​
 
-## Tech Stack  
-- **React Native** with Expo  
-- **React Navigation** for smooth navigation  
-- **Firebase** for authentication 
-- **AWS** for storage
-- **Gesture Handler** for fluid interactions  
+## Tech Stack
 
-## Authors
-- Malek Mansour
-- Nasser Nasser
-- Kaleb Berhane
-- Vardan Jaswal
-- Yassine Ghannay
-- Yaling Wei
+### Frontend
+* React Native
+* Expo
+* Javascript
+
+### Backend
+* Node.js
+* Express.js
+* MySql (AWS RDS)
+
+### Cloud & Authentication
+* Firebase
+* Google Sign-In
+* AWS S3
+
+### Core UI & Navigation
+* React Native Navigation
+* Gesture Handler
+* Blur View
+* React Animated
+
+### Media & Content
+* Expo AV
+* Expo Document Picker
+* Media Controls
+
+### Additional Technologies
+* Token Verification
+* .Dotenv
+* Music Metadata
+
+## Features
+
+## Scalability
+
+## Performance Testing
+
+
+
+## Team Members
+* Malek Mansour
+* Nasser Nasser
+* Kaleb Berhane 
+* Yassine Ghannay
+* Yaling Wei
+
+## License
+Distributed under the MIT License.
