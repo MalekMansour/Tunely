@@ -14,7 +14,7 @@ const SongCard = ({ song, playlistId, showOptions, onRemove, isOwnContent }) => 
   const navigation = useNavigation();
   const { playSound, pauseSound, resumeSound, currentSong, isPlaying } = useAudio();
 
-  // Determine if this is the current song - same approach as SongCard2
+  // Determine if this is the current song 
   const isCurrentSong = currentSong?.songId === song.songId;
 
   const handlePress = async () => {

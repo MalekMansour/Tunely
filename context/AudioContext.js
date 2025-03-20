@@ -142,7 +142,7 @@ export const AudioProvider = ({ children }) => {
       }
     }
   };
-
+//clean up when not using audio provider anymore
   React.useEffect(() => {
     return () => {
       if (sound) {
