@@ -34,7 +34,7 @@ import AdminCheck from "./Utility/adminCheck";
 import PrivacySettings from "./screens/PrivacySettings";
 import Notifications from "./screens/Notifications";
 import GenreSongs from './screens/GenreSongs';
-import CatBot from "./components/CatBot"
+import CatBot from "./components/catBot"
 import BotChat from "./screens/botCat";
 
 const Tab = createBottomTabNavigator();
