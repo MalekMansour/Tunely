@@ -5,19 +5,43 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { songService } from '../services/songService';
+import { useAudio } from '../context/AudioContext';
+import SongCard from '../components/SongCard';
 
 export default function BotCat() {
   const navigation = useNavigation();
+  const { playSong } = useAudio();
+
   const [selectedMood, setSelectedMood] = useState(null);
+  const [recommendedSongs, setRecommendedSongs] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const moodOptions = ['Happy', 'Sad', 'Energetic', 'Relaxed', 'Romantic', 'Angry'];
 
-  const handleMoodSelect = (mood) => {
+  const handleMoodSelection = async (mood) => {
     setSelectedMood(mood);
+    setLoading(true);
+    try {
+      const songs = await songService.getAllSongs();
+      const shuffledSongs = songs.sort(() => 0.5 - Math.random());
+      setRecommendedSongs(shuffledSongs.slice(0, 5));
+    } catch (error) {
+      console.error('Error fetching songs:', error);
+      setRecommendedSongs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePlaySong = async (song) => {
+    await playSong(song);
+    navigation.navigate('SongDetail', { song });
   };
 
   return (
@@ -32,31 +56,42 @@ export default function BotCat() {
 
       <ScrollView style={styles.chatContainer}>
         <View style={styles.botBubble}>
-          <Text style={styles.botText}>Hey there! 🐱 How are you feeling today?</Text>
+          <Text style={styles.botText}>Hey there! How are you feeling today?</Text>
         </View>
 
-        {!selectedMood ? (
+        {!selectedMood && (
           <View style={styles.optionsContainer}>
-            {moodOptions.map((mood, index) => (
+            {moodOptions.map((mood) => (
               <TouchableOpacity
-                key={index}
+                key={mood}
                 style={styles.optionButton}
-                onPress={() => handleMoodSelect(mood)}
+                onPress={() => handleMoodSelection(mood)}
               >
                 <Text style={styles.optionText}>{mood}</Text>
               </TouchableOpacity>
             ))}
           </View>
-        ) : (
+        )}
+
+        {selectedMood && (
           <>
             <View style={styles.userBubble}>
               <Text style={styles.userText}>{selectedMood}</Text>
             </View>
 
             <View style={styles.botBubble}>
-              <Text style={styles.botText}>
-                Nice! Let me find a perfect "{selectedMood}" song for you! 🎶
-              </Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" style={{ marginVertical: 10 }} />
+              ) : recommendedSongs.length > 0 ? (
+                <>
+                  <Text style={styles.botText}>Here's your "{selectedMood}" mix:</Text>
+                  {recommendedSongs.map((song) => (
+                    <SongCard key={song.songId} song={song} onPress={() => handlePlaySong(song)} />
+                  ))}
+                </>
+              ) : (
+                <Text style={styles.botText}>Sorry, couldn't find any songs right now.</Text>
+              )}
             </View>
           </>
         )}
@@ -69,40 +104,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    padding: 16,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   headerTitle: {
-    fontSize: 22,
     color: '#fff',
+    fontSize: 22,
     fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
   },
   chatContainer: {
     flex: 1,
   },
   botBubble: {
-    alignSelf: 'flex-start',
     backgroundColor: '#333',
-    padding: 12,
     borderRadius: 15,
-    borderBottomLeftRadius: 0,
-    marginBottom: 15,
+    padding: 12,
+    marginVertical: 8,
+    alignSelf: 'flex-start',
     maxWidth: '80%',
   },
   userBubble: {
-    alignSelf: 'flex-end',
     backgroundColor: '#4A90E2',
-    padding: 12,
     borderRadius: 15,
-    borderBottomRightRadius: 0,
-    marginBottom: 15,
-    maxWidth: '80%',
+    padding: 12,
+    marginVertical: 8,
+    alignSelf: 'flex-end',
   },
   botText: {
     color: '#fff',
@@ -119,16 +151,15 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   optionButton: {
-    backgroundColor: '#222',
     borderWidth: 1,
     borderColor: '#4A90E2',
-    borderRadius: 20,
     paddingVertical: 8,
-    paddingHorizontal: 15,
-    margin: 6,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    margin: 5,
   },
   optionText: {
     color: '#4A90E2',
-    fontSize: 16,
-  },
+    fontSize: 15,
+  }
 });
