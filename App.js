@@ -110,7 +110,7 @@ function HomeStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="HomeScreen" component={HomeWithTopBar} />
       <Stack.Screen name="PlaylistDetail" component={PlaylistDetail} />
-      <Stack.Screen name="BotChat" component={BotChat} />
+      <Stack.Screen name="BotCat" component={BotChat} />
     </Stack.Navigator>
   );
 }
