@@ -6,34 +6,28 @@ import { useNavigation } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get("window");
 const BUTTON_SIZE = 80;
-const SIDE_MARGIN = 20;   // left/right margin for free dragging
+const SIDE_MARGIN = 20;   
 const TOP_MARGIN = 80;     // snapping top margin
 const BOTTOM_MARGIN = 150;  // snapping bottom margin
 
 const MIN_X = SIDE_MARGIN;
 const MAX_X = width - BUTTON_SIZE - SIDE_MARGIN;
-// These free-drag boundaries keep the button on screen.
-// Adjust these values as needed.
 const MIN_Y = 20;
 const MAX_Y = height - BUTTON_SIZE - 20;
 
-// Default position: bottom-right with bottom margin of 150.
 const DEFAULT_X = MAX_X;
 const DEFAULT_Y = height - BUTTON_SIZE - BOTTOM_MARGIN;
 
 export default function FloatingButton() {
-  // Set up animated values and a ref for the last confirmed position.
   const translateX = useRef(new Animated.Value(DEFAULT_X)).current;
   const translateY = useRef(new Animated.Value(DEFAULT_Y)).current;
   const lastPositionRef = useRef({ x: DEFAULT_X, y: DEFAULT_Y });
 
-  // Navigation function using useCallback.
   const navigation = useNavigation();
   const openChat = useCallback(() => {
     navigation.navigate("BotCat");
   }, [navigation]);
 
-  // Memoize the gesture event handler.
   const onGestureEvent = useMemo(
     () =>
       Animated.event(
@@ -43,22 +37,18 @@ export default function FloatingButton() {
     [translateX, translateY]
   );
 
-  // Gesture state change handler that snaps the button to the nearest corner.
   const onHandlerStateChange = useCallback(
     ({ nativeEvent }) => {
       if (nativeEvent.state === State.BEGAN) {
-        // When drag starts, set the current position as offset.
         translateX.setOffset(lastPositionRef.current.x);
         translateY.setOffset(lastPositionRef.current.y);
         translateX.setValue(0);
         translateY.setValue(0);
       }
       if (nativeEvent.state === State.END) {
-        // Update the last known position with the drag translation.
         lastPositionRef.current.x += nativeEvent.translationX;
         lastPositionRef.current.y += nativeEvent.translationY;
 
-        // Clamp free-drag values so the button stays on-screen.
         lastPositionRef.current.x = Math.max(
           MIN_X,
           Math.min(lastPositionRef.current.x, MAX_X)
@@ -68,7 +58,6 @@ export default function FloatingButton() {
           Math.min(lastPositionRef.current.y, MAX_Y)
         );
 
-        // Define snapping corners using the new vertical margins.
         const corners = [
           { x: MIN_X, y: TOP_MARGIN },
           { x: MAX_X, y: TOP_MARGIN },
@@ -106,7 +95,6 @@ export default function FloatingButton() {
           useNativeDriver: false,
         }).start();
 
-        // Reset offsets.
         translateX.setOffset(0);
         translateX.setValue(lastPositionRef.current.x);
         translateY.setOffset(0);
