@@ -49,8 +49,8 @@ export default function MyUploads() {
                 renderItem={({ item }) => (
                     <SongCard 
                         song={item} 
-                        isOwnContent={true} // This is the user's own content
-                        onRemove={handleDeleteSong} // Use the same property name as in PlaylistDetail
+                        isOwnContent={true} 
+                        onRemove={handleDeleteSong} 
                         isDeleting={deletingId === item.songId}
                     />
                 )}
