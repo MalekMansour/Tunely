@@ -7,7 +7,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { authService } from "../services/authService"; 
 import { auth } from "../Utility/firebaseConfig";
 import { Button } from "react-native-paper";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons"; // Import Icon
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 export default function LoginFormPage() {
   const [email, setEmail] = useState("");
