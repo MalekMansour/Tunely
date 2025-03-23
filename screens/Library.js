@@ -2,7 +2,6 @@ import React, { useState, useCallback } from "react";
 import {
   Text,
   View,
-  Image,
   TouchableOpacity,
   ScrollView,
   FlatList,
@@ -15,32 +14,30 @@ import TopBarProfileIcon from "../components/TopBarProfileIcon";
 import SongCard from "../components/SongCard";
 import { useGetSongs } from "../hooks/useGetSongs";
 
-const COLORS = {
-  BACKGROUND: "#000000",
-  CARD_BACKGROUND: "#121212",
-  PRIMARY: "#182952", 
-  TEXT_PRIMARY: "#FFFFFF",
-  TEXT_SECONDARY: "#AAAAAA",
-  INACTIVE: "rgba(42, 42, 42, 0.7)",
-  ACTIVE: "#1D1D1D",
-  ACTIVE_BORDER: "#444",
-};
+// THEME IMPORT
+import { useTheme } from "../context/ThemeContext";
+import ThemedScreen from "../components/ThemedScreen";
 
 export default function LibraryScreen() {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState(false);
-  const { 
-    songs: likedSongs, 
-    loading: likedLoading, 
-    error: likedError, 
-    refreshSongs: refreshLikedSongs 
-  } = useGetSongs('liked');
-  const { 
-    songs: recentlyPlayedSongs, 
-    loading: recentlyPlayedLoading, 
-    error: recentlyPlayedError, 
-    refreshSongs: refreshRecentlyPlayed 
-  } = useGetSongs('recently-played');
+
+  // THEME HOOK
+  const { theme } = useTheme();
+
+  const {
+    songs: likedSongs,
+    loading: likedLoading,
+    error: likedError,
+    refreshSongs: refreshLikedSongs,
+  } = useGetSongs("liked");
+
+  const {
+    songs: recentlyPlayedSongs,
+    loading: recentlyPlayedLoading,
+    error: recentlyPlayedError,
+    refreshSongs: refreshRecentlyPlayed,
+  } = useGetSongs("recently-played");
 
   useFocusEffect(
     useCallback(() => {
@@ -61,46 +58,44 @@ export default function LibraryScreen() {
     navigation.navigate("MyUploads");
   };
 
-  const TabButton = ({ title, isActive, onPress }) => {
-    return (
-      <TouchableOpacity
-        style={[styles.tabButton, isActive && styles.activeTabButton]}
-        onPress={onPress}
-      >
-        <Text style={styles.tabButtonText}>{title}</Text>
-      </TouchableOpacity>
-    );
-  };
+  const TabButton = ({ title, isActive, onPress }) => (
+    <TouchableOpacity
+      style={[
+        styles.tabButton,
+        { backgroundColor: isActive ? theme.secondary : theme.background },
+        isActive && { borderColor: theme.text, borderWidth: 1 },
+      ]}
+      onPress={onPress}
+    >
+      <Text style={{ color: theme.text }}>{title}</Text>
+    </TouchableOpacity>
+  );
 
   const ActionButton = ({ icon, title, onPress }) => {
     return (
       <TouchableOpacity style={styles.actionButton} onPress={onPress}>
-        <View style={styles.actionIconContainer}>
-          <Text style={styles.actionIcon}>{icon}</Text>
+        <View style={[styles.actionIconContainer, { backgroundColor: theme.primary }]}>
+          <Text style={{ fontSize: 24, color: theme.text }}>{icon}</Text>
         </View>
-        <Text style={styles.actionText}>{title}</Text>
+        <Text style={[styles.actionText, { color: theme.text }]}>{title}</Text>
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={styles.fullContainer}>
+    <ThemedScreen style={styles.fullContainer}>
       <StatusBar barStyle="light-content" />
 
-      <View style={styles.headerRow}>
+      <View style={[styles.headerRow, { backgroundColor: theme.background }]}>
         <View style={styles.titleContainer}>
-          <Text style={styles.headerTitle}>Your Library</Text>
+          <Text style={[styles.headerTitle, { color: theme.text }]}>Your Library</Text>
         </View>
-
-        <TouchableOpacity
-          style={styles.profileButton}
-          onPress={handleProfilePress}
-        >
-          <TopBarProfileIcon size={30}/>
+        <TouchableOpacity style={styles.profileButton} onPress={handleProfilePress}>
+          <TopBarProfileIcon size={30} />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.tabContainer}>
           <TabButton
             title="Playlists"
@@ -122,11 +117,10 @@ export default function LibraryScreen() {
             title="Liked"
             isActive={activeTab === "Liked"}
             onPress={() => {
-              // If already on Liked tab, go back to default view
               if (activeTab === "Liked") {
-                setActiveTab(false); // Reset to default view
+                setActiveTab(false);
               } else {
-                setActiveTab("Liked"); // Switch to Liked view
+                setActiveTab("Liked");
               }
             }}
           />
@@ -134,9 +128,11 @@ export default function LibraryScreen() {
 
         {activeTab === "Liked" ? (
           <>
-            <Text style={styles.sectionTitle}>Your Liked Songs</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              Your Liked Songs
+            </Text>
             {likedLoading ? (
-              <ActivityIndicator size="large" color={COLORS.PRIMARY} />
+              <ActivityIndicator size="large" color={theme.primary} />
             ) : (
               <FlatList
                 data={likedSongs}
@@ -144,66 +140,67 @@ export default function LibraryScreen() {
                 renderItem={({ item }) => <SongCard song={item} />}
                 contentContainerStyle={styles.songListContainer}
                 ListEmptyComponent={() => (
-                  <Text style={styles.emptyText}>No liked songs yet</Text>
+                  <Text style={[styles.emptyText, { color: theme.text }]}>
+                    No liked songs yet
+                  </Text>
                 )}
                 showsVerticalScrollIndicator={false}
                 onRefresh={refreshLikedSongs}
                 refreshing={likedLoading}
               />
             )}
-            {likedError && <Text style={styles.errorText}>{likedError}</Text>}
+            {likedError && (
+              <Text style={[styles.errorText, { color: theme.text }]}>
+                {likedError}
+              </Text>
+            )}
           </>
         ) : (
           <ScrollView style={styles.scrollContainer}>
-            <ActionButton
-              icon="+"
-              title="Upload a Song"
-              onPress={() => navigation.navigate("Upload")}
-            />
-           
-            <ActionButton
-              icon="♥"
-              title="Your Liked Songs"
-              onPress={() => setActiveTab("Liked")}
-            />
-            
+            <ActionButton icon="+" title="Upload a Song" onPress={() => navigation.navigate("Upload")} />
+            <ActionButton icon="♥" title="Your Liked Songs" onPress={() => setActiveTab("Liked")} />
+
             <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Recently played</Text>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>Recently played</Text>
               {recentlyPlayedLoading ? (
-                <ActivityIndicator size="small" color={COLORS.PRIMARY} />
+                <ActivityIndicator size="small" color={theme.primary} />
               ) : recentlyPlayedSongs && recentlyPlayedSongs.length > 0 ? (
                 <FlatList
-                  data={recentlyPlayedSongs} // Limit to 5 items
+                  data={recentlyPlayedSongs}
                   keyExtractor={(item) => `recent-${item.songId}`}
                   scrollEnabled={false}
                   renderItem={({ item }) => <SongCard song={item} />}
                   ListEmptyComponent={() => (
-                    <Text style={styles.emptyText}>No recently played songs</Text>
+                    <Text style={[styles.emptyText, { color: theme.text }]}>
+                      No recently played songs
+                    </Text>
                   )}
                 />
               ) : (
-                <Text style={styles.emptyText}>No recently played songs</Text>
+                <Text style={[styles.emptyText, { color: theme.text }]}>
+                  No recently played songs
+                </Text>
               )}
               {recentlyPlayedError && (
-                <Text style={styles.errorText}>{recentlyPlayedError}</Text>
+                <Text style={[styles.errorText, { color: theme.text }]}>
+                  {recentlyPlayedError}
+                </Text>
               )}
             </View>
           </ScrollView>
         )}
       </View>
-    </View>
+    </ThemedScreen>
   );
 }
 
 const styles = StyleSheet.create({
   fullContainer: {
     flex: 1,
-    backgroundColor: COLORS.BACKGROUND,
   },
   container: {
     flex: 1,
     paddingHorizontal: 16,
-    backgroundColor: COLORS.BACKGROUND,
   },
   headerRow: {
     flexDirection: "row",
@@ -212,20 +209,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 45,
     paddingBottom: 16,
-    backgroundColor: COLORS.BACKGROUND,
   },
   titleContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 10,
   },
-  musicIcon: {
-    fontSize: 30,
-    color: COLORS.PRIMARY,
-    marginRight: 8,
-  },
   headerTitle: {
-    color: COLORS.TEXT_PRIMARY,
     fontSize: 24,
     fontWeight: "bold",
   },
@@ -238,20 +228,10 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   tabButton: {
-    backgroundColor: COLORS.INACTIVE,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
     marginRight: 8,
-  },
-  activeTabButton: {
-    backgroundColor: COLORS.ACTIVE,
-    borderWidth: 1,
-    borderColor: COLORS.ACTIVE_BORDER,
-  },
-  tabButtonText: {
-    color: COLORS.TEXT_PRIMARY,
-    fontSize: 14,
   },
   scrollContainer: {
     flex: 1,
@@ -268,17 +248,11 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: COLORS.PRIMARY,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
   },
-  actionIcon: {
-    fontSize: 24,
-    color: COLORS.TEXT_PRIMARY,
-  },
   actionText: {
-    color: COLORS.TEXT_PRIMARY,
     fontSize: 16,
     fontWeight: "500",
   },
@@ -287,24 +261,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    color: COLORS.TEXT_PRIMARY,
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 12,
   },
   emptyText: {
-    color: COLORS.TEXT_SECONDARY,
     fontSize: 14,
     textAlign: "center",
     marginTop: 20,
     fontStyle: "italic",
   },
   errorText: {
-    color: "red",
     textAlign: "center",
     marginTop: 20,
   },
-  recentSongCardContainer: {
-    marginBottom: 8,
-  }
 });
