@@ -1,7 +1,7 @@
 /**********************************************
   1) Utility function to pick text color
- **********************************************/
-  function getContrastingTextColor(
+**********************************************/
+function getContrastingTextColor(
     bgColor,
     lightText = "#F1F1F1",
     darkText = "#1a1a1a"
@@ -15,23 +15,23 @@
     const b = parseInt(hex.substring(4, 6), 16);
   
     // basic brightness formula
-    const brightness = (0.299 * r + 0.587 * g + 0.114 * b);
+    const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
   
     // pick dark text if background is bright
-    // threshold is around ~ 186 out of 255
+    // threshold is around ~186 out of 255
     return brightness > 186 ? darkText : lightText;
   }
   
   /**********************************************
     2) Helper function to create each theme
-   **********************************************/
-  function createTheme({ 
-    name, 
-    background, 
-    primary, 
-    secondary, 
-    text, 
-    del = "#BF3131" 
+  **********************************************/
+  function createTheme({
+    name,
+    background,
+    primary,
+    secondary,
+    text,
+    del = "#BF3131",
   }) {
     // if text wasn't provided, pick automatically
     const finalText = text || getContrastingTextColor(background);
@@ -47,7 +47,7 @@
   
   /**********************************************
     3) Export your themes
-   **********************************************/
+  **********************************************/
   export const themes = {
     dark: createTheme({
       name: "Classic Dark Mode",
@@ -78,7 +78,7 @@
       background: "#FFD6E8",
       primary: "#F7B5CA",
       secondary: "#F3D0D7",
-      // no text => will auto pick dark or white
+      // no text => auto pick dark or white
       text: "#2f2f2f",
     }),
   
@@ -104,65 +104,7 @@
       background: "#F5E7DE",
       primary: "#F2BFA4",
       secondary: "#E5A884",
-    }),
-  
-    bowiesDressingRoom: createTheme({
-      name: "Bowie's Dressing Room",
-      background: "#E7D3BB",
-      primary: "#F02F34",
-      secondary: "#C87E86",
-    }),
-  
-    blockchain: createTheme({
-      name: "Blockchain",
-      background: "#17203D",
-      primary: "#6552D0",
-      secondary: "#4438A0",
-    }),
-  
-    deduxer: createTheme({
-      name: "Deduxer",
-      background: "#A5A5A5",
-      primary: "#6552D0",
-      secondary: "#7A5EDD",
-    }),
-  
-    tiktok: createTheme({
-      name: "TikTok",
-      background: "#000000",
-      primary: "#74f0ed",
-      secondary: "#ea445a",
-      text: "#FFFFFF",
-    }),
-  
-    boldNature: createTheme({
-      name: "Bold Nature",
-      background: "#172d13",
-      primary: "#d76f30",
-      secondary: "#6bb77b",
-    }),
-  
-    authenticBrief: createTheme({
-      name: "Authentic Brief",
-      background: "#fdf5df",
-      primary: "#5ebec4",
-      secondary: "#f92c85",
-    }),
-  
-    sigurdLewerentz: createTheme({
-      name: "Sigurd Lewerentz",
-      background: "#a0aecd",
-      primary: "#000000",
-      secondary: "#595959",
-    }),
-  
-    golfSpace: createTheme({
-      name: "GolfSpace",
-      background: "#6e6e6e",
-      primary: "#bcfd4c",
-      secondary: "#99fa28",
-    }),
-  
+    }),  
     omegaYeast: createTheme({
       name: "Omega Yeast",
       background: "#f7f7f7",
@@ -182,13 +124,6 @@
       background: "#051622",
       primary: "#1ba098",
       secondary: "#deb992",
-    }),
-  
-    pittoriDiCinema: createTheme({
-      name: "Pittori di Cinema",
-      background: "#fdd935",
-      primary: "#000000",
-      secondary: "#333333",
     }),
   
     weHeart: createTheme({
