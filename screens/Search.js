@@ -6,15 +6,18 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
   ActivityIndicator,
   FlatList,
 } from "react-native";
 import { playlistService } from "../services/playlistService";
 import { songService } from "../services/songService";
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
 import PlayList from "../components/Playlist";
 import SongCard from "../components/SongCard";
+
+// THEME IMPORTS
+import { useTheme } from "../context/ThemeContext";
+import ThemedScreen from "../components/ThemedScreen";
 
 const musicGenres = [
   { id: "1", name: "Pop", color: "#E74C3C" },
@@ -35,9 +38,12 @@ export default function Search() {
   const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+
+  // THEME USAGE
+  const { theme } = useTheme();
 
   useEffect(() => {
     async function fetchPlaylists() {
@@ -46,7 +52,6 @@ export default function Search() {
       setPlaylists(playlistData);
       setLoading(false);
     }
-
     fetchPlaylists();
   }, []);
 
@@ -63,20 +68,20 @@ export default function Search() {
   };
 
   const clearSearch = () => {
-    setQuery('');
+    setQuery("");
     setResults([]);
     setIsSearching(false);
   };
 
   const openGenrePage = (genre) => {
-    navigation.navigate('GenreSongs', { genre });
+    navigation.navigate("GenreSongs", { genre });
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ThemedScreen style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.searchBarContainer}>
         <TextInput
-          style={styles.searchBar}
+          style={[styles.searchBar, { color: theme.text }]}
           placeholder="Search for something"
           placeholderTextColor="#888"
           value={query}
@@ -84,11 +89,11 @@ export default function Search() {
         />
         {query ? (
           <TouchableOpacity style={styles.searchIcon} onPress={clearSearch}>
-            <Text style={styles.searchIconText}>✕</Text>
+            <Text style={{ fontSize: 18, color: "#888" }}>✕</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={styles.searchIcon}>
-            <Text style={styles.searchIconText}>🔍</Text>
+            <Text style={{ fontSize: 18, color: "#888" }}>🔍</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -98,14 +103,20 @@ export default function Search() {
           data={results}
           keyExtractor={(item) => item.songId.toString()}
           renderItem={({ item }) => <SongCard song={item} />}
-          ListEmptyComponent={<Text style={styles.emptyText}>No results found</Text>}
+          ListEmptyComponent={
+            <Text style={[styles.emptyText, { color: theme.text }]}>
+              No results found
+            </Text>
+          }
         />
       ) : (
         <ScrollView>
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Playlists</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              Playlists
+            </Text>
             {loading ? (
-              <ActivityIndicator size="large" color="#f1f1f1" />
+              <ActivityIndicator size="large" color={theme.text} />
             ) : (
               <ScrollView horizontal>
                 {playlists.slice(0, 10).map((playlist) => (
@@ -123,7 +134,9 @@ export default function Search() {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Browse by Genre</Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>
+              Browse by Genre
+            </Text>
             <View style={styles.browseGrid}>
               {musicGenres.map((genre) => (
                 <TouchableOpacity
@@ -138,9 +151,10 @@ export default function Search() {
           </View>
         </ScrollView>
       )}
-    </SafeAreaView>
+    </ThemedScreen>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -149,7 +163,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     paddingHorizontal: 16,
-    paddingBottom: 16, 
+    paddingBottom: 16,
   },
   searchBarContainer: {
     flexDirection: "row",
@@ -162,17 +176,12 @@ const styles = StyleSheet.create({
     height: 40,
     backgroundColor: "#333",
     borderRadius: 20,
-    color: "#fff",
     paddingHorizontal: 16,
     fontSize: 16,
   },
   searchIcon: {
     position: "absolute",
     right: 15,
-  },
-  searchIconText: {
-    fontSize: 18,
-    color: "#888",
   },
   section: {
     marginVertical: 16,
@@ -182,9 +191,8 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 12,
-    marginLeft: 18, 
+    marginLeft: 18,
   },
-  // Artist styles
   artistCard: {
     marginRight: 16,
     width: 100,
@@ -201,7 +209,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
   },
-  // Playlist styles
   playlistCard: {
     marginRight: 16,
     width: 160,
@@ -216,7 +223,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
   },
-  // Browse categories styles
   browseGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -257,9 +263,8 @@ const styles = StyleSheet.create({
   categoryIcon: {
     width: 60,
     height: 60,
-    resizeMode: "contain", 
+    resizeMode: "contain",
   },
-  // Bottom Navigation 
   navbar: {
     flexDirection: "row",
     height: 60,
@@ -302,16 +307,15 @@ const styles = StyleSheet.create({
   playlistsContainer: {
     paddingRight: 10,
     paddingBottom: 5,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   playlistWrap: {
     width: 300,
     marginRight: 0,
   },
-  // search results 
   resultsList: {
     paddingHorizontal: 16,
     paddingTop: 10,
-    paddingBottom: 70, 
+    paddingBottom: 70,
   },
 });
