@@ -8,10 +8,12 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "../styles";
+import { useTheme } from "../context/ThemeContext";
+import ThemedScreen from "../components/ThemedScreen";
 
 export default function SettingsScreen({ navigation }) {
-  const [darkMode, setDarkMode] = useState(true);
   const [isPrivate, setIsPrivate] = useState(false);
+  const { theme } = useTheme();
 
   const handleDeleteAccount = () => {
     Alert.alert(
@@ -19,31 +21,25 @@ export default function SettingsScreen({ navigation }) {
       "Are you sure you want to delete your account? This action is irreversible.",
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Delete", style: "destructive", onPress: () => console.log("Delete account logic here") }
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => console.log("Delete account logic here"),
+        },
       ]
     );
   };
 
   const settingsOptions = [
     {
-      label: "Edit Profile Picture",
-      icon: "image-outline",
-      onPress: () => navigation.navigate("EditProfilePicture"),
-    },
-    {
-      label: "Edit Username",
-      icon: "person-outline",
-      onPress: () => navigation.navigate("EditUsername"),
-    },
-    {
       label: `Privacy: ${isPrivate ? "Private" : "Public"}`,
       icon: isPrivate ? "lock-closed-outline" : "lock-open-outline",
       onPress: () => setIsPrivate(!isPrivate),
     },
     {
-        label: "Themes",
-        icon: "color-palette-outline",
-        onPress: () => navigation.navigate("ThemeSettings"),
+      label: "Themes",
+      icon: "color-palette-outline",
+      onPress: () => navigation.navigate("ThemeSettings"),
     },
     {
       label: "ChatBot Buddy",
@@ -68,22 +64,17 @@ export default function SettingsScreen({ navigation }) {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: "#000", flex: 1 }]}>
+    <ThemedScreen>
       <TouchableOpacity
         style={{ position: "absolute", top: 50, left: 20 }}
         onPress={() => navigation.goBack()}
       >
-        <Ionicons name="arrow-back" size={28} color="#f1f1f1" />
+        <Ionicons name="arrow-back" size={28} color={theme.text} />
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={{ position: "absolute", top: 50, right: 20 }}
-        onPress={() => setDarkMode(!darkMode)}
-      >
-        <Ionicons name={darkMode ? "sunny" : "moon"} size={28} color="#f1f1f1" />
-      </TouchableOpacity>
-
-      <Text style={[styles.title, { marginTop: 100, color: "#f1f1f1" }]}>Settings</Text>
+      <Text style={[styles.title, { marginTop: 100, marginLeft: 160, fontSize: 28, color: theme.text }]}>
+        Settings
+      </Text>
 
       <ScrollView
         contentContainerStyle={{ paddingVertical: 30, alignItems: "center" }}
@@ -96,7 +87,7 @@ export default function SettingsScreen({ navigation }) {
             style={{
               flexDirection: "row",
               alignItems: "center",
-              backgroundColor: "#182952",
+              backgroundColor: theme.primary,
               paddingVertical: 15,
               paddingHorizontal: 20,
               borderRadius: 12,
@@ -104,8 +95,15 @@ export default function SettingsScreen({ navigation }) {
               width: "90%",
             }}
           >
-            <Ionicons name={item.icon} size={22} color="#fff" style={{ marginRight: 15 }} />
-            <Text style={{ color: "#fff", fontSize: 16 }}>{item.label}</Text>
+            <Ionicons
+              name={item.icon}
+              size={22}
+              color={theme.text}
+              style={{ marginRight: 15 }}
+            />
+            <Text style={{ color: theme.text, fontSize: 16 }}>
+              {item.label}
+            </Text>
           </TouchableOpacity>
         ))}
 
@@ -114,7 +112,7 @@ export default function SettingsScreen({ navigation }) {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: "#330000",
+            backgroundColor: theme.delete,
             paddingVertical: 15,
             paddingHorizontal: 20,
             borderRadius: 12,
@@ -122,12 +120,23 @@ export default function SettingsScreen({ navigation }) {
             width: "90%",
           }}
         >
-          <Ionicons name="trash-outline" size={22} color="#ff4d4d" style={{ marginRight: 15 }} />
-          <Text style={{ color: "#ff4d4d", fontSize: 16, fontWeight: "bold" }}>
+          <Ionicons
+            name="trash-outline"
+            size={22}
+            color="#fff"
+            style={{ marginRight: 15 }}
+          />
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 16,
+              fontWeight: "bold",
+            }}
+          >
             DELETE ACCOUNT
           </Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </ThemedScreen>
   );
 }
