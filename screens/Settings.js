@@ -41,9 +41,9 @@ export default function SettingsScreen({ navigation }) {
       onPress: () => setIsPrivate(!isPrivate),
     },
     {
-      label: "Themes",
-      icon: "color-palette-outline",
-      onPress: () => navigation.navigate("Themes"),
+        label: "Themes",
+        icon: "color-palette-outline",
+        onPress: () => navigation.navigate("ThemeSettings"),
     },
     {
       label: "ChatBot Buddy",
