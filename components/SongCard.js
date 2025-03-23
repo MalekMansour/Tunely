@@ -1,23 +1,28 @@
 import React from "react";
-import { Text, View, TouchableOpacity, Image, Modal } from "react-native";
-import { styles } from "../styles";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useAudio } from "../context/AudioContext";
-import { Ionicons } from '@expo/vector-icons';
-import { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 
-const defaultCoverImage = require('../assets/note.jpg');
+import { useTheme } from "../context/ThemeContext"; // for colors
+import ThemedView from "../components/ThemedScreen";   
+
+import { styles } from "../styles";
+import { useAudio } from "../context/AudioContext";
+import { auth } from "../Utility/firebaseConfig";
+import { likesService } from "../services/likesService";
+
+const defaultCoverImage = require("../assets/note.jpg");
 
 const SongCard = ({ song, playlistId, showOptions, onRemove, isOwnContent }) => {
-
   const navigation = useNavigation();
+  const { theme } = useTheme(); // Access theme.* colors
   const { playSound, pauseSound, resumeSound, currentSong, isPlaying } = useAudio();
 
-  // Determine if this is the current song 
+  // Determine if this is the current song
   const isCurrentSong = currentSong?.songId === song.songId;
 
   const handlePress = async () => {
-    if (currentSong?.songId === song.songId) {
+    if (isCurrentSong) {
       if (isPlaying) {
         await pauseSound();
       } else {
@@ -28,37 +33,38 @@ const SongCard = ({ song, playlistId, showOptions, onRemove, isOwnContent }) => 
     }
   };
 
-
   return (
-    <View>
+    <ThemedView style={{ marginVertical: 4 }}>
       <TouchableOpacity
         style={[styles.songCard, isCurrentSong && styles.activeSongCard]}
         onPress={handlePress}
       >
-        <Image 
+        <Image
           source={song.song_photo_url ? { uri: song.song_photo_url } : defaultCoverImage}
-          style={styles.songCardImage} 
+          style={styles.songCardImage}
         />
         <View style={styles.songCardInfo}>
-          <Text style={styles.songCardTitle}>{song.title}</Text>
-          <Text style={styles.songCardArtist}>{song.artistName}</Text>
+  
+          {/* Apply the theme color here */}
+          <Text style={[styles.songCardTitle, { color: theme.text }]}>
+            {song.title}
+          </Text>
+          <Text style={[styles.songCardArtist, { color: theme.text }]}>
+            {song.artistName}
+          </Text>
+  
         </View>
-        
-        {/* Only show options if it's the user's own content */}
+  
         {isOwnContent && (
-          <TouchableOpacity 
-          onPress={() => onRemove(song.songId || song.id)} 
-          style={styles.optionsIcon}
-        >
-            <Ionicons name="ellipsis-vertical" size={24} color="#333" />
+          <TouchableOpacity
+            onPress={() => onRemove(song.songId || song.id)}
+            style={styles.optionsIcon}
+          >
+            <Ionicons name="ellipsis-vertical" size={24} color={theme.text} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
-
-      {/* Modal for confirming song removal */}
-
-    </View>
+    </ThemedView>
   );
-};
-
+}
 export default SongCard;
