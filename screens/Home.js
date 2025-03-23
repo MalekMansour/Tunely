@@ -5,11 +5,18 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useGetSongs } from "../hooks/useGetSongs";
 import { useAudio } from "../context/AudioContext";
 import { playlistService } from "../services/playlistService";
-import SongCard from "../components/SongCard"; 
+import SongCard from "../components/SongCard";
 import SongCard2 from "../components/SongCard2";
 import PlayList from "../components/Playlist";
 
+// THEME IMPORTS
+import { useTheme } from "../context/ThemeContext";
+import ThemedScreen from "../components/ThemedScreen";
+
 export default function HomeScreen() {
+  // THEME HOOK
+  const { theme } = useTheme();
+
   // Fetch all songs
   const { songs, loading, error, refreshSongs } = useGetSongs("all");
 
@@ -17,7 +24,7 @@ export default function HomeScreen() {
   const {
     songs: recentlyPlayedSongs,
     loading: recentPlayedLoading,
-    refreshSongs: refreshRecentlyPlayedSongs, 
+    refreshSongs: refreshRecentlyPlayedSongs,
   } = useGetSongs("recently-played");
 
   const { changePlaylist } = useAudio();
@@ -82,16 +89,16 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ThemedScreen style={[styles.container, { backgroundColor: theme.background }]}>
       <FlatList
         data={playlists}
         ListHeaderComponent={
           <>
             {/* Recently Played - Horizontal Scroll */}
             <View style={styles.sectionContainer}>
-              <Text style={styles.subtitle}>Recently Played</Text>
+              <Text style={[styles.subtitle, { color: theme.text }]}>Recently Played</Text>
               {recentPlayedLoading ? (
-                <ActivityIndicator size="32" color="#f1f1f1" />
+                <ActivityIndicator size={32} color={theme.text} />
               ) : (
                 <View style={{ height: 180 }}>
                   <FlatList
@@ -103,7 +110,9 @@ export default function HomeScreen() {
                     onRefresh={refreshRecentlyPlayedSongs}
                     refreshing={recentPlayedLoading}
                     ListEmptyComponent={
-                      <Text style={styles.emptyText}>No recently played songs</Text>
+                      <Text style={[styles.emptyText, { color: theme.text }]}>
+                        No recently played songs
+                      </Text>
                     }
                   />
                 </View>
@@ -112,11 +121,11 @@ export default function HomeScreen() {
 
             {/* New Songs - Vertical Scroll */}
             <View style={styles.sectionContainer}>
-              <Text style={styles.subtitle}>New Songs</Text>
+              <Text style={[styles.subtitle, { color: theme.text }]}>New Songs</Text>
               <FlatList
                 data={newSongs}
                 keyExtractor={(item) => item.songId.toString()}
-                renderItem={({ item }) => <SongCard song={item} />} 
+                renderItem={({ item }) => <SongCard song={item} />}
                 showsVerticalScrollIndicator={false}
               />
             </View>
@@ -124,21 +133,23 @@ export default function HomeScreen() {
             {/* Genre Sections */}
             {Object.entries(categorizedSongs).map(([genre, songs]) => (
               <View key={genre} style={styles.sectionContainer}>
-                <Text style={styles.subtitle}>{genre}</Text>
+                <Text style={[styles.subtitle, { color: theme.text }]}>{genre}</Text>
                 <FlatList
                   data={songs}
                   keyExtractor={(item) => item.songId.toString()}
                   renderItem={({ item }) => <SongCard song={item} />}
                   showsVerticalScrollIndicator={false}
                   ListEmptyComponent={
-                    <Text style={styles.emptyText}>No {genre} songs</Text>
+                    <Text style={[styles.emptyText, { color: theme.text }]}>
+                      No {genre} songs
+                    </Text>
                   }
                 />
               </View>
             ))}
 
             {/* Playlists Section */}
-            <Text style={styles.subtitle}>Playlists</Text>
+            <Text style={[styles.subtitle, { color: theme.text }]}>Playlists</Text>
           </>
         }
         keyExtractor={(item) => item.id.toString()}
@@ -158,14 +169,18 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         onRefresh={() => {
           refreshSongs();
-          refreshRecentlyPlayedSongs(); 
+          refreshRecentlyPlayedSongs();
         }}
         refreshing={loading}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No playlists available</Text>
+          <Text style={[styles.emptyText, { color: theme.text }]}>No playlists available</Text>
         }
       />
-      {error && <Text style={styles.errorText}>Error loading songs: {error}</Text>}
-    </View>
+      {error && (
+        <Text style={[styles.errorText, { color: theme.text }]}>
+          Error loading songs: {error}
+        </Text>
+      )}
+    </ThemedScreen>
   );
 }
