@@ -9,7 +9,7 @@ export default function MyUploads() {
     const { songs, loading, error, refreshSongs } = useGetSongs('my-uploads');
     const [deletingId, setDeletingId] = useState(null);
 
-    const handleDeleteSong = async (playlistId, songId) => {
+    const handleDeleteSong = async (songId) => {
         try {
             setDeletingId(songId);
             

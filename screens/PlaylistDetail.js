@@ -285,7 +285,7 @@ const PlaylistDetail = () => {
           item?.id ? item.id.toString() : `fallback-${index}`
         }
         renderItem={({ item }) => (
-          <SongCard song={item} onRemove={() => handleRemoveSong(item.id)} isOwnContent={isOwnPlaylist} />
+          <SongCard song={item} onRemove={() => handleRemoveSong(item.songId)} isOwnContent={isOwnPlaylist} />
         )}
       />
 

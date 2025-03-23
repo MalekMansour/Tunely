@@ -126,43 +126,41 @@ fetchPlaylist: async (playlistId) => {
 },
 
   // Add a song to a playlist
-addSongToPlaylist: async (playlistId, song, setUserSongs, setModalVisible) => {
-  try {
-    console.log("Song object:", song); // Debugging
-
-    if (!song || song.songId === undefined || song.songId === null) {
-      console.error("Invalid song object:", song);
-      return; // exit if song is invalid
+  addSongToPlaylist: async (playlistId, song) => {
+    try {
+      console.log("Song object:", song); // Debugging
+  
+      if (!song || !song.songId) {
+        console.error("Invalid song object:", song);
+        throw new Error("Invalid song object");
+      }
+  
+      const headers = await getAuthHeaders(); 
+      const requestBody = {
+        songIds: [song.songId], 
+      };
+      
+      const response = await fetch(`${API_URL}/playlists/${playlistId}/songs`, {
+        method: 'POST',
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to add song to playlist');
+      }
+      
+      return await response.json(); 
+    } catch (error) {
+      console.error('Add song to playlist error:', error);
+      throw error; 
     }
+  },
 
-    const headers = await getAuthHeaders(); // Get the headers, including the Authorization token
-    const requestBody = {
-      songIds: [song.songId], // Ensure it's an array
-    };
-    
-    const response = await fetch(`${API_URL}/playlists/${playlistId}/songs`, {
-      method: 'POST',
-      headers: {
-        ...headers,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    console.log("Sending request with body:", requestBody);
-
-    if (response.ok) {
-      console.log(`Song added to playlist: ${song.title}`);
-      setUserSongs((prevSongs) => [...prevSongs, song]); // Update the UI by adding the song
-      setModalVisible(false); // Close the modal after adding
-    } else {
-      console.log('Failed to add song');
-    }
-  } catch (error) {
-    console.error(error);
-  }
-},
-removeSongFromPlaylist: async (playlistId, songId) => {
+  removeSongFromPlaylist: async (playlistId, songId) => {
   try {
     const headers = await getAuthHeaders();
     const response = await fetch(`${API_URL}/playlists/${playlistId}/songs/${songId}`, {
