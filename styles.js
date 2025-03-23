@@ -28,7 +28,6 @@ export const styles = StyleSheet.create({
     marginBottom: 10,
   },
   songTitle: {
-    color: "#f1f1f1", 
     fontWeight: "bold",
   },
   //when using safeareaview for iphone notch
@@ -222,7 +221,6 @@ export const styles = StyleSheet.create({
   },
   songCardArtist: {
     fontSize: 12,
-    color: "#d1d1d1",
   },
 
   songCard2: {
