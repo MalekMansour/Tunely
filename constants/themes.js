@@ -95,7 +95,6 @@ function getContrastingTextColor(
       background: "#0B2447",
       primary: "#19376D",
       secondary: "#576CBC",
-      // text is omitted => auto pick
       // text: "#F0F3FF",
     }),
   
