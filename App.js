@@ -33,7 +33,7 @@ import MyUploadButton from "./components/MyUploadButton";
 import AdminPage from "./screens/adminPage";
 import AdminCheck from "./Utility/adminCheck";
 import Notifications from "./screens/Notifications";
-import GenreSongs from './screens/GenreSongs';
+import GenreSongs from "./screens/GenreSongs";
 import CatBot from "./components/catbot";
 import BotChat from "./screens/BotCat";
 import ThemeSettings from "./screens/ThemeSettings";
@@ -172,8 +172,9 @@ function TabNavigator() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: theme.text,
-        tabBarInactiveTintColor: "#666",
+        // dynamic colors from theme:
+        tabBarActiveTintColor: theme.primary, // or theme.text if you prefer
+        tabBarInactiveTintColor: theme.inactive, // or theme.secondary
         tabBarStyle: {
           ...styles.tabBarStyle,
           backgroundColor: "transparent",
@@ -201,8 +202,16 @@ export default function App() {
               <View style={{ flex: 1 }}>
                 <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
                   <Stack.Screen name="Home" component={TabNavigator} />
-                  <Stack.Screen name="SongDetail" component={SongDetailScreen} options={{ presentation: "transparentModal" }}/>
-                  <Stack.Screen name="CommentScreen" component={CommentScreen} options={{ presentation: "transparentModal" }}/>
+                  <Stack.Screen
+                    name="SongDetail"
+                    component={SongDetailScreen}
+                    options={{ presentation: "transparentModal" }}
+                  />
+                  <Stack.Screen
+                    name="CommentScreen"
+                    component={CommentScreen}
+                    options={{ presentation: "transparentModal" }}
+                  />
                   <Stack.Screen name="Profile" component={ProfileScreen} />
                   <Stack.Screen name="Settings" component={SettingsScreen} />
                   <Stack.Screen name="Login" component={LoginScreen} />
@@ -211,7 +220,7 @@ export default function App() {
                   <Stack.Screen name="Upload" component={UploadScreen} />
                   <Stack.Screen name="MyUploads" component={MyUploads} />
                   <Stack.Screen name="ThemeSettings" component={ThemeSettings} />
-                  <Stack.Screen name="Notifications" component={Notifications}/>
+                  <Stack.Screen name="Notifications" component={Notifications} />
                   <Stack.Screen name="AdminPage" component={AdminPage} />
                   <Stack.Screen name="AuthCheck" component={AdminCheck} />
                   <Stack.Screen name="BotCat" component={BotChat} />
@@ -240,6 +249,5 @@ function ConditionalCatBot() {
   if (!routeName || hiddenScreens.includes(routeName)) {
     return null;
   }
-
   return <CatBot />;
 }
