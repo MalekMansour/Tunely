@@ -8,9 +8,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AudioProvider } from "./context/AudioContext";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { Provider as PaperProvider } from "react-native-paper";
 
-// Import screens (unchanged)
+// Screens
 import HomeScreen from "./screens/Home";
 import SearchScreen from "./screens/Search";
 import LibraryScreen from "./screens/Library";
@@ -41,12 +42,12 @@ import ThemeSettings from "./screens/ThemeSettings";
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-
 function ScreenWithTopBar({ navigation, children, title }) {
+  const { theme } = useTheme();
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
       <View style={styles.topBar}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
         <TouchableOpacity
           style={styles.profileButton}
           onPress={() => navigation.navigate("Profile")}
@@ -147,6 +148,7 @@ function SearchStack() {
 }
 
 function TabNavigator() {
+  const { theme } = useTheme();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -171,7 +173,7 @@ function TabNavigator() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "#f1f1f1",
+        tabBarActiveTintColor: theme.text,
         tabBarInactiveTintColor: "#666",
         tabBarStyle: {
           ...styles.tabBarStyle,
@@ -194,39 +196,40 @@ export default function App() {
   return (
     <PaperProvider>
       <AudioProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <NavigationContainer>
-            <View style={{ flex: 1 }}>
-              <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="Home" component={TabNavigator} />
-                <Stack.Screen name="SongDetail" component={SongDetailScreen} options={{ presentation: "transparentModal" }}/>
-                <Stack.Screen name="CommentScreen" component={CommentScreen} options={{ presentation: "transparentModal" }}/>
-                <Stack.Screen name="Profile" component={ProfileScreen} />
-                <Stack.Screen name="Settings" component={SettingsScreen} />
-                <Stack.Screen name="Login" component={LoginScreen} />
-                <Stack.Screen name="LoginFormPage" component={LoginFormPage} />
-                <Stack.Screen name="SignUp" component={SignUpScreen} />
-                <Stack.Screen name="Upload" component={UploadScreen} />
-                <Stack.Screen name="MyUploads" component={MyUploads} />
-                <Stack.Screen name="PrivacySettings" component={PrivacySettings}/>
-                <Stack.Screen name="ThemeSettings" component={ThemeSettings} />
-                <Stack.Screen name="Notifications" component={Notifications}/>
-                <Stack.Screen name="AdminPage" component={AdminPage} />
-                <Stack.Screen name="AuthCheck" component={AdminCheck} />
-                <Stack.Screen name="BotCat" component={BotChat} />
-              </Stack.Navigator>
-              <FloatingPlayer />
+        <ThemeProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <NavigationContainer>
+              <View style={{ flex: 1 }}>
+                <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="Home" component={TabNavigator} />
+                  <Stack.Screen name="SongDetail" component={SongDetailScreen} options={{ presentation: "transparentModal" }}/>
+                  <Stack.Screen name="CommentScreen" component={CommentScreen} options={{ presentation: "transparentModal" }}/>
+                  <Stack.Screen name="Profile" component={ProfileScreen} />
+                  <Stack.Screen name="Settings" component={SettingsScreen} />
+                  <Stack.Screen name="Login" component={LoginScreen} />
+                  <Stack.Screen name="LoginFormPage" component={LoginFormPage} />
+                  <Stack.Screen name="SignUp" component={SignUpScreen} />
+                  <Stack.Screen name="Upload" component={UploadScreen} />
+                  <Stack.Screen name="MyUploads" component={MyUploads} />
+                  <Stack.Screen name="PrivacySettings" component={PrivacySettings}/>
+                  <Stack.Screen name="ThemeSettings" component={ThemeSettings} />
+                  <Stack.Screen name="Notifications" component={Notifications}/>
+                  <Stack.Screen name="AdminPage" component={AdminPage} />
+                  <Stack.Screen name="AuthCheck" component={AdminCheck} />
+                  <Stack.Screen name="BotCat" component={BotChat} />
+                </Stack.Navigator>
 
-              <ConditionalCatBot />
-            </View>
-          </NavigationContainer>
-        </GestureHandlerRootView>
+                <FloatingPlayer />
+                <ConditionalCatBot />
+              </View>
+            </NavigationContainer>
+          </GestureHandlerRootView>
+        </ThemeProvider>
       </AudioProvider>
     </PaperProvider>
   );
 }
 
-// Helper component:
 function ConditionalCatBot() {
   const routeName = useNavigationState((state) => {
     if (!state) return null;
