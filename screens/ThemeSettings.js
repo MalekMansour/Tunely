@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -7,47 +7,45 @@ import {
   StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-const themes = [
-  { name: "Classic Dark Mode", value: "dark" },
-  { name: "Classic Light Mode", value: "light" },
-  { name: "Astro Neon", value: "astro" },
-  { name: "Deep Blue Sea", value: "ocean" },
-  { name: "Cherry Blossom", value: "cherry" },
-];
+import { useTheme } from "../context/ThemeContext";
+import { themes } from "../constants/themes";
 
 export default function ThemeSettings({ navigation }) {
-  const [selectedTheme, setSelectedTheme] = useState("dark");
+  const { theme, themeName, changeTheme } = useTheme();
 
   const handleSelectTheme = (theme) => {
-    setSelectedTheme(theme.value);
-    // You can store this in context, firebase, or AsyncStorage later
+    changeTheme(theme.value);
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <TouchableOpacity
         style={{ position: "absolute", top: 50, left: 20 }}
         onPress={() => navigation.goBack()}
       >
-        <Ionicons name="arrow-back-outline" size={28} color="#f1f1f1" />
+        <Ionicons name="arrow-back-outline" size={28} color={theme.text} />
       </TouchableOpacity>
 
-      <Text style={styles.title}>Choose Your Theme</Text>
+      <Text style={[styles.title, { color: theme.text }]}>
+        Choose Your Theme
+      </Text>
 
       <ScrollView contentContainerStyle={styles.optionsContainer}>
-        {themes.map((theme) => (
+        {Object.entries(themes).map(([key, value]) => (
           <TouchableOpacity
-            key={theme.value}
-            onPress={() => handleSelectTheme(theme)}
+            key={key}
+            onPress={() => handleSelectTheme({ value: key })}
             style={[
               styles.optionButton,
-              selectedTheme === theme.value && styles.selectedOption,
+              { backgroundColor: theme.primary },
+              themeName === key && styles.selectedOption,
             ]}
           >
-            <Text style={styles.optionText}>{theme.name}</Text>
-            {selectedTheme === theme.value && (
-              <Ionicons name="checkmark" size={20} color="#4A90E2" />
+            <Text style={[styles.optionText, { color: theme.text }]}>
+              {value.name}
+            </Text>
+            {themeName === key && (
+              <Ionicons name="checkmark" size={20} color={theme.text} />
             )}
           </TouchableOpacity>
         ))}
@@ -59,12 +57,10 @@ export default function ThemeSettings({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
     paddingTop: 100,
     paddingHorizontal: 20,
   },
   title: {
-    color: "#fff",
     fontSize: 22,
     fontWeight: "bold",
     textAlign: "center",
@@ -74,7 +70,6 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   optionButton: {
-    backgroundColor: "#1a1a1a",
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
@@ -87,7 +82,6 @@ const styles = StyleSheet.create({
     borderColor: "#4A90E2",
   },
   optionText: {
-    color: "#fff",
     fontSize: 16,
   },
 });
