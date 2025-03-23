@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
   View,
   Text,
   TouchableOpacity,
@@ -14,10 +13,16 @@ import { songService } from '../services/songService';
 import { useAudio } from '../context/AudioContext';
 import SongCard from '../components/SongCard';
 
+// THEME IMPORTS
+import { useTheme } from '../context/ThemeContext';
+import ThemedScreen from '../components/ThemedScreen';
+
 export default function BotCat() {
   const navigation = useNavigation();
   const { playSong } = useAudio();
-
+  
+  const { theme } = useTheme();  // <-- THEME HOOK
+  
   const [selectedMood, setSelectedMood] = useState(null);
   const [recommendedSongs, setRecommendedSongs] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -45,18 +50,20 @@ export default function BotCat() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ThemedScreen style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back-outline" size={32} color="#fff" />
+          <Ionicons name="arrow-back-outline" size={32} color={theme.text} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>CatBot 🎧</Text>
-        <View style={{ width: 32 }} />
+        <Text style={[styles.headerTitle, { color: theme.text }]}>CatBot 🎧</Text>
+        <View style={{ width: 32, marginTop: 150 }} />
       </View>
 
       <ScrollView style={styles.chatContainer}>
-        <View style={styles.botBubble}>
-          <Text style={styles.botText}>Hey there! How are you feeling today?</Text>
+        <View style={[styles.botBubble, { backgroundColor: theme.secondary }]}>
+          <Text style={[styles.botText, { color: theme.text }]}>
+            Hey there! How are you feeling today?
+          </Text>
         </View>
 
         {!selectedMood && (
@@ -64,10 +71,12 @@ export default function BotCat() {
             {moodOptions.map((mood) => (
               <TouchableOpacity
                 key={mood}
-                style={styles.optionButton}
+                style={[styles.optionButton, { borderColor: theme.primary }]}
                 onPress={() => handleMoodSelection(mood)}
               >
-                <Text style={styles.optionText}>{mood}</Text>
+                <Text style={[styles.optionText, { color: theme.primary }]}>
+                  {mood}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -75,35 +84,44 @@ export default function BotCat() {
 
         {selectedMood && (
           <>
-            <View style={styles.userBubble}>
-              <Text style={styles.userText}>{selectedMood}</Text>
+            <View style={[styles.userBubble, { backgroundColor: theme.primary }]}>
+              <Text style={[styles.userText, { color: theme.text }]}>
+                {selectedMood}
+              </Text>
             </View>
 
-            <View style={styles.botBubble}>
+            <View style={[styles.botBubble, { backgroundColor: theme.secondary }]}>
               {loading ? (
-                <ActivityIndicator size="small" color="#fff" style={{ marginVertical: 10 }} />
+                <ActivityIndicator size="small" color={theme.text} style={{ marginVertical: 10 }} />
               ) : recommendedSongs.length > 0 ? (
                 <>
-                  <Text style={styles.botText}>Here's your "{selectedMood}" mix:</Text>
+                  <Text style={[styles.botText, { color: theme.text }]}>
+                    Here's your "{selectedMood}" mix:
+                  </Text>
                   {recommendedSongs.map((song) => (
-                    <SongCard key={song.songId} song={song} onPress={() => handlePlaySong(song)} />
+                    <SongCard
+                      key={song.songId}
+                      song={song}
+                      onPress={() => handlePlaySong(song)}
+                    />
                   ))}
                 </>
               ) : (
-                <Text style={styles.botText}>Sorry, couldn't find any songs right now.</Text>
+                <Text style={[styles.botText, { color: theme.text }]}>
+                  Sorry, couldn't find any songs right now.
+                </Text>
               )}
             </View>
           </>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </ThemedScreen>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
     padding: 16,
   },
   header: {
@@ -112,7 +130,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   headerTitle: {
-    color: '#fff',
     fontSize: 22,
     fontWeight: 'bold',
     flex: 1,
@@ -122,7 +139,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   botBubble: {
-    backgroundColor: '#333',
     borderRadius: 15,
     padding: 12,
     marginVertical: 8,
@@ -130,18 +146,15 @@ const styles = StyleSheet.create({
     maxWidth: '80%',
   },
   userBubble: {
-    backgroundColor: '#4A90E2',
     borderRadius: 15,
     padding: 12,
     marginVertical: 8,
     alignSelf: 'flex-end',
   },
   botText: {
-    color: '#fff',
     fontSize: 16,
   },
   userText: {
-    color: '#fff',
     fontSize: 16,
   },
   optionsContainer: {
@@ -152,14 +165,12 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     borderWidth: 1,
-    borderColor: '#4A90E2',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
     margin: 5,
   },
   optionText: {
-    color: '#4A90E2',
     fontSize: 15,
-  }
+  },
 });
