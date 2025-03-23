@@ -11,8 +11,8 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+
 import Scrubber from "../components/Scrubber";
 import PlayPauseButton from "../components/PlayPauseButton";
 import SkipButton from "../components/SkipButton";
@@ -20,6 +20,7 @@ import { useAudio } from "../context/AudioContext";
 import { likesService } from "../services/likesService";
 import { auth } from "../Utility/firebaseConfig";
 import { styles } from "../styles";
+import { useTheme } from "../context/ThemeContext"; // THEME HOOK
 
 const defaultCoverImage = require("../assets/note.jpg");
 
@@ -30,8 +31,11 @@ export default function SongDetailScreen({ route }) {
   const { song } = route.params;
   const navigation = useNavigation();
   const translateY = useRef(new Animated.Value(0)).current;
-  const { currentSong, isPlaying, playNextSong, playPreviousSong, playlist } =
-    useAudio();
+
+  // THEME USAGE
+  const { theme } = useTheme();
+
+  const { currentSong, isPlaying, playNextSong, playPreviousSong, playlist } = useAudio();
 
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(song.likes || 0);
@@ -67,7 +71,6 @@ export default function SongDetailScreen({ route }) {
     try {
       setIsLikeLoading(true);
       const user = auth.currentUser;
-
       if (!user) {
         Alert.alert("Sign In Required", "Please sign in to like songs");
         return;
@@ -125,7 +128,6 @@ export default function SongDetailScreen({ route }) {
     const unsubscribe = navigation.addListener("focus", () => {
       translateY.setValue(0);
     });
-
     return unsubscribe;
   }, [navigation]);
 
@@ -137,7 +139,6 @@ export default function SongDetailScreen({ route }) {
 
         const result = await likesService.checkLiked(song.songId);
         setIsLiked(result.liked);
-
         if (result.likeCount) {
           setLikeCount(result.likeCount);
         }
@@ -145,21 +146,17 @@ export default function SongDetailScreen({ route }) {
         console.error("Error checking like status:", error);
       }
     };
-
     checkLikeStatus();
   }, [song.songId]);
 
   return (
-    <PanGestureHandler
-      onGestureEvent={onGestureEvent}
-      onHandlerStateChange={onHandlerStateChange}
-    >
+    <PanGestureHandler onGestureEvent={onGestureEvent} onHandlerStateChange={onHandlerStateChange}>
       <Animated.View
         style={[
           styles.songDetailsContainer,
           {
             transform: [{ translateY }],
-            backgroundColor: "rgb(25, 26, 27)",
+            backgroundColor: theme.background, // replaced "rgb(25, 26, 27)"
             borderWidth: 1,
             borderColor: "#99a9b9",
             shadowColor: "#99a9b9",
@@ -189,8 +186,10 @@ export default function SongDetailScreen({ route }) {
               },
             ]}
           />
-          <Text style={styles.songTitle}>{song.title}</Text>
-          <Text style={styles.songArtist}>{song.artistName}</Text>
+          <Text style={[styles.songTitle, { color: theme.text }]}>{song.title}</Text>
+          <Text style={[styles.songArtist, { color: theme.text }]}>
+            {song.artistName}
+          </Text>
         </View>
 
         <Scrubber />
@@ -203,39 +202,46 @@ export default function SongDetailScreen({ route }) {
           <SkipButton direction="forward" onPress={handleNext} />
         </View>
 
-         {/* Control buttons for like and comment */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 20 }}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("CommentScreen", { song: song })}
-          style={{ alignSelf: 'flex-end' }} 
+        {/* Control buttons for like and comment */}
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: "100%",
+            paddingHorizontal: 20,
+          }}
         >
-          <Ionicons
-            name="chatbubble-ellipses-outline"
-            size={40}
-            marginTop={60}
-            marginLeft={30}
-            color="#ffffff"
-          />
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("CommentScreen", { song: song })}
+            style={{ alignSelf: "flex-end" }}
+          >
+            <Ionicons
+              name="chatbubble-ellipses-outline"
+              size={40}
+              marginTop={60}
+              marginLeft={30}
+              color={theme.text}
+            />
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={toggleLike}
-          disabled={isLikeLoading}
-          style={{ alignSelf: 'flex-end' }} 
-        >
-          <Ionicons
-            name={isLiked ? "heart" : "heart-outline"}
-            size={40}
-            marginTop={60}
-            marginRight={30}
-            color={isLiked ? "#ff375f" : "#ffffff"}
-          />
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            onPress={toggleLike}
+            disabled={isLikeLoading}
+            style={{ alignSelf: "flex-end" }}
+          >
+            <Ionicons
+              name={isLiked ? "heart" : "heart-outline"}
+              size={40}
+              marginTop={60}
+              marginRight={30}
+              color={isLiked ? "#ff375f" : theme.text}
+            />
+          </TouchableOpacity>
+        </View>
 
         {/* Down Arrow Button */}
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.arrowButton}>
-          <Ionicons name="chevron-down" size={32} color="#ffffff" />
+          <Ionicons name="chevron-down" size={32} color={theme.text} />
         </TouchableOpacity>
       </Animated.View>
     </PanGestureHandler>
