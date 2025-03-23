@@ -208,7 +208,7 @@ export default function SongDetailScreen({ route }) {
               name={isLiked ? "heart" : "heart-outline"}
               size={40}
               style={{ marginTop: 60, marginRight: 30 }}
-              color={isLiked ? "#ff375f" : theme.text} // pink if liked, else theme.text
+              color={isLiked ? "#ff375f" : theme.text} 
             />
           </TouchableOpacity>
         </View>
