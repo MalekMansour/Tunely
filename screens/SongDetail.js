@@ -4,7 +4,6 @@ import {
   Text,
   Image,
   Animated,
-  StyleSheet,
   TouchableOpacity,
   Dimensions,
   Alert,
@@ -12,7 +11,6 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
-
 import Scrubber from "../components/Scrubber";
 import PlayPauseButton from "../components/PlayPauseButton";
 import SkipButton from "../components/SkipButton";
@@ -20,22 +18,19 @@ import { useAudio } from "../context/AudioContext";
 import { likesService } from "../services/likesService";
 import { auth } from "../Utility/firebaseConfig";
 import { styles } from "../styles";
-import { useTheme } from "../context/ThemeContext"; // THEME HOOK
+import { useTheme } from "../context/ThemeContext"; // get theme
 
 const defaultCoverImage = require("../assets/note.jpg");
-
 const SCREEN_HEIGHT = Dimensions.get("window").height;
-const IMAGE_SIZE = 350; // Standard image size
+const IMAGE_SIZE = 350;
 
 export default function SongDetailScreen({ route }) {
   const { song } = route.params;
   const navigation = useNavigation();
   const translateY = useRef(new Animated.Value(0)).current;
 
-  // THEME USAGE
-  const { theme } = useTheme();
-
   const { currentSong, isPlaying, playNextSong, playPreviousSong, playlist } = useAudio();
+  const { theme } = useTheme(); // theme with background, text, border, etc.
 
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(song.likes || 0);
@@ -67,7 +62,6 @@ export default function SongDetailScreen({ route }) {
 
   const toggleLike = async () => {
     if (isLikeLoading) return;
-
     try {
       setIsLikeLoading(true);
       const user = auth.currentUser;
@@ -75,7 +69,6 @@ export default function SongDetailScreen({ route }) {
         Alert.alert("Sign In Required", "Please sign in to like songs");
         return;
       }
-
       const result = await likesService.toggleLike(song.songId);
       setIsLiked(result.action === "liked");
       setLikeCount(result.likeCount);
@@ -112,7 +105,7 @@ export default function SongDetailScreen({ route }) {
           useNativeDriver: false,
         }).start(() => navigation.goBack());
       } else if (event.nativeEvent.translationY < -100) {
-        navigation.navigate("CommentScreen", { song: song });
+        navigation.navigate("CommentScreen", { song });
       } else {
         Animated.spring(translateY, {
           toValue: 0,
@@ -136,7 +129,6 @@ export default function SongDetailScreen({ route }) {
       try {
         const user = auth.currentUser;
         if (!user) return;
-
         const result = await likesService.checkLiked(song.songId);
         setIsLiked(result.liked);
         if (result.likeCount) {
@@ -156,10 +148,10 @@ export default function SongDetailScreen({ route }) {
           styles.songDetailsContainer,
           {
             transform: [{ translateY }],
-            backgroundColor: theme.background, // replaced "rgb(25, 26, 27)"
+            backgroundColor: theme.background,
             borderWidth: 1,
-            borderColor: "#99a9b9",
-            shadowColor: "#99a9b9",
+            borderColor: theme.border,
+            shadowColor: theme.border,
             shadowOffset: { width: 0, height: 0 },
             shadowOpacity: 1,
             shadowRadius: 10,
@@ -173,9 +165,7 @@ export default function SongDetailScreen({ route }) {
       >
         <View style={styles.imageTitleContainer}>
           <Animated.Image
-            source={
-              song.song_photo_url ? { uri: song.song_photo_url } : defaultCoverImage
-            }
+            source={song.song_photo_url ? { uri: song.song_photo_url } : defaultCoverImage}
             style={[
               styles.songImage,
               {
@@ -186,13 +176,13 @@ export default function SongDetailScreen({ route }) {
               },
             ]}
           />
+          {/* Use theme.text for these titles */}
           <Text style={[styles.songTitle, { color: theme.text }]}>{song.title}</Text>
-          <Text style={[styles.songArtist, { color: theme.text }]}>
-            {song.artistName}
-          </Text>
+          <Text style={[styles.songArtist, { color: theme.text }]}>{song.artistName}</Text>
         </View>
 
         <Scrubber />
+
         <View style={styles.controls}>
           <SkipButton direction="back" onPress={handlePrevious} />
           <PlayPauseButton
@@ -202,44 +192,28 @@ export default function SongDetailScreen({ route }) {
           <SkipButton direction="forward" onPress={handleNext} />
         </View>
 
-        {/* Control buttons for like and comment */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            width: "100%",
-            paddingHorizontal: 20,
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => navigation.navigate("CommentScreen", { song: song })}
-            style={{ alignSelf: "flex-end" }}
-          >
+        {/* Like and Comment icons: use theme.text for normal, pink if liked */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%", paddingHorizontal: 20 }}>
+          <TouchableOpacity onPress={() => navigation.navigate("CommentScreen", { song })}>
             <Ionicons
               name="chatbubble-ellipses-outline"
               size={40}
-              marginTop={60}
-              marginLeft={30}
+              style={{ marginTop: 60, marginLeft: 30 }}
               color={theme.text}
             />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={toggleLike}
-            disabled={isLikeLoading}
-            style={{ alignSelf: "flex-end" }}
-          >
+          <TouchableOpacity onPress={toggleLike} disabled={isLikeLoading}>
             <Ionicons
               name={isLiked ? "heart" : "heart-outline"}
               size={40}
-              marginTop={60}
-              marginRight={30}
-              color={isLiked ? "#ff375f" : theme.text}
+              style={{ marginTop: 60, marginRight: 30 }}
+              color={isLiked ? "#ff375f" : theme.text} // pink if liked, else theme.text
             />
           </TouchableOpacity>
         </View>
 
-        {/* Down Arrow Button */}
+        {/* Down Arrow Button: use theme.text */}
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.arrowButton}>
           <Ionicons name="chevron-down" size={32} color={theme.text} />
         </TouchableOpacity>
