@@ -7,11 +7,14 @@ import { signOutUser, updateUserData, uploadProfilePicture } from "../Utility/fi
 import { getCurrentUser, signOut as googleSignOut } from "../Utility/googleAuth";
 import blankProfilePic from "../assets/blank_profile.png";
 import { useUserData } from "../hooks/useUserData";
- 
+import { useTheme } from "../context/ThemeContext";
+import ThemedScreen from "../components/ThemedScreen";
+
 export default function ProfileScreen({ navigation }) {
   const [isGoogleUser, setIsGoogleUser] = useState(false);
   const { username, profilePic } = useUserData();
- 
+  const { theme } = useTheme();
+
   useEffect(() => {
     const requestPermissions = async () => {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -21,7 +24,7 @@ export default function ProfileScreen({ navigation }) {
     };
     requestPermissions();
   }, []);
- 
+
   const changeProfilePicture = async () => {
     if (isGoogleUser) return;
     try {
@@ -40,7 +43,7 @@ export default function ProfileScreen({ navigation }) {
       Alert.alert("Error", "Failed to update profile picture.");
     }
   };
- 
+
   const handleLogout = () => {
     Alert.alert("Confirm Logout", "Are you sure you want to log out?", [
       { text: "Cancel", style: "cancel" },
@@ -61,50 +64,63 @@ export default function ProfileScreen({ navigation }) {
       },
     ]);
   };
- 
+
   return (
-    <View style={styles.container}>
+    <ThemedScreen style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#f1f1f1" />
+          <Ionicons name="arrow-back" size={24} color={theme.text} />
         </TouchableOpacity>
         <TouchableOpacity>
-          <Ionicons name="search" size={24} color="#f1f1f1" />
+          <Ionicons name="search" size={24} color={theme.text} />
         </TouchableOpacity>
       </View>
- 
+
       <View style={styles.profileSection}>
         <Image
           source={typeof profilePic === "string" ? { uri: profilePic } : blankProfilePic}
-          style={styles.profileImage}
+          style={[styles.profileImage, { borderColor: theme.text }]}
         />
-        <Text style={styles.username}>{username || "User"}</Text>
+        <Text style={[styles.username, { color: theme.text }]}>{username || "User"}</Text>
       </View>
- 
-      <View style={styles.separator} />
- 
+
+      <View style={[styles.separator, { backgroundColor: theme.secondary }]} />
+
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={changeProfilePicture}>
-          <Text style={styles.buttonText}>Change Profile Picture</Text>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: theme.primary }]}
+          onPress={changeProfilePicture}
+        >
+          <Text style={[styles.buttonText, { color: theme.text }]}>Change Profile Picture</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Settings")}>
-          <Text style={styles.buttonText}>Settings</Text>
+
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: theme.primary }]}
+          onPress={() => navigation.navigate("Settings")}
+        >
+          <Text style={[styles.buttonText, { color: theme.text }]}>Settings</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Upload")}>
-          <Text style={styles.buttonText}>Upload</Text>
+
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: theme.primary }]}
+          onPress={() => navigation.navigate("Upload")}
+        >
+          <Text style={[styles.buttonText, { color: theme.text }]}>Upload</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={handleLogout}>
-          <Text style={styles.buttonText}>Logout</Text>
+
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: theme.delete }]}
+          onPress={handleLogout}
+        >
+          <Text style={[styles.buttonText, { color: "#fff" }]}>Logout</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ThemedScreen>
   );
 }
- 
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#121212",
     paddingTop: 50,
   },
   header: {
@@ -124,16 +140,13 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     borderWidth: 2,
-    borderColor: "#f1f1f1",
   },
   username: {
-    color: "#f1f1f1",
     fontSize: 20,
     marginLeft: 15,
   },
   separator: {
     height: 2,
-    backgroundColor: "#808080",
     width: "100%",
     marginBottom: 20,
   },
@@ -141,7 +154,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   button: {
-    backgroundColor: "#182952",
     padding: 15,
     borderRadius: 10,
     width: "80%",
@@ -149,7 +161,6 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   buttonText: {
-    color: "#f1f1f1",
     fontSize: 16,
   },
 });
