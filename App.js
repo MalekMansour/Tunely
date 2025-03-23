@@ -36,9 +36,11 @@ import Notifications from "./screens/Notifications";
 import GenreSongs from './screens/GenreSongs';
 import CatBot from "./components/catbot";
 import BotChat from "./screens/BotCat";
+import ThemeSettings from "./screens/ThemeSettings";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
+
 
 function ScreenWithTopBar({ navigation, children, title }) {
   return (
@@ -207,6 +209,7 @@ export default function App() {
                 <Stack.Screen name="Upload" component={UploadScreen} />
                 <Stack.Screen name="MyUploads" component={MyUploads} />
                 <Stack.Screen name="PrivacySettings" component={PrivacySettings}/>
+                <Stack.Screen name="ThemeSettings" component={ThemeSettings} />
                 <Stack.Screen name="Notifications" component={Notifications}/>
                 <Stack.Screen name="AdminPage" component={AdminPage} />
                 <Stack.Screen name="AuthCheck" component={AdminCheck} />
