@@ -1,13 +1,25 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Alert, TextInput, Image, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  TextInput,
+  Image,
+  StyleSheet,
+} from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { songService } from "../services/songService";
+import { useTheme } from "../context/ThemeContext";
+import ThemedScreen from "../components/ThemedScreen";
 
 export default function Upload({ navigation }) {
+  const { theme } = useTheme();
+
   const [loading, setLoading] = useState(false);
   const [songTitle, setSongTitle] = useState("");
   const [artistName, setArtistName] = useState("");
@@ -15,11 +27,14 @@ export default function Upload({ navigation }) {
   const [songFile, setSongFile] = useState(null);
   const [coverImage, setCoverImage] = useState(null);
   const [uploadTimeout, setUploadTimeout] = useState(null);
-  const [buttonColor, setButtonColor] = useState("#182952");
+  const [buttonColor, setButtonColor] = useState(theme.primary);
 
   const pickSong = async () => {
     try {
-      const result = await DocumentPicker.getDocumentAsync({ type: "audio/*", copyToCacheDirectory: true });
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "audio/*",
+        copyToCacheDirectory: true,
+      });
       if (!result.canceled) setSongFile(result.assets[0]);
     } catch (error) {
       Alert.alert("Error", "Failed to pick song");
@@ -50,13 +65,21 @@ export default function Upload({ navigation }) {
 
     try {
       const formData = new FormData();
-      formData.append('song', { uri: songFile.uri, type: 'audio/mpeg', name: songFile.name || 'song.mp3' });
+      formData.append("song", {
+        uri: songFile.uri,
+        type: "audio/mpeg",
+        name: songFile.name || "song.mp3",
+      });
       if (coverImage) {
-        formData.append('cover', { uri: coverImage.uri, type: 'image/jpeg', name: 'cover.jpg' });
+        formData.append("cover", {
+          uri: coverImage.uri,
+          type: "image/jpeg",
+          name: "cover.jpg",
+        });
       }
-      formData.append('title', songTitle);
-      formData.append('artistName', artistName);
-      formData.append('genre', genre);
+      formData.append("title", songTitle);
+      formData.append("artistName", artistName);
+      formData.append("genre", genre);
 
       const result = await songService.uploadSong(formData);
       Alert.alert("Success", "Song uploaded successfully!");
@@ -75,13 +98,15 @@ export default function Upload({ navigation }) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     let colorChangeInterval = setInterval(() => {
-      setButtonColor(prevColor => (prevColor === "#007bff" ? "#0056b3" : "#007bff")); 
+      setButtonColor((prevColor) =>
+        prevColor === theme.primary ? theme.secondary : theme.primary
+      );
     }, 100);
 
     const timeout = setTimeout(() => {
       clearInterval(colorChangeInterval);
       handleUpload();
-      setButtonColor("#182952"); 
+      setButtonColor(theme.primary);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     }, 3000);
 
@@ -93,30 +118,34 @@ export default function Upload({ navigation }) {
       clearTimeout(uploadTimeout.timeout);
       clearInterval(uploadTimeout.colorChangeInterval);
       setUploadTimeout(null);
-      setButtonColor("#182952"); // Reset color
+      setButtonColor(theme.primary);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     }
   };
 
   return (
-    <View style={styles.container}>
+    <ThemedScreen style={{ padding: 20 }}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={24} color="#fff" />
+        <Ionicons name="arrow-back" size={24} color={theme.text} />
       </TouchableOpacity>
 
       <View style={styles.form}>
-        <TouchableOpacity style={styles.button} onPress={pickSong} disabled={loading}>
-          <Text style={styles.buttonText}>{songFile ? "Song Selected" : "Select Song"}</Text>
+        <TouchableOpacity style={[styles.button, { backgroundColor: theme.secondary }]} onPress={pickSong} disabled={loading}>
+          <Text style={[styles.buttonText, { color: theme.text }]}>
+            {songFile ? "Song Selected" : "Select Song"}
+          </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button} onPress={pickCover} disabled={loading}>
-          <Text style={styles.buttonText}>{coverImage ? "Cover Selected" : "Select Cover"}</Text>
+        <TouchableOpacity style={[styles.button, { backgroundColor: theme.secondary }]} onPress={pickCover} disabled={loading}>
+          <Text style={[styles.buttonText, { color: theme.text }]}>
+            {coverImage ? "Cover Selected" : "Select Cover"}
+          </Text>
         </TouchableOpacity>
 
         {coverImage && <Image source={{ uri: coverImage.uri }} style={styles.coverPreview} />}
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
           placeholder="Song Title"
           placeholderTextColor="#aaa"
           value={songTitle}
@@ -125,7 +154,7 @@ export default function Upload({ navigation }) {
         />
 
         <TextInput
-          style={styles.input}
+          style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
           placeholder="Artist Name"
           placeholderTextColor="#aaa"
           value={artistName}
@@ -133,48 +162,86 @@ export default function Upload({ navigation }) {
           editable={!loading}
         />
 
-        <View style={styles.pickerContainer}>
-          <Text style={styles.pickerLabel}>Genre</Text>
-          <Picker selectedValue={genre} onValueChange={setGenre} enabled={!loading} style={styles.picker}>
+        <View style={[styles.pickerContainer, { backgroundColor: theme.secondary }]}>
+          <Text style={[styles.pickerLabel, { color: "#aaa" }]}>Genre</Text>
+          <Picker selectedValue={genre} onValueChange={setGenre} enabled={!loading} style={{ color: theme.text }}>
             <Picker.Item label="Select a genre" value="" color="#aaa" />
-            <Picker.Item label="Pop" value="Pop" color="#fff" />
-            <Picker.Item label="Rap" value="Rap" color="#fff" />
-            <Picker.Item label="Acoustic" value="Acoustic" color="#fff" />
-            <Picker.Item label="Lofi" value="Lofi" color="#fff" />
-            <Picker.Item label="R&B" value="R&B" color="#fff" />
-            <Picker.Item label="Rock" value="Rock" color="#fff" />
-            <Picker.Item label="Electronic" value="Electronic" color="#fff" />
-            <Picker.Item label="Alternative" value="Alternative" color="#fff" />
-            <Picker.Item label="Jazz" value="Jazz" color="#fff" />
-            <Picker.Item label="Trap" value="Trap" color="#fff" />
-            <Picker.Item label="Country" value="Country" color="#fff" />
-            <Picker.Item label="Other" value="Other" color="#fff" />
+            <Picker.Item label="Pop" value="Pop" />
+            <Picker.Item label="Rap" value="Rap" />
+            <Picker.Item label="Acoustic" value="Acoustic" />
+            <Picker.Item label="Lofi" value="Lofi" />
+            <Picker.Item label="R&B" value="R&B" />
+            <Picker.Item label="Rock" value="Rock" />
+            <Picker.Item label="Electronic" value="Electronic" />
+            <Picker.Item label="Alternative" value="Alternative" />
+            <Picker.Item label="Jazz" value="Jazz" />
+            <Picker.Item label="Trap" value="Trap" />
+            <Picker.Item label="Country" value="Country" />
+            <Picker.Item label="Other" value="Other" />
           </Picker>
         </View>
 
         <TouchableOpacity
-          style={[styles.holdButton, { backgroundColor: buttonColor }, loading && styles.buttonDisabled]}
+          style={[
+            styles.holdButton,
+            { backgroundColor: buttonColor },
+            loading && styles.buttonDisabled,
+          ]}
           onPressIn={startUploadHold}
           onPressOut={cancelUploadHold}
         >
-          <Text style={styles.buttonText}>{loading ? "Uploading..." : "Hold to Upload"}</Text>
+          <Text style={styles.buttonText}>
+            {loading ? "Uploading..." : "Hold to Upload"}
+          </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ThemedScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#121212", padding: 20 },
   form: { marginTop: 60 },
   backButton: { position: "absolute", top: 40, left: 10, padding: 10 },
-  button: { backgroundColor: "#213555", padding: 15, borderRadius: 8, alignItems: "center", marginVertical: 10 },
-  holdButton: { padding: 15, borderRadius: 8, alignItems: "center", marginVertical: 10 },
-  buttonDisabled: { opacity: 0.5 },
-  buttonText: { color: "#f1f1f1", fontWeight: "bold", fontSize: 16 },
-  input: { backgroundColor: "#2a2a2a", color: "#f1f1f1", padding: 15, borderRadius: 8, marginVertical: 10, fontSize: 16 },
-  coverPreview: { width: 150, height: 150, borderRadius: 8, alignSelf: "center", marginVertical: 10 },
-  pickerContainer: { backgroundColor: "#2a2a2a", borderRadius: 8, marginVertical: 10, overflow: "hidden" },
-  pickerLabel: { color: "#aaa", fontSize: 14, paddingLeft: 15, paddingTop: 5 },
-  picker: { color: "#f1f1f1", backgroundColor: "transparent" },
+  button: {
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  holdButton: {
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+  buttonText: {
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  input: {
+    padding: 15,
+    borderRadius: 8,
+    marginVertical: 10,
+    fontSize: 16,
+  },
+  coverPreview: {
+    width: 150,
+    height: 150,
+    borderRadius: 8,
+    alignSelf: "center",
+    marginVertical: 10,
+  },
+  pickerContainer: {
+    borderRadius: 8,
+    marginVertical: 10,
+    overflow: "hidden",
+  },
+  pickerLabel: {
+    fontSize: 14,
+    paddingLeft: 15,
+    paddingTop: 5,
+  },
 });
