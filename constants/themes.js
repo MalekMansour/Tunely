@@ -69,7 +69,7 @@ function getContrastingTextColor(
       primary: "#7da2a9",
       secondary: "#52767b",
       text: "#1a1a1a",
-      border: "#1a1a1a", 
+      border: "#182952", 
     }),
     cherry: createTheme({
       name: "Cherry Blossom",
@@ -77,6 +77,7 @@ function getContrastingTextColor(
       primary: "#F7B5CA",
       secondary: "#F3D0D7",
       text: "#2f2f2f",
+      border: "#FF2DF1",
     }),
     astro: createTheme({
       name: "Astro Neon",
@@ -84,49 +85,49 @@ function getContrastingTextColor(
       primary: "#836FFF",
       secondary: "#15F5BA",
       text: "#F0F3FF",
+      border: "#2D336B",
     }),
     ocean: createTheme({
       name: "Deep Blue Sea",
       background: "#0B2447",
       primary: "#19376D",
       secondary: "#576CBC",
-      // text will be auto-detected
+      border: "#99a9b9",
     }),
     kaffestuggu: createTheme({
       name: "Kaffestuggu",
       background: "#F5E7DE",
       primary: "#F2BFA4",
       secondary: "#E5A884",
-    }),
-    farmFood: createTheme({
-      name: "Farm Food",
-      background: "#ffffff",
-      primary: "#a7bc5b",
-      secondary: "#8da242",
+      border: "#99a9b9",
     }),
     slumber: createTheme({
       name: "Slumber",
       background: "#051622",
       primary: "#1ba098",
       secondary: "#deb992",
+      border: "#99a9b9",
     }),
     weHeart: createTheme({
       name: "We Heart",
       background: "#e1f2f7",
       primary: "#ef0d50",
       secondary: "#eb3a70",
+      border: "#99a9b9",
     }),
     igor: createTheme({
       name: "Igor",
       background: "#000000",
       primary: "#fa255e",
       secondary: "#c39ea0",
+      border: "#99a9b9",
     }),
     brat: createTheme({
       name: "brat",
       background: "#8ACE00",
       primary: "#a1e832",
       secondary: "#6fbf00",
+      border: "#99a9b9",
     }),
   };
   
