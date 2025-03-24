@@ -6,9 +6,9 @@ import { useNavigation } from "@react-navigation/native";
 
 const { width, height } = Dimensions.get("window");
 const BUTTON_SIZE = 80;
-const SIDE_MARGIN = 20;   
-const TOP_MARGIN = 80;     // snapping top margin
-const BOTTOM_MARGIN = 150;  // snapping bottom margin
+const SIDE_MARGIN = 20;
+const TOP_MARGIN = 80;
+const BOTTOM_MARGIN = 150;
 
 const MIN_X = SIDE_MARGIN;
 const MAX_X = width - BUTTON_SIZE - SIDE_MARGIN;
@@ -18,7 +18,7 @@ const MAX_Y = height - BUTTON_SIZE - 20;
 const DEFAULT_X = MAX_X;
 const DEFAULT_Y = height - BUTTON_SIZE - BOTTOM_MARGIN;
 
-export default function FloatingButton() {
+export default function CatBot() {
   const translateX = useRef(new Animated.Value(DEFAULT_X)).current;
   const translateY = useRef(new Animated.Value(DEFAULT_Y)).current;
   const lastPositionRef = useRef({ x: DEFAULT_X, y: DEFAULT_Y });
@@ -49,14 +49,8 @@ export default function FloatingButton() {
         lastPositionRef.current.x += nativeEvent.translationX;
         lastPositionRef.current.y += nativeEvent.translationY;
 
-        lastPositionRef.current.x = Math.max(
-          MIN_X,
-          Math.min(lastPositionRef.current.x, MAX_X)
-        );
-        lastPositionRef.current.y = Math.max(
-          MIN_Y,
-          Math.min(lastPositionRef.current.y, MAX_Y)
-        );
+        lastPositionRef.current.x = Math.max(MIN_X, Math.min(lastPositionRef.current.x, MAX_X));
+        lastPositionRef.current.y = Math.max(MIN_Y, Math.min(lastPositionRef.current.y, MAX_Y));
 
         const corners = [
           { x: MIN_X, y: TOP_MARGIN },
@@ -65,24 +59,16 @@ export default function FloatingButton() {
           { x: MAX_X, y: height - BUTTON_SIZE - BOTTOM_MARGIN },
         ];
 
-        // Find the nearest corner using Euclidean distance.
         let nearestCorner = corners[0];
-        let minDistance = Math.hypot(
-          lastPositionRef.current.x - corners[0].x,
-          lastPositionRef.current.y - corners[0].y
-        );
+        let minDistance = Math.hypot(lastPositionRef.current.x - corners[0].x, lastPositionRef.current.y - corners[0].y);
         corners.forEach((corner) => {
-          const distance = Math.hypot(
-            lastPositionRef.current.x - corner.x,
-            lastPositionRef.current.y - corner.y
-          );
+          const distance = Math.hypot(lastPositionRef.current.x - corner.x, lastPositionRef.current.y - corner.y);
           if (distance < minDistance) {
             minDistance = distance;
             nearestCorner = corner;
           }
         });
 
-        // Snap to the nearest corner.
         lastPositionRef.current.x = nearestCorner.x;
         lastPositionRef.current.y = nearestCorner.y;
 
@@ -105,10 +91,7 @@ export default function FloatingButton() {
   );
 
   return (
-    <PanGestureHandler
-      onGestureEvent={onGestureEvent}
-      onHandlerStateChange={onHandlerStateChange}
-    >
+    <PanGestureHandler onGestureEvent={onGestureEvent} onHandlerStateChange={onHandlerStateChange}>
       <Animated.View
         style={[
           styles.floatingButton,
