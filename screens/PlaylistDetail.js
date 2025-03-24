@@ -38,7 +38,7 @@ const PlaylistDetail = () => {
 
   // Local state
   const [playlistSongs, setPlaylistSongs] = useState([]);
-  const [userSongs, setUserSongs] = useState([]); // same data as playlistSongs, if you prefer
+  const [userSongs, setUserSongs] = useState([]);
   const [isOwnPlaylist, setIsOwnPlaylist] = useState(false);
 
   // Extra details for the footer
@@ -55,7 +55,7 @@ const PlaylistDetail = () => {
   // Edit playlist modal
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState(title);
-  const [coverImage, setCoverImage] = useState(null);
+  // Removed all references to "coverImage" or "handleChangeCover"
 
   useEffect(() => {
     loadPlaylistSongs();
@@ -79,17 +79,16 @@ const PlaylistDetail = () => {
       const user = auth.currentUser;
       const details = await playlistService.getPlaylistById(playlistId);
 
-      // e.g., if your backend returns "details.user_id", "details.username", "details.created_at"
       setIsOwnPlaylist(user && details.user_id === user.uid);
       setCreatorName(details.username || "Unknown");
-      setCreatedAt(details.created_at || ""); // You can format the date if you want
+      setCreatedAt(details.created_at || "");
     } catch (error) {
       console.error("Error checking playlist ownership / details:", error);
       setIsOwnPlaylist(false);
     }
   };
 
-  // Pick up to 4 covers to display in the grid
+  // Generate up to 4 covers
   const getSongCovers = () => {
     const covers = [];
     for (let i = 0; i < Math.min(userSongs.length, 4); i++) {
@@ -125,7 +124,7 @@ const PlaylistDetail = () => {
     }
   };
 
-  // Searching for songs
+  // Searching
   const handleSearch = async (text) => {
     setQuery(text);
     if (text.length > 2) {
@@ -156,7 +155,7 @@ const PlaylistDetail = () => {
       await playlistService.addSongToPlaylist(playlistId, song);
       setUserSongs((prev) => [...prev, song]);
       setPlaylistSongs((prev) => [...prev, song]);
-      setSearchResults(searchResults.filter((s) => s.id !== song.id));
+      setSearchResults((prev) => prev.filter((s) => s.id !== song.id));
     } catch (error) {
       console.error("Error adding song:", error);
     }
@@ -190,11 +189,12 @@ const PlaylistDetail = () => {
     );
   };
 
-  // Edit playlist
+  // Edit
   const handleEditPlaylist = () => {
     setEditModalVisible(true);
   };
 
+  // Rename
   const handleRenamePlaylist = async () => {
     if (newTitle.trim() && newTitle !== title) {
       try {
@@ -208,27 +208,7 @@ const PlaylistDetail = () => {
     setEditModalVisible(false);
   };
 
-  // Change the cover
-  const handleChangeCover = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: [ImagePicker.MediaType.IMAGE],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-      if (!result.canceled) {
-        const imageUrl = result.assets[0].uri;
-        await playlistService.updatePlaylistCover(playlistId, { cover: imageUrl });
-        setCoverImage({ uri: imageUrl });
-        Alert.alert("Success", "Playlist cover updated successfully.");
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to update playlist cover.");
-    }
-  };
-
-  // Delete the entire playlist
+  // Delete entire playlist
   const handleDeletePlaylist = async () => {
     Alert.alert(
       "Delete Playlist",
@@ -252,7 +232,7 @@ const PlaylistDetail = () => {
     setEditModalVisible(false);
   };
 
-  // Render the top
+  // Render top
   const renderHeader = () => (
     <>
       <View style={[styles.topBar, { backgroundColor: theme.background }]}>
@@ -267,14 +247,12 @@ const PlaylistDetail = () => {
         )}
       </View>
 
-      {/* 4-square cover block */}
       <View style={styles.coverGrid}>
         {songCovers.map((cover, index) => (
           <Image key={index} source={cover} style={styles.coverQuadrant} />
         ))}
       </View>
 
-      {/* Play / Shuffle / Add Songs */}
       <View style={styles.controlsContainer}>
         <TouchableOpacity style={styles.controlButton} onPress={handlePlay}>
           <Ionicons name="play-circle" size={32} color={theme.text} />
@@ -294,11 +272,19 @@ const PlaylistDetail = () => {
     </>
   );
 
+  // Render footer
   const renderFooter = () => (
     <View style={styles.footerContainer}>
       <Text style={[styles.footerTitle, { color: theme.text }]}>Playlist Details</Text>
       <Text style={[styles.footerText, { color: theme.text }]}>
-        Created On: {createdAt ? new Date(createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "Unknown"}
+        Created On:{" "}
+        {createdAt
+          ? new Date(createdAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          : "Unknown"}
       </Text>
     </View>
   );
@@ -339,9 +325,9 @@ const PlaylistDetail = () => {
             <Pressable style={[styles.button, { backgroundColor: theme.primary }]} onPress={handleRenamePlaylist}>
               <Text style={[styles.buttonText, { color: theme.text }]}>Rename</Text>
             </Pressable>
-            <Pressable style={[styles.button, { backgroundColor: theme.primary }]} onPress={handleChangeCover}>
-              <Text style={[styles.buttonText, { color: theme.text }]}>Change Cover</Text>
-            </Pressable>
+
+            {/* The "Change Cover" is removed, so we skip that pressable */}
+
             <Pressable style={[styles.deleteButton, { backgroundColor: theme.delete }]} onPress={handleDeletePlaylist}>
               <Text style={[styles.buttonText, { color: theme.text }]}>Delete Playlist</Text>
             </Pressable>
@@ -364,9 +350,7 @@ const PlaylistDetail = () => {
       >
         <View style={styles.modalContainer}>
           <View style={[styles.modalContent, { backgroundColor: theme.secondary }]}>
-            <Text style={[styles.modalHeader, { color: theme.text }]}>
-              Search for Songs to Add
-            </Text>
+            <Text style={[styles.modalHeader, { color: theme.text }]}>Search for Songs to Add</Text>
             <View style={styles.searchBarContainer}>
               <TextInput
                 style={[styles.searchBar, { backgroundColor: theme.background, color: theme.text }]}
@@ -403,9 +387,7 @@ const PlaylistDetail = () => {
               )}
               ListEmptyComponent={
                 !loadingSearch && (
-                  <Text style={[styles.emptyText, { color: theme.text }]}>
-                    No results found
-                  </Text>
+                  <Text style={[styles.emptyText, { color: theme.text }]}>No results found</Text>
                 )
               }
             />
@@ -540,7 +522,6 @@ const styles = StyleSheet.create({
   footerContainer: {
     padding: 20,
     marginBottom: 70,
-
   },
   footerTitle: {
     fontSize: 16,
