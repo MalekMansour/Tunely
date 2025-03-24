@@ -167,7 +167,7 @@ export default function LibraryScreen() {
     navigation.navigate("Profile");
   };
 
-  // Button for each tab
+  // A button for each tab
   const TabButton = ({ title, isActive, onPress }) => (
     <TouchableOpacity
       onPress={onPress}
@@ -175,7 +175,7 @@ export default function LibraryScreen() {
         styles.tabButton,
         {
           borderColor: theme.text, // default border color
-          borderWidth: 1,          // we add a default border
+          borderWidth: 1,
           backgroundColor: isActive ? theme.secondary : theme.background,
         },
       ]}
@@ -184,7 +184,7 @@ export default function LibraryScreen() {
     </TouchableOpacity>
   );
 
-  // Action button (like the "Upload a Song" or "Your Liked Songs" icons)
+  // A quick helper for a row-based icon & text
   const ActionButton = ({ icon, title, onPress }) => (
     <TouchableOpacity style={styles.actionButton} onPress={onPress}>
       <View style={[styles.actionIconContainer, { backgroundColor: theme.primary }]}>
@@ -206,6 +206,13 @@ export default function LibraryScreen() {
     }
     return (
       <>
+        {/* Insert your button at the top */}
+        <ActionButton
+          icon="+"
+          title="Create a Playlist"
+          onPress={() => setModalVisible(true)}
+        />
+
         <FlatList
           data={playlists}
           keyExtractor={(item) => item.id.toString()}
@@ -221,7 +228,9 @@ export default function LibraryScreen() {
           )}
         />
 
-        {/* Create Playlist FAB */}
+        {/* We can optionally remove the old FAB, or leave it if you want both. 
+            Let’s remove it for a single approach: */}
+        {/* 
         <TouchableOpacity
           style={styles.fabButton}
           onPress={() => setModalVisible(true)}
@@ -230,6 +239,7 @@ export default function LibraryScreen() {
           <Ionicons name="add-circle" size={24} color={theme.text} />
           <Text style={[styles.fabButtonText, { color: theme.text }]}>New</Text>
         </TouchableOpacity>
+        */}
 
         {/* Create Playlist Modal */}
         <Modal
@@ -344,7 +354,7 @@ export default function LibraryScreen() {
    ***********************************************/
   const renderDefault = () => (
     <ScrollView style={styles.scrollContainer}>
-      <ActionButton style={styles.actionButton} icon="+" title="Upload a Song" onPress={() => navigation.navigate("Upload")} />
+      <ActionButton icon="+" title="Upload a Song" onPress={() => navigation.navigate("Upload")} />
 
       <View style={styles.sectionContainer}>
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Recently played</Text>
@@ -357,9 +367,7 @@ export default function LibraryScreen() {
             scrollEnabled={false}
             renderItem={({ item }) => <SongCard song={item} />}
             ListEmptyComponent={() => (
-              <Text style={[styles.emptyText, { color: theme.text }]}>
-                No recently played songs
-              </Text>
+              <Text style={[styles.emptyText, { color: theme.text }]}>No recently played songs</Text>
             )}
           />
         ) : (
