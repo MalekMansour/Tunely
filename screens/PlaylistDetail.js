@@ -36,78 +36,88 @@ const PlaylistDetail = () => {
   // ✅ THEME USAGE
   const { theme } = useTheme();
 
+  // Local state
   const [playlistSongs, setPlaylistSongs] = useState([]);
-  const [userSongs, setUserSongs] = useState([]);
+  const [userSongs, setUserSongs] = useState([]); // same data as playlistSongs, if you prefer
   const [isOwnPlaylist, setIsOwnPlaylist] = useState(false);
 
+  // Extra details for the footer
+  const [creatorName, setCreatorName] = useState("");
+  const [createdAt, setCreatedAt] = useState("");
+
+  // Add-songs modal
   const [modalVisible, setModalVisible] = useState(false);
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
 
+  // Edit playlist modal
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [newTitle, setNewTitle] = useState(title);
   const [coverImage, setCoverImage] = useState(null);
 
   useEffect(() => {
-    const loadPlaylist = async () => {
-      try {
-        const songs = await playlistService.fetchPlaylist(playlistId);
-        setUserSongs(songs);
-        setPlaylistSongs(songs);
-      } catch (error) {
-        console.error("Error loading playlist:", error);
-      }
-    };
-    loadPlaylist();
+    loadPlaylistSongs();
+    loadPlaylistDetails();
   }, [playlistId]);
 
-  useEffect(() => {
-    const checkOwnership = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) {
-          setIsOwnPlaylist(false);
-          return;
-        }
-        const details = await playlistService.getPlaylistById(playlistId);
-        setIsOwnPlaylist(details.user_id === user.uid);
-      } catch (error) {
-        console.error("Error checking playlist ownership:", error);
-        setIsOwnPlaylist(false);
-      }
-    };
-    checkOwnership();
-  }, [playlistId]);
+  // 1) Fetch the songs in this playlist
+  const loadPlaylistSongs = async () => {
+    try {
+      const songs = await playlistService.fetchPlaylist(playlistId);
+      setUserSongs(songs);
+      setPlaylistSongs(songs);
+    } catch (error) {
+      console.error("Error loading playlist:", error);
+    }
+  };
 
+  // 2) Fetch additional info: creatorName, createdAt
+  const loadPlaylistDetails = async () => {
+    try {
+      const user = auth.currentUser;
+      const details = await playlistService.getPlaylistById(playlistId);
+
+      // e.g., if your backend returns "details.user_id", "details.username", "details.created_at"
+      setIsOwnPlaylist(user && details.user_id === user.uid);
+      setCreatorName(details.username || "Unknown");
+      setCreatedAt(details.created_at || ""); // You can format the date if you want
+    } catch (error) {
+      console.error("Error checking playlist ownership / details:", error);
+      setIsOwnPlaylist(false);
+    }
+  };
+
+  // Pick up to 4 covers to display in the grid
   const getSongCovers = () => {
-    const songCovers = [];
-    if (userSongs.length > 0) {
-      for (let i = 0; i < Math.min(userSongs.length, 4); i++) {
-        if (userSongs[i]?.song_photo_url) {
-          songCovers.push({ uri: userSongs[i].song_photo_url });
-        } else if (userSongs[i]?.image) {
-          songCovers.push(userSongs[i].image);
-        } else {
-          songCovers.push(defaultCoverImage);
-        }
+    const covers = [];
+    for (let i = 0; i < Math.min(userSongs.length, 4); i++) {
+      if (userSongs[i]?.song_photo_url) {
+        covers.push({ uri: userSongs[i].song_photo_url });
+      } else if (userSongs[i]?.image) {
+        covers.push(userSongs[i].image);
+      } else {
+        covers.push(defaultCoverImage);
       }
     }
-    while (songCovers.length < 4) {
-      songCovers.push(defaultCoverImage);
+    // fill up if fewer than 4
+    while (covers.length < 4) {
+      covers.push(defaultCoverImage);
     }
-    return songCovers;
+    return covers;
   };
 
   const songCovers = getSongCovers();
 
+  // Play the first song
   const handlePlay = () => {
     if (userSongs.length > 0) {
       playSound(userSongs[0]);
     }
   };
 
+  // Shuffle
   const handleShuffle = () => {
     if (userSongs.length > 0) {
       const randomSong = userSongs[Math.floor(Math.random() * userSongs.length)];
@@ -115,6 +125,7 @@ const PlaylistDetail = () => {
     }
   };
 
+  // Searching for songs
   const handleSearch = async (text) => {
     setQuery(text);
     if (text.length > 2) {
@@ -122,9 +133,9 @@ const PlaylistDetail = () => {
       setLoadingSearch(true);
       try {
         const results = await songService.searchSongs(text);
+        // Exclude songs already in this playlist
         const filtered = results.filter(
-          (song) =>
-            !playlistSongs.some((ps) => (ps.id || ps.songId) === song.id)
+          (song) => !playlistSongs.some((ps) => (ps.id || ps.songId) === song.id)
         );
         setSearchResults(filtered);
       } catch (error) {
@@ -139,25 +150,27 @@ const PlaylistDetail = () => {
     }
   };
 
+  // Add a song
   const handleAddToPlaylist = async (song) => {
     try {
       await playlistService.addSongToPlaylist(playlistId, song);
-      setUserSongs([...userSongs, song]);
-      setPlaylistSongs([...playlistSongs, song]);
+      setUserSongs((prev) => [...prev, song]);
+      setPlaylistSongs((prev) => [...prev, song]);
       setSearchResults(searchResults.filter((s) => s.id !== song.id));
     } catch (error) {
       console.error("Error adding song:", error);
     }
   };
 
+  // Remove a song
   const handleRemoveSong = async (songId) => {
     Alert.alert(
-      "Delete Song",
+      "Remove Song",
       "Are you sure you want to remove this song from the playlist?",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Delete",
+          text: "Remove",
           style: "destructive",
           onPress: async () => {
             try {
@@ -177,6 +190,7 @@ const PlaylistDetail = () => {
     );
   };
 
+  // Edit playlist
   const handleEditPlaylist = () => {
     setEditModalVisible(true);
   };
@@ -194,6 +208,7 @@ const PlaylistDetail = () => {
     setEditModalVisible(false);
   };
 
+  // Change the cover
   const handleChangeCover = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -213,6 +228,7 @@ const PlaylistDetail = () => {
     }
   };
 
+  // Delete the entire playlist
   const handleDeletePlaylist = async () => {
     Alert.alert(
       "Delete Playlist",
@@ -236,26 +252,14 @@ const PlaylistDetail = () => {
     setEditModalVisible(false);
   };
 
+  // Render the top
   const renderHeader = () => (
     <>
-      <View
-        style={[
-          styles.topBar,
-          // Overriding default color from styles
-          { backgroundColor: theme.background },
-        ]}
-      >
+      <View style={[styles.topBar, { backgroundColor: theme.background }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.arrowButton}>
           <Ionicons name="arrow-back" size={28} color={theme.text} />
         </TouchableOpacity>
-        <Text
-          style={[
-            styles.playlistTitleHeader,
-            { color: theme.text },
-          ]}
-        >
-          {title}
-        </Text>
+        <Text style={[styles.playlistTitleHeader, { color: theme.text }]}>{title}</Text>
         {isOwnPlaylist && (
           <TouchableOpacity onPress={handleEditPlaylist} style={styles.editButton}>
             <Ionicons name="pencil" size={24} color={theme.text} />
@@ -263,12 +267,14 @@ const PlaylistDetail = () => {
         )}
       </View>
 
+      {/* 4-square cover block */}
       <View style={styles.coverGrid}>
         {songCovers.map((cover, index) => (
           <Image key={index} source={cover} style={styles.coverQuadrant} />
         ))}
       </View>
 
+      {/* Play / Shuffle / Add Songs */}
       <View style={styles.controlsContainer}>
         <TouchableOpacity style={styles.controlButton} onPress={handlePlay}>
           <Ionicons name="play-circle" size={32} color={theme.text} />
@@ -279,18 +285,22 @@ const PlaylistDetail = () => {
           <Text style={[styles.controlText, { color: theme.text }]}>Shuffle</Text>
         </TouchableOpacity>
         {isOwnPlaylist && (
-          <TouchableOpacity
-            style={styles.controlButton}
-            onPress={() => setModalVisible(true)}
-          >
+          <TouchableOpacity style={styles.controlButton} onPress={() => setModalVisible(true)}>
             <Ionicons name="add-circle-outline" size={32} color={theme.text} />
-            <Text style={[styles.controlText, { color: theme.text }]}>
-              Add Songs
-            </Text>
+            <Text style={[styles.controlText, { color: theme.text }]}>Add Songs</Text>
           </TouchableOpacity>
         )}
       </View>
     </>
+  );
+
+  const renderFooter = () => (
+    <View style={styles.footerContainer}>
+      <Text style={[styles.footerTitle, { color: theme.text }]}>Playlist Details</Text>
+      <Text style={[styles.footerText, { color: theme.text }]}>
+        Created On: {createdAt ? new Date(createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "Unknown"}
+      </Text>
+    </View>
   );
 
   return (
@@ -298,9 +308,8 @@ const PlaylistDetail = () => {
       <FlatList
         data={userSongs}
         ListHeaderComponent={renderHeader}
-        keyExtractor={(item, index) =>
-          item?.id ? item.id.toString() : `fallback-${index}`
-        }
+        ListFooterComponent={renderFooter}
+        keyExtractor={(item, index) => (item?.id ? item.id.toString() : `fallback-${index}`)}
         renderItem={({ item }) => (
           <SongCard
             song={item}
@@ -310,18 +319,16 @@ const PlaylistDetail = () => {
         )}
       />
 
-      {/* Modal for editing playlist details */}
+      {/* Edit Playlist Modal */}
       <Modal
         animationType="slide"
         transparent={true}
         visible={editModalVisible}
         onRequestClose={() => setEditModalVisible(false)}
       >
-        <View style={[styles.modalContainer]}>
+        <View style={styles.modalContainer}>
           <View style={[styles.modalContent, { backgroundColor: theme.secondary }]}>
-            <Text style={[styles.modalHeader, { color: theme.text }]}>
-              Edit Playlist
-            </Text>
+            <Text style={[styles.modalHeader, { color: theme.text }]}>Edit Playlist</Text>
             <TextInput
               style={[styles.textInput, { backgroundColor: theme.background, color: theme.text }]}
               onChangeText={setNewTitle}
@@ -338,14 +345,17 @@ const PlaylistDetail = () => {
             <Pressable style={[styles.deleteButton, { backgroundColor: theme.delete }]} onPress={handleDeletePlaylist}>
               <Text style={[styles.buttonText, { color: theme.text }]}>Delete Playlist</Text>
             </Pressable>
-            <Pressable style={[styles.closeButton, { backgroundColor: theme.primary }]} onPress={() => setEditModalVisible(false)}>
+            <Pressable
+              style={[styles.closeButton, { backgroundColor: theme.primary }]}
+              onPress={() => setEditModalVisible(false)}
+            >
               <Text style={[styles.closeButtonText, { color: theme.text }]}>Close</Text>
             </Pressable>
           </View>
         </View>
       </Modal>
 
-      {/* Modal for adding songs with search */}
+      {/* Add Songs Modal */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -359,10 +369,7 @@ const PlaylistDetail = () => {
             </Text>
             <View style={styles.searchBarContainer}>
               <TextInput
-                style={[
-                  styles.searchBar,
-                  { backgroundColor: theme.background, color: theme.text },
-                ]}
+                style={[styles.searchBar, { backgroundColor: theme.background, color: theme.text }]}
                 placeholder="Search by title or artist..."
                 placeholderTextColor="#aaa"
                 value={query}
@@ -383,16 +390,13 @@ const PlaylistDetail = () => {
             )}
             <FlatList
               data={searchResults}
-              keyExtractor={(item, index) =>
-                item.id ? item.id.toString() : `fallback-${index}`
-              }
+              keyExtractor={(item, index) => (item.id ? item.id.toString() : `fallback-${index}`)}
               renderItem={({ item }) => (
                 <View style={styles.songItem}>
                   <Text style={[styles.songTitle, { color: theme.text }]}>
                     {item.title} - {item.artist}
                   </Text>
                   <TouchableOpacity onPress={() => handleAddToPlaylist(item)}>
-                    {/* Keeping #28a745 for success color not in theme */}
                     <Ionicons name="add-circle" size={24} color="#28a745" />
                   </TouchableOpacity>
                 </View>
@@ -421,7 +425,6 @@ const PlaylistDetail = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    // originally backgroundColor: "rgb(4,4,4)"
   },
   topBar: {
     flexDirection: "row",
@@ -429,11 +432,16 @@ const styles = StyleSheet.create({
     padding: 20,
     marginTop: 50,
   },
+  arrowButton: {
+    marginRight: 10,
+  },
   playlistTitleHeader: {
     flex: 1,
     textAlign: "center",
     fontSize: 24,
-    color: "#fff", 
+  },
+  editButton: {
+    padding: 10,
   },
   coverGrid: {
     flexDirection: "row",
@@ -454,7 +462,6 @@ const styles = StyleSheet.create({
   },
   controlButton: { alignItems: "center" },
   controlText: {
-    color: "#f1f1f1", // overridden in-line with theme.text
     fontSize: 14,
     marginTop: 4,
   },
@@ -466,13 +473,12 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     width: "80%",
-    backgroundColor: "#333", // overridden in-line with theme.secondary
+    backgroundColor: "#333",
     padding: 20,
     borderRadius: 10,
   },
   modalHeader: {
     fontSize: 18,
-    color: "#fff", // overridden in-line
     marginBottom: 10,
   },
   searchBarContainer: {
@@ -482,8 +488,7 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     flex: 1,
-    backgroundColor: "#444", // overridden in-line
-    color: "#fff", // overridden in-line
+    backgroundColor: "#444",
     padding: 10,
     borderRadius: 5,
   },
@@ -495,54 +500,56 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 10,
-    },
+  },
   songTitle: {
-    color: "#fff", // overridden in-line
     fontSize: 16,
   },
   emptyText: {
-    color: "#aaa", // overridden in-line
     textAlign: "center",
     marginTop: 20,
   },
   closeButton: {
     padding: 10,
-    backgroundColor: "#555", // overridden in-line
     borderRadius: 5,
     alignItems: "center",
     marginTop: 10,
   },
   closeButtonText: {
-    color: "#fff", // overridden in-line
     fontSize: 16,
-  },
-  editButton: {
-    padding: 10,
   },
   button: {
     padding: 10,
     marginTop: 10,
-    backgroundColor: "#182952", // overridden in-line
     borderRadius: 5,
     alignItems: "center",
   },
   buttonText: {
-    color: "#fff", // overridden in-line
     fontSize: 16,
   },
   deleteButton: {
     padding: 10,
     marginTop: 10,
-    backgroundColor: "#BF3131", // overridden in-line
     borderRadius: 5,
     alignItems: "center",
   },
   textInput: {
-    backgroundColor: "#222", // overridden in-line
-    color: "#fff", // overridden in-line
     padding: 10,
     borderRadius: 5,
     marginBottom: 10,
+  },
+  footerContainer: {
+    padding: 20,
+    marginBottom: 70,
+
+  },
+  footerTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  footerText: {
+    fontSize: 14,
+    marginBottom: 2,
   },
 });
 
