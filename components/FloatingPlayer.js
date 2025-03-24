@@ -29,7 +29,8 @@ export default function FloatingPlayer() {
     currentRoute?.name === 'PrivacySettings' ||
     currentRoute?.name === 'Notifications' ||
     currentRoute?.name === 'AdminPage' ||
-    currentRoute?.name === 'AuthCheck'
+    currentRoute?.name === 'AuthCheck' ||
+    currentRoute?.name === 'ThemeSettings'
 ) return null;
 
   const handlePress = () => {
