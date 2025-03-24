@@ -23,12 +23,10 @@ import SongDetailScreen from "./screens/SongDetail";
 import SettingsScreen from "./screens/Settings";
 import UploadScreen from "./screens/Upload";
 import PlaylistDetail from "./screens/PlaylistDetail";
-import UserPlayList from "./screens/UserPlayList";
 import PlayListButton from "./components/PlayListButton";
 import CommentScreen from "./screens/CommentScreen";
 import TopBarProfileIcon from "./components/TopBarProfileIcon";
 import FloatingPlayer from "./components/FloatingPlayer";
-import MyUploads from "./screens/MyUploads";
 import MyUploadButton from "./components/MyUploadButton";
 import AdminPage from "./screens/adminPage";
 import AdminCheck from "./Utility/adminCheck";
@@ -218,7 +216,6 @@ export default function App() {
                   <Stack.Screen name="LoginFormPage" component={LoginFormPage} />
                   <Stack.Screen name="SignUp" component={SignUpScreen} />
                   <Stack.Screen name="Upload" component={UploadScreen} />
-                  <Stack.Screen name="MyUploads" component={MyUploads} />
                   <Stack.Screen name="ThemeSettings" component={ThemeSettings} />
                   <Stack.Screen name="Notifications" component={Notifications} />
                   <Stack.Screen name="AdminPage" component={AdminPage} />
