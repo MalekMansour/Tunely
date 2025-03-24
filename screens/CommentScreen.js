@@ -1,9 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  Image, 
-  Animated, 
+import {
+  View,
+  Text,
+  Image,
+  Animated,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
@@ -12,7 +12,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  SafeAreaView
+  SafeAreaView,
+  Keyboard,
 } from 'react-native';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
@@ -32,13 +33,12 @@ export default function CommentScreen({ route }) {
   const { username, profilePic } = useUserData();
   const insets = useSafeAreaInsets();
   const defaultCoverImage = require('../assets/note.jpg');
- 
-  // Load comments from API when screen mounts
+  const inputRef = useRef(null);
+
   useEffect(() => {
     loadComments();
   }, []);
 
-  // Fetch comments from backend
   const loadComments = async () => {
     try {
       setIsLoading(true);
@@ -52,13 +52,8 @@ export default function CommentScreen({ route }) {
       setIsLoading(false);
     }
   };
-  
+
   const translateY = useRef(new Animated.Value(0)).current;
-  const scale = translateY.interpolate({
-    inputRange: [0, 300],
-    outputRange: [1, 0.5],
-    extrapolate: 'clamp',
-  });
 
   const onGestureEvent = Animated.event(
     [{ nativeEvent: { translationY: translateY } }],
@@ -69,20 +64,10 @@ export default function CommentScreen({ route }) {
     if (event.nativeEvent.state === State.END) {
       if (event.nativeEvent.translationY > 150) {
         navigation.goBack();
-      } else if (event.nativeEvent.translationY < -insets.top) {
-        // Prevent going beyond safe area
-        Animated.spring(translateY, {
-          toValue: -insets.top,
-          useNativeDriver: true,
-          friction: 8,
-          tension: 40
-        }).start();
       } else {
         Animated.spring(translateY, {
           toValue: 0,
           useNativeDriver: true,
-          friction: 8,
-          tension: 40
         }).start();
       }
     }
@@ -90,32 +75,24 @@ export default function CommentScreen({ route }) {
 
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return '';
-    
     const date = new Date(timestamp);
     const now = new Date();
     const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-    
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
     return date.toLocaleDateString();
   };
 
-  // Submit comment to backend
   const handleSubmitComment = async () => {
     if (comment.trim() && !isSubmitting) {
       try {
         setIsSubmitting(true);
         const songId = song.id || song.songId;
-        
-        // Send comment to backend
         await commentsService.postComment(songId, comment.trim());
-        
-        // Reload comments from backend
         await loadComments();
-        
-        // Clear the input
         setComment('');
+        Keyboard.dismiss();
       } catch (error) {
         console.error('Error posting comment:', error);
         Alert.alert('Error', 'Failed to post your comment.');
@@ -125,11 +102,9 @@ export default function CommentScreen({ route }) {
     }
   };
 
-  // Handle comment deletion
   const handleDeleteComment = async (commentId) => {
     try {
       await commentsService.deleteComment(commentId);
-      // Remove from local state
       setComments(comments.filter(comment => comment.id !== commentId));
     } catch (error) {
       console.error('Error deleting comment:', error);
@@ -139,10 +114,10 @@ export default function CommentScreen({ route }) {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 5 : 20}
+        keyboardVerticalOffset={70}
       >
         <PanGestureHandler
           onGestureEvent={onGestureEvent}
@@ -150,11 +125,14 @@ export default function CommentScreen({ route }) {
         >
           <Animated.View style={[styles.container, { transform: [{ translateY }] }]}>
             <View style={styles.header}>
-              <Image source={
-                        song.song_photo_url 
-                          ? { uri: song.song_photo_url }
-                          : defaultCoverImage
-                      } style={styles.songImage} />
+              <Image
+                source={
+                  song.song_photo_url
+                    ? { uri: song.song_photo_url }
+                    : defaultCoverImage
+                }
+                style={styles.songImage}
+              />
               <View style={styles.songInfo}>
                 <Text style={styles.songTitle}>{song.title}</Text>
                 <Text style={styles.artistName}>{song.artistName}</Text>
@@ -174,25 +152,18 @@ export default function CommentScreen({ route }) {
                   renderItem={({ item }) => (
                     <View style={styles.commentItem}>
                       <View style={styles.commentWrapper}>
-                        <Image 
+                        <Image
                           source={typeof item.profilePic === 'string' ? { uri: item.profilePic } : blankProfilePic}
                           style={styles.profilePic}
                         />
                         <View style={styles.commentContent}>
                           <View style={styles.commentHeader}>
                             <Text style={styles.username}>{item.username}</Text>
-                            <Text style={styles.timestamp}>
-                              {formatTimestamp(item.created_at)}
-                            </Text>
+                            <Text style={styles.timestamp}>{formatTimestamp(item.created_at)}</Text>
                           </View>
                           <Text style={styles.commentText}>{item.text}</Text>
-                          
-                          {/* Add delete option for user's own comments */}
                           {auth.currentUser && item.user_id === auth.currentUser.uid && (
-                            <TouchableOpacity
-                              style={styles.deleteButton}
-                              onPress={() => handleDeleteComment(item.id)}
-                            >
+                            <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteComment(item.id)}>
                               <Text style={styles.deleteText}>Delete</Text>
                             </TouchableOpacity>
                           )}
@@ -209,17 +180,20 @@ export default function CommentScreen({ route }) {
 
               <View style={styles.inputContainer}>
                 <TextInput
+                  ref={inputRef}
                   style={styles.input}
                   value={comment}
                   onChangeText={setComment}
                   placeholder="Add a comment..."
                   placeholderTextColor="#666"
                   multiline
+                  returnKeyType="done"
+                  onSubmitEditing={Keyboard.dismiss}
                 />
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[
                     styles.submitButton,
-                    (isSubmitting || !comment.trim()) && styles.submitButtonDisabled
+                    (isSubmitting || !comment.trim()) && styles.submitButtonDisabled,
                   ]}
                   onPress={handleSubmitComment}
                   disabled={isSubmitting || !comment.trim()}
@@ -323,6 +297,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
     color: '#fff',
     fontSize: 16,
+    maxHeight: 120,
   },
   submitButton: {
     backgroundColor: '#007AFF',
@@ -350,7 +325,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
   },
-
   commentContent: {
     flex: 1,
     marginLeft: 8,
