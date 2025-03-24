@@ -171,7 +171,7 @@ function TabNavigator() {
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         // dynamic colors from theme:
-        tabBarActiveTintColor: theme.primary, 
+        tabBarActiveTintColor: theme.icon, 
         tabBarInactiveTintColor:  "#FFFFFF",
         tabBarStyle: {
           ...styles.tabBarStyle,
