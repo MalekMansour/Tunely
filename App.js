@@ -1,17 +1,21 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
-import { NavigationContainer, useNavigationState } from "@react-navigation/native";
-import { View, Text, TouchableOpacity, Settings } from "react-native";
+import {
+  NavigationContainer,
+  useNavigationState,
+} from "@react-navigation/native";
+import { View, Text, TouchableOpacity } from "react-native";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AudioProvider } from "./context/AudioContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import { ChatbotProvider, useChatbot } from "./context/ChatbotContext";
 import { Provider as PaperProvider } from "react-native-paper";
 
-// Screens
+// Screens & Components
 import HomeScreen from "./screens/Home";
 import SearchScreen from "./screens/Search";
 import LibraryScreen from "./screens/Library";
@@ -77,34 +81,6 @@ function LibraryWithTopBar({ navigation }) {
   return <LibraryScreen navigation={navigation} />;
 }
 
-function UserPlayListWithTopBar({ navigation }) {
-  return (
-    <ScreenWithTopBar navigation={navigation} title="Playlists">
-      <View style={styles.container}>
-        <View style={styles.buttonContainer}>
-          <PlayListButton title="Playlists" />
-          <MyUploadButton title="My Uploads" />
-        </View>
-        <UserPlayList />
-      </View>
-    </ScreenWithTopBar>
-  );
-}
-
-function MyUploadsWithTopBar({ navigation }) {
-  return (
-    <ScreenWithTopBar navigation={navigation} title="My Uploads">
-      <View style={styles.container}>
-        <View style={styles.buttonContainer}>
-          <PlayListButton title="Playlists" />
-          <MyUploadButton title="My Uploads" />
-        </View>
-        <MyUploads />
-      </View>
-    </ScreenWithTopBar>
-  );
-}
-
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -119,16 +95,6 @@ function LibraryStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="LibraryScreen" component={LibraryWithTopBar} />
-      <Stack.Screen
-        name="UserPlayList"
-        component={UserPlayListWithTopBar}
-        options={{ presentation: "card", animationEnabled: true }}
-      />
-      <Stack.Screen
-        name="MyUploads"
-        component={MyUploadsWithTopBar}
-        options={{ presentation: "card", animationEnabled: true }}
-      />
       <Stack.Screen name="PlaylistDetail" component={PlaylistDetail} />
     </Stack.Navigator>
   );
@@ -170,9 +136,8 @@ function TabNavigator() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        // dynamic colors from theme:
-        tabBarActiveTintColor: theme.icon, 
-        tabBarInactiveTintColor:  "#FFFFFF",
+        tabBarActiveTintColor: theme.icon,
+        tabBarInactiveTintColor: "#FFFFFF",
         tabBarStyle: {
           ...styles.tabBarStyle,
           backgroundColor: "transparent",
@@ -195,39 +160,36 @@ export default function App() {
     <PaperProvider>
       <AudioProvider>
         <ThemeProvider>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <NavigationContainer>
-              <View style={{ flex: 1 }}>
-                <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="Home" component={TabNavigator} />
-                  <Stack.Screen
-                    name="SongDetail"
-                    component={SongDetailScreen}
-                    options={{ presentation: "transparentModal" }}
-                  />
-                  <Stack.Screen
-                    name="CommentScreen"
-                    component={CommentScreen}
-                    options={{ presentation: "transparentModal" }}
-                  />
-                  <Stack.Screen name="Profile" component={ProfileScreen} />
-                  <Stack.Screen name="Settings" component={SettingsScreen} />
-                  <Stack.Screen name="Login" component={LoginScreen} />
-                  <Stack.Screen name="LoginFormPage" component={LoginFormPage} />
-                  <Stack.Screen name="SignUp" component={SignUpScreen} />
-                  <Stack.Screen name="Upload" component={UploadScreen} />
-                  <Stack.Screen name="ThemeSettings" component={ThemeSettings} />
-                  <Stack.Screen name="Notifications" component={Notifications} />
-                  <Stack.Screen name="AdminPage" component={AdminPage} />
-                  <Stack.Screen name="AuthCheck" component={AdminCheck} />
-                  <Stack.Screen name="BotCat" component={BotChat} />
-                </Stack.Navigator>
+          <ChatbotProvider>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <NavigationContainer>
+                <View style={{ flex: 1 }}>
+                  <Stack.Navigator
+                    initialRouteName="Login"
+                    screenOptions={{ headerShown: false }}
+                  >
+                    <Stack.Screen name="Home" component={TabNavigator} />
+                    <Stack.Screen name="SongDetail" component={SongDetailScreen} />
+                    <Stack.Screen name="CommentScreen" component={CommentScreen} />
+                    <Stack.Screen name="Profile" component={ProfileScreen} />
+                    <Stack.Screen name="Settings" component={SettingsScreen} />
+                    <Stack.Screen name="Login" component={LoginScreen} />
+                    <Stack.Screen name="LoginFormPage" component={LoginFormPage} />
+                    <Stack.Screen name="SignUp" component={SignUpScreen} />
+                    <Stack.Screen name="Upload" component={UploadScreen} />
+                    <Stack.Screen name="ThemeSettings" component={ThemeSettings} />
+                    <Stack.Screen name="Notifications" component={Notifications} />
+                    <Stack.Screen name="AdminPage" component={AdminPage} />
+                    <Stack.Screen name="AuthCheck" component={AdminCheck} />
+                    <Stack.Screen name="BotCat" component={BotChat} />
+                  </Stack.Navigator>
 
-                <FloatingPlayer />
-                <ConditionalCatBot />
-              </View>
-            </NavigationContainer>
-          </GestureHandlerRootView>
+                  <FloatingPlayer />
+                  <ConditionalCatBot />
+                </View>
+              </NavigationContainer>
+            </GestureHandlerRootView>
+          </ChatbotProvider>
         </ThemeProvider>
       </AudioProvider>
     </PaperProvider>
@@ -241,10 +203,23 @@ function ConditionalCatBot() {
     return route.name;
   });
 
-  const hiddenScreens = ["Login", "LoginFormPage", "SignUp", "Profile", "BotCat", "AdminPage", "ThemeSettings", "Settings", "Notifications"];
+  const { chatbotVisible } = useChatbot();
 
-  if (!routeName || hiddenScreens.includes(routeName)) {
+  const hiddenScreens = [
+    "Login",
+    "LoginFormPage",
+    "SignUp",
+    "Profile",
+    "BotCat",
+    "AdminPage",
+    "ThemeSettings",
+    "Settings",
+    "Notifications",
+  ];
+
+  if (!chatbotVisible || !routeName || hiddenScreens.includes(routeName)) {
     return null;
   }
+
   return <CatBot />;
 }
