@@ -8,10 +8,9 @@ import {
   StatusBar,
   StyleSheet,
   ActivityIndicator,
-  SafeAreaView,
+  Alert,
   Modal,
   TextInput,
-  Alert
 } from "react-native";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,7 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 // Custom components & services
 import TopBarProfileIcon from "../components/TopBarProfileIcon";
 import SongCard from "../components/SongCard";
-import PlayList from "../components/Playlist"; 
+import PlayList from "../components/Playlist";
 import { useGetSongs } from "../hooks/useGetSongs";
 import { playlistService } from "../services/playlistService";
 import { songService } from "../services/songService";
@@ -32,10 +31,10 @@ export default function LibraryScreen() {
   const navigation = useNavigation();
   const { theme } = useTheme();
 
-  // Active tab can be: "Playlists", "MyUploads", "Liked", or false (for default: recently-played)
+  // Active tab can be: "Playlists", "MyUploads", "Liked", or false (for recently-played)
   const [activeTab, setActiveTab] = useState(false);
 
-  // ***** 1) Liked songs
+  // 1) Liked songs
   const {
     songs: likedSongs,
     loading: likedLoading,
@@ -43,7 +42,7 @@ export default function LibraryScreen() {
     refreshSongs: refreshLikedSongs,
   } = useGetSongs("liked");
 
-  // ***** 2) Recently Played
+  // 2) Recently Played
   const {
     songs: recentlyPlayedSongs,
     loading: recentlyPlayedLoading,
@@ -51,7 +50,7 @@ export default function LibraryScreen() {
     refreshSongs: refreshRecentlyPlayed,
   } = useGetSongs("recently-played");
 
-  // ***** 3) My Uploads
+  // 3) My Uploads
   const {
     songs: myUploads,
     loading: myUploadsLoading,
@@ -92,7 +91,7 @@ export default function LibraryScreen() {
     }
   };
 
-  // ***** 4) Playlists
+  // 4) Playlists
   const [playlists, setPlaylists] = useState([]);
   const [playlistsLoading, setPlaylistsLoading] = useState(false);
   const [playlistsError, setPlaylistsError] = useState(null);
@@ -125,7 +124,7 @@ export default function LibraryScreen() {
     }
   };
 
-  // Create new playlist
+  // Create a new playlist
   const handleCreatePlaylist = async () => {
     if (playlistTitle.trim() === "") {
       Alert.alert("Error", "Please enter a playlist title");
@@ -135,7 +134,7 @@ export default function LibraryScreen() {
       setLoadingCreate(true);
       await playlistService.createPlaylist({
         title: playlistTitle,
-        songs: [], // or let user choose songs if you want
+        songs: [],
       });
       Alert.alert("Success", "Playlist created successfully!");
       setModalVisible(false);
@@ -168,21 +167,24 @@ export default function LibraryScreen() {
     navigation.navigate("Profile");
   };
 
-  // TabButton
+  // Button for each tab
   const TabButton = ({ title, isActive, onPress }) => (
     <TouchableOpacity
+      onPress={onPress}
       style={[
         styles.tabButton,
-        { backgroundColor: isActive ? theme.secondary : theme.background },
-        isActive && { borderColor: theme.text, borderWidth: 1 },
+        {
+          borderColor: theme.text, // default border color
+          borderWidth: 1,          // we add a default border
+          backgroundColor: isActive ? theme.secondary : theme.background,
+        },
       ]}
-      onPress={onPress}
     >
       <Text style={{ color: theme.text }}>{title}</Text>
     </TouchableOpacity>
   );
 
-  // ActionButton
+  // Action button (like the "Upload a Song" or "Your Liked Songs" icons)
   const ActionButton = ({ icon, title, onPress }) => (
     <TouchableOpacity style={styles.actionButton} onPress={onPress}>
       <View style={[styles.actionIconContainer, { backgroundColor: theme.primary }]}>
@@ -192,9 +194,9 @@ export default function LibraryScreen() {
     </TouchableOpacity>
   );
 
-  /*******************************************
+  /***********************************************
    * RENDER: PLAYLISTS
-   *******************************************/
+   ***********************************************/
   const renderPlaylists = () => {
     if (playlistsLoading) {
       return <ActivityIndicator size="large" color={theme.primary} />;
@@ -215,15 +217,11 @@ export default function LibraryScreen() {
             </Text>
           )}
           renderItem={({ item }) => (
-            <PlayList
-              title={item.title}
-              playlistId={item.id}
-              onDelete={handleDeletePlaylist}
-            />
+            <PlayList title={item.title} playlistId={item.id} onDelete={handleDeletePlaylist} />
           )}
         />
 
-        {/* Create Playlist Button (FAB) */}
+        {/* Create Playlist FAB */}
         <TouchableOpacity
           style={styles.fabButton}
           onPress={() => setModalVisible(true)}
@@ -242,7 +240,9 @@ export default function LibraryScreen() {
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text style={[styles.modalTitle, { color: theme.text }]}>Create New Playlist</Text>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>
+                Create New Playlist
+              </Text>
 
               <TextInput
                 style={[styles.input, { color: theme.text, borderColor: theme.secondary }]}
@@ -279,9 +279,9 @@ export default function LibraryScreen() {
     );
   };
 
-  /*******************************************
+  /***********************************************
    * RENDER: MY UPLOADS
-   *******************************************/
+   ***********************************************/
   const renderMyUploads = () => {
     if (myUploadsLoading) {
       return <ActivityIndicator size="large" color={theme.primary} />;
@@ -309,9 +309,9 @@ export default function LibraryScreen() {
     );
   };
 
-  /*******************************************
+  /***********************************************
    * RENDER: LIKED
-   *******************************************/
+   ***********************************************/
   const renderLiked = () => {
     return (
       <>
@@ -339,13 +339,12 @@ export default function LibraryScreen() {
     );
   };
 
-  /*******************************************
+  /***********************************************
    * RENDER: DEFAULT (RECENTLY PLAYED)
-   *******************************************/
+   ***********************************************/
   const renderDefault = () => (
     <ScrollView style={styles.scrollContainer}>
-      <ActionButton icon="+" title="Upload a Song" onPress={() => navigation.navigate("Upload")} />
-      <ActionButton icon="♥" title="Your Liked Songs" onPress={() => setActiveTab("Liked")} />
+      <ActionButton style={styles.actionButton} icon="+" title="Upload a Song" onPress={() => navigation.navigate("Upload")} />
 
       <View style={styles.sectionContainer}>
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Recently played</Text>
@@ -364,9 +363,7 @@ export default function LibraryScreen() {
             )}
           />
         ) : (
-          <Text style={[styles.emptyText, { color: theme.text }]}>
-            No recently played songs
-          </Text>
+          <Text style={[styles.emptyText, { color: theme.text }]}>No recently played songs</Text>
         )}
         {recentlyPlayedError && (
           <Text style={[styles.errorText, { color: theme.text }]}>{recentlyPlayedError}</Text>
@@ -375,9 +372,6 @@ export default function LibraryScreen() {
     </ScrollView>
   );
 
-  /*******************************************
-   * MAIN RENDER
-   *******************************************/
   return (
     <ThemedScreen style={styles.fullContainer}>
       <StatusBar barStyle="light-content" />
@@ -387,7 +381,7 @@ export default function LibraryScreen() {
         <View style={styles.titleContainer}>
           <Text style={[styles.headerTitle, { color: theme.text }]}>Your Library</Text>
         </View>
-        <TouchableOpacity style={styles.profileButton} onPress={handleProfilePress}>
+        <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate("Profile")}>
           <TopBarProfileIcon size={30} />
         </TouchableOpacity>
       </View>
@@ -513,7 +507,7 @@ const styles = StyleSheet.create({
     color: "red",
   },
 
-  // For the "New Playlist" FAB & Modal
+  /* For the "New Playlist" FAB & Modal */
   fabButton: {
     flexDirection: "row",
     alignItems: "center",
