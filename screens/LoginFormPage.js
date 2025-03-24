@@ -45,7 +45,10 @@ export default function LoginFormPage() {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigation.navigate("AuthCheck");  
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "AuthCheck" }],
+      });
     } catch (error) {
       Alert.alert("Error", error.message);
     }
@@ -55,7 +58,10 @@ export default function LoginFormPage() {
     setIsLoading(true);
     try {
       const userInfo = await authService.signInWithGoogleAuth();
-      navigation.navigate("AuthCheck");  
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "AuthCheck" }],
+      });
     } catch (error) {
       Alert.alert("Error", error.message || "Failed to sign in with Google");
     } finally {

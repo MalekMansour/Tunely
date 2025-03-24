@@ -43,7 +43,7 @@ function ScreenWithTopBar({ navigation, children, title }) {
   const { theme } = useTheme();
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
-      <View style={styles.topBar}>
+      <View style={[styles.topBar, { backgroundColor: theme.background }]}>
         <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
         <TouchableOpacity
           style={styles.profileButton}
@@ -171,8 +171,8 @@ function TabNavigator() {
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         // dynamic colors from theme:
-        tabBarActiveTintColor: theme.primary, // or theme.text if you prefer
-        tabBarInactiveTintColor: theme.inactive, // or theme.secondary
+        tabBarActiveTintColor: theme.primary, 
+        tabBarInactiveTintColor:  "#FFFFFF",
         tabBarStyle: {
           ...styles.tabBarStyle,
           backgroundColor: "transparent",
@@ -241,7 +241,7 @@ function ConditionalCatBot() {
     return route.name;
   });
 
-  const hiddenScreens = ["Login", "LoginFormPage", "SignUp", "Profile", "BotCat", "AdminPage, AuthCheck", "ThemeSettings", "Settings", "Notifications"];
+  const hiddenScreens = ["Login", "LoginFormPage", "SignUp", "Profile", "BotCat", "AdminPage", "ThemeSettings", "Settings", "Notifications"];
 
   if (!routeName || hiddenScreens.includes(routeName)) {
     return null;

@@ -4,16 +4,18 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../Utility/firebaseConfig";
 import { signOutUser, updateUserData, uploadProfilePicture } from "../Utility/firebaseConfig";
-import { getCurrentUser, signOut as googleSignOut } from "../Utility/googleAuth";
+import { signOut as googleSignOut } from "../Utility/googleAuth";
 import blankProfilePic from "../assets/blank_profile.png";
 import { useUserData } from "../hooks/useUserData";
 import { useTheme } from "../context/ThemeContext";
 import ThemedScreen from "../components/ThemedScreen";
+import { useAudio } from '../context/AudioContext';
 
 export default function ProfileScreen({ navigation }) {
   const [isGoogleUser, setIsGoogleUser] = useState(false);
   const { username, profilePic } = useUserData();
   const { theme } = useTheme();
+  const { stopSound } = useAudio();
 
   useEffect(() => {
     const requestPermissions = async () => {
@@ -51,6 +53,7 @@ export default function ProfileScreen({ navigation }) {
         text: "Logout",
         onPress: async () => {
           try {
+            await stopSound();
             if (isGoogleUser) {
               await googleSignOut();
             } else {

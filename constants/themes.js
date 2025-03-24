@@ -30,7 +30,7 @@ function getContrastingTextColor(
     primary,
     secondary,
     text,
-    border,         // <---- newly added
+    border,         
     del = "#BF3131",
     inactive,
   }) {
@@ -47,12 +47,12 @@ function getContrastingTextColor(
       text: finalText,
       delete: del,
       inactive: inactive || "#666",
-      border: finalBorder, // <---- store final border color
+      border: finalBorder, 
     };
   }
   
   /**********************************************
-    3) Export your themes
+    3) Export themes
   **********************************************/
   export const themes = {
     dark: createTheme({

@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   Alert
 } from 'react-native';
-import { getAuth } from 'firebase/auth';
+import { getAuth, signOut } from 'firebase/auth';
 import { API_URL } from '../config/apiConfig';
 
 
@@ -104,6 +104,19 @@ export default function AdminPage({ navigation }) {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }]
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      Alert.alert('Error', 'Failed to log out');
+    }
+  };
+
   const renderUserItem = ({ item }) => (
     <View style={styles.userCard}>
       <View>
@@ -153,9 +166,9 @@ export default function AdminPage({ navigation }) {
         <Text style={styles.headerTitle}>Admin Dashboard</Text>
         <TouchableOpacity 
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={handleLogout}
         >
-          <Text style={styles.backButtonText}>Back</Text>
+          <Text style={styles.backButtonText}>Log Out</Text>
         </TouchableOpacity>
       </View>
 

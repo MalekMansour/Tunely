@@ -142,6 +142,19 @@ export const AudioProvider = ({ children }) => {
       }
     }
   };
+
+  const stopSound = async () => {
+    try {
+      if (sound) {
+        await sound.unloadAsync();
+        setSound(null);
+        setIsPlaying(false);
+        // Don't reset currentSong here - useful to remember what was playing
+      }
+    } catch (error) {
+      console.error('Error stopping sound:', error);
+    }
+  };
 //clean up when not using audio provider anymore
   React.useEffect(() => {
     return () => {
@@ -164,7 +177,8 @@ export const AudioProvider = ({ children }) => {
         resumeSound,
         playNextSong,
         playPreviousSong,
-        changePlaylist
+        changePlaylist,
+        stopSound
       }}
     >
       {children}
