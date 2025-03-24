@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,13 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "../styles";
 import { useTheme } from "../context/ThemeContext";
+import { useChatbot } from "../context/ChatbotContext";
 import ThemedScreen from "../components/ThemedScreen";
 
 export default function SettingsScreen({ navigation }) {
   const [isPrivate, setIsPrivate] = useState(false);
   const { theme } = useTheme();
+  const { chatbotVisible, setChatbotVisible } = useChatbot(); 
 
   const handleDeleteAccount = () => {
     Alert.alert(
@@ -42,9 +44,9 @@ export default function SettingsScreen({ navigation }) {
       onPress: () => navigation.navigate("ThemeSettings"),
     },
     {
-      label: "ChatBot Buddy",
-      icon: "chatbubbles-outline",
-      onPress: () => navigation.navigate("ChatBotBuddy"),
+      label: `ChatBot Buddy: ${chatbotVisible ? "On" : "Off"}`, // ✅ dynamic label
+      icon: chatbotVisible ? "chatbubbles" : "chatbubbles-outline",
+      onPress: () => setChatbotVisible(!chatbotVisible), // ✅ toggle
     },
     {
       label: "Audio Quality",
@@ -72,7 +74,17 @@ export default function SettingsScreen({ navigation }) {
         <Ionicons name="arrow-back" size={28} color={theme.text} />
       </TouchableOpacity>
 
-      <Text style={[styles.title, { marginTop: 100, marginLeft: 160, fontSize: 28, color: theme.text }]}>
+      <Text
+        style={[
+          styles.title,
+          {
+            marginTop: 100,
+            marginLeft: 160,
+            fontSize: 28,
+            color: theme.text,
+          },
+        ]}
+      >
         Settings
       </Text>
 
