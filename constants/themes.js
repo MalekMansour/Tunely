@@ -30,7 +30,8 @@ function getContrastingTextColor(
     primary,
     secondary,
     text,
-    border,         
+    border,        
+    icon, 
     del = "#BF3131",
     inactive,
   }) {
@@ -48,6 +49,7 @@ function getContrastingTextColor(
       delete: del,
       inactive: inactive || "#666",
       border: finalBorder, 
+      icon,
     };
   }
   
@@ -62,6 +64,7 @@ function getContrastingTextColor(
       secondary: "#213555",
       text: "#F1F1F1",
       border: "#99a9b9", 
+      icon: "#0079FF",
     }),
     light: createTheme({
       name: "Classic Light Mode",
@@ -70,6 +73,7 @@ function getContrastingTextColor(
       secondary: "#52767b",
       text: "#1a1a1a",
       border: "#182952", 
+      icon: "#182952",
     }),
     ocean: createTheme({
         name: "Deep Blue Sea",
@@ -77,29 +81,33 @@ function getContrastingTextColor(
         primary: "#19376D",
         secondary: "#576CBC",
         border: "#99a9b9",
+        icon: "#0079FF",
       }),
     cherry: createTheme({
       name: "Cherry Blossom",
-      background: "#FFD6E8",
-      primary: "#F7B5CA",
-      secondary: "#F3D0D7",
-      text: "#2f2f2f",
-      border: "#FF2DF1",
+      background: "#FFB7C5",
+      primary: "#FF69B4",
+      secondary: "#F0F3FF",
+      text: "#1a1a1a",
+      border: "#FF69B4",
+      icon: "#FF69B4",
     }),
     astro: createTheme({
       name: "Astro Neon",
       background: "#211951",
       primary: "#836FFF",
-      secondary: "#15F5BA",
+      secondary: "#865DFF",
       text: "#F0F3FF",
       border: "#2D336B",
+      icon: "#836FFF",  
     }),
-    kaffestuggu: createTheme({
-      name: "Kaffestuggu",
-      background: "#F5E7DE",
-      primary: "#F2BFA4",
-      secondary: "#E5A884",
-      border: "#E5A884",
+    cafe: createTheme({
+      name: "Cafe Latte",
+      background: "#FED8B1",
+      primary: "#A67B5B",
+      secondary: "#6F4E37",
+      border: "#543310",
+      icon: "#ECB176",
     }),
     slumber: createTheme({
       name: "Slumber",
@@ -107,20 +115,23 @@ function getContrastingTextColor(
       primary: "#1ba098",
       secondary: "#deb992",
       border: "#1ba098",
+      icon: "#1ba098",
     }),
-    weHeart: createTheme({
-      name: "We Heart",
-      background: "#e1f2f7",
-      primary: "#ef0d50",
+    heartbreak: createTheme({
+      name: "808's & Heartbreak",
+      background: "#D2E0FB",
+      primary: "#E50046",
       secondary: "#eb3a70",
-      border: "#ef0d50",
+      border: "#E50046",
+      icon: "#E50046",
     }),
     igor: createTheme({
       name: "Igor",
       background: "#000000",
       primary: "#fa255e",
-      secondary: "#c39ea0",
+      secondary: "#fa255e",
       border: "#fa255e",
+      icon: "#fa255e",
     }),
     brat: createTheme({
       name: "brat",
@@ -128,7 +139,8 @@ function getContrastingTextColor(
       primary: "#a1e832",
       secondary: "#6fbf00",
       text: "#000000",
-      border: "#99a9b9",
+      border: "#000000",
+      icon: "#000000",
     }),
   };
   
