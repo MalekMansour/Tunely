@@ -2,7 +2,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { NavigationContainer, useNavigationState } from "@react-navigation/native";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Settings } from "react-native";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
@@ -244,7 +244,7 @@ function ConditionalCatBot() {
     return route.name;
   });
 
-  const hiddenScreens = ["Login", "LoginFormPage", "SignUp", "Profile", "BotCat"];
+  const hiddenScreens = ["Login", "LoginFormPage", "SignUp", "Profile", "BotCat", "AdminPage, AuthCheck", "ThemeSettings", "Settings", "Notifications"];
 
   if (!routeName || hiddenScreens.includes(routeName)) {
     return null;
