@@ -106,6 +106,7 @@ function getContrastingTextColor(
       background: "#FED8B1",
       primary: "#A67B5B",
       secondary: "#6F4E37",
+      text: "#1a1a1a",
       border: "#543310",
       icon: "#ECB176",
     }),
