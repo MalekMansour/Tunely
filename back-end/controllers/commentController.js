@@ -3,8 +3,9 @@ const db = require("../db");
 const axios = require("axios");
 
 
-const AZURE_ENDPOINT = "https://tunelycontentmoderation.cognitiveservices.azure.com/"; 
-const AZURE_KEY = "3SYDKxMLnMG0Jf2vKG45aPDFDbj4UHSgcTYGGVo0BlysaCfQ5S2mJQQJ99BCACYeBjFXJ3w3AAAHACOGwvMm"; 
+const AZURE_ENDPOINT = process.env.AZURE_ENDPOINT;
+const AZURE_KEY = process.env.AZURE_KEY;
+
 const commentController = {
   // Add a comment
   addComment: async (req, res) => {
