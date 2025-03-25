@@ -443,14 +443,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  profileButton: {
-    padding: 4,
-    marginTop: 10,
-  },
   tabContainer: {
     flexDirection: "row",
     marginBottom: 20,
