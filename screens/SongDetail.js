@@ -148,7 +148,6 @@ export default function SongDetailScreen({ route }) {
           styles.songDetailsContainer,
           {
             transform: [{ translateY }],
-            backgroundColor: theme.background,
             borderWidth: 1,
             borderColor: theme.border,
             shadowColor: theme.border,
@@ -176,7 +175,6 @@ export default function SongDetailScreen({ route }) {
               },
             ]}
           />
-          {/* Use theme.text for these titles */}
           <Text style={[styles.songTitle, { color: theme.text }]}>{song.title}</Text>
           <Text style={[styles.songArtist, { color: theme.text }]}>{song.artistName}</Text>
         </View>
