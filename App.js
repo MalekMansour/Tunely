@@ -173,7 +173,14 @@ export default function App() {
                     screenOptions={{ headerShown: false }}
                   >
                     <Stack.Screen name="Home" component={TabNavigator} />
-                    <Stack.Screen name="SongDetail" component={SongDetailScreen} />
+                    <Stack.Screen 
+                      name="SongDetail" 
+                      component={SongDetailScreen}
+                      options={{
+                      presentation: "transparentModal",
+                      cardStyle: { backgroundColor: "transparent" },
+                      }}
+                        />
                     <Stack.Screen name="CommentScreen" component={CommentScreen} />
                     <Stack.Screen name="Profile" component={ProfileScreen} />
                     <Stack.Screen name="Settings" component={SettingsScreen} />
