@@ -1,6 +1,10 @@
 const CommentModel = require("../models/commentModel");
 const db = require("../db");
+const axios = require("axios");
 
+
+const AZURE_ENDPOINT = "https://tunelycontentmoderation.cognitiveservices.azure.com/"; 
+const AZURE_KEY = "3SYDKxMLnMG0Jf2vKG45aPDFDbj4UHSgcTYGGVo0BlysaCfQ5S2mJQQJ99BCACYeBjFXJ3w3AAAHACOGwvMm"; 
 const commentController = {
   // Add a comment
   addComment: async (req, res) => {
@@ -12,6 +16,27 @@ const commentController = {
       const { songId } = req.params;
       const userId = req.user.uid;
       const { text } = req.body;
+
+      // Send comment to Azure Content Safety for moderation
+      const azureResponse = await axios.post(
+        `${AZURE_ENDPOINT}/contentsafety/text:analyze?api-version=2023-10-01`,
+        {
+          text: text,
+          categories: ["Hate", "SelfHarm", "Sexual", "Violence"]
+        },
+        {
+          headers: {
+            "Ocp-Apim-Subscription-Key": AZURE_KEY,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      // Check if Azure flagged the comment
+      const isFlagged = azureResponse.data.categoriesAnalysis.some(cat => cat.severity >= 2);
+      if (isFlagged) {
+        return res.status(403).json({ message: "Comment contains inappropriate content." });
+      }
 
       
       await CommentModel.create({

@@ -86,21 +86,22 @@ export default function CommentScreen({ route }) {
 
   const handleSubmitComment = async () => {
     if (comment.trim() && !isSubmitting) {
-      try {
-        setIsSubmitting(true);
-        const songId = song.id || song.songId;
-        await commentsService.postComment(songId, comment.trim());
-        await loadComments();
-        setComment('');
-        Keyboard.dismiss();
-      } catch (error) {
-        console.error('Error posting comment:', error);
-        Alert.alert('Error', 'Failed to post your comment.');
-      } finally {
-        setIsSubmitting(false);
-      }
+        try {
+            setIsSubmitting(true);
+            const songId = song.id || song.songId;
+            await commentsService.postComment(songId, comment.trim());
+            await loadComments();
+            setComment('');
+            Keyboard.dismiss();
+        } catch (error) {
+            console.error('Error posting comment:', error);
+            Alert.alert('Error', error.message || 'Failed to post your comment.');
+        } finally {
+            setIsSubmitting(false);
+        }
     }
-  };
+};
+
 
   const handleDeleteComment = async (commentId) => {
     try {
