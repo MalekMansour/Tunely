@@ -74,9 +74,6 @@ export default function ProfileScreen({ navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={theme.text} />
         </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons name="search" size={24} color={theme.text} />
-        </TouchableOpacity>
       </View>
 
       <View style={styles.profileSection}>
