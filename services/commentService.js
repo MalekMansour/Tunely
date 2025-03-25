@@ -37,24 +37,26 @@ export const commentsService = {
   // Post a new comment for a song
   postComment: async (songId, text) => {
     try {
-      const headers = await getAuthHeaders();
-      // Updated to match backend route
-      const response = await fetch(`${API_URL}/comments/${songId}`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ text })
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to post comment');
-      }
+        const headers = await getAuthHeaders();
+        const response = await fetch(`${API_URL}/comments/${songId}`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ text })
+        });
 
-      return response.json();
+        const data = await response.json(); // Convert response to JSON
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Failed to post comment');
+        }
+
+        return data; // Return success message
     } catch (error) {
-      console.error("Error in postComment:", error);
-      throw error;
+        console.error("Error in postComment:", error);
+        throw new Error(error.message || "Something went wrong. Please try again.");
     }
-  },
+},
+
   
   // Delete a comment by ID
   deleteComment: async (commentId) => {
