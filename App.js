@@ -47,10 +47,10 @@ function ScreenWithTopBar({ navigation, children, title }) {
   const { theme } = useTheme();
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
-      <View style={[styles.topBar, { backgroundColor: theme.background }]}>
-        <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
+      <View style={[styles.topBar, { backgroundColor: theme.background}]}>
+        <Text style={[styles.title,{ color: theme.text , marginTop: 30 }]}>{title}</Text>
         <TouchableOpacity
-          style={styles.profileButton}
+          style={[styles.profileButton, {marginTop: 30}] }
           onPress={() => navigation.navigate("Profile")}
         >
           <TopBarProfileIcon size={30} />
@@ -78,7 +78,11 @@ function SearchWithTopBar({ navigation }) {
 }
 
 function LibraryWithTopBar({ navigation }) {
-  return <LibraryScreen navigation={navigation} />;
+  return (
+    <ScreenWithTopBar navigation={navigation} title="Your Library">
+      <LibraryScreen />
+    </ScreenWithTopBar>
+  );
 }
 
 function HomeStack() {
