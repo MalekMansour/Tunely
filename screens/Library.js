@@ -384,16 +384,6 @@ export default function LibraryScreen() {
     <ThemedScreen style={styles.fullContainer}>
       <StatusBar barStyle="light-content" />
 
-      {/* Top Header */}
-      <View style={[styles.headerRow, { backgroundColor: theme.background }]}>
-        <View style={styles.titleContainer}>
-          <Text style={[styles.headerTitle, { color: theme.text }]}>Your Library</Text>
-        </View>
-        <TouchableOpacity style={styles.profileButton} onPress={() => navigation.navigate("Profile")}>
-          <TopBarProfileIcon size={30} />
-        </TouchableOpacity>
-      </View>
-
       {/* Tabs & Content */}
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.tabContainer}>
