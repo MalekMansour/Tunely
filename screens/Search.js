@@ -81,13 +81,13 @@ export default function Search() {
   return (
     <ThemedScreen style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.searchBarContainer}>
-        <TextInput
-          style={[styles.searchBar, { color: theme.text }]}
-          placeholder="Search for something"
-          placeholderTextColor="#888"
-          value={query}
-          onChangeText={handleSearch}
-        />
+      <TextInput
+        style={[styles.searchBar, { color: "#000" }]}
+        placeholder="Search for something"
+        placeholderTextColor="#888"
+        value={query}
+        onChangeText={handleSearch}
+      />
         {query ? (
           <TouchableOpacity style={styles.searchIcon} onPress={clearSearch}>
             <Text style={{ fontSize: 18, color: "#000" }}>✕</Text>
@@ -105,7 +105,7 @@ export default function Search() {
           keyExtractor={(item) => item.songId.toString()}
           renderItem={({ item }) => <SongCard song={item} />}
           ListEmptyComponent={
-            <Text style={[styles.emptyText, { color: theme.text }]}>
+            <Text style={[styles.emptyText, { color: "#000" }]}>
               No results found
             </Text>
           }
