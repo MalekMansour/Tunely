@@ -228,19 +228,6 @@ export default function LibraryScreen() {
           )}
         />
 
-        {/* We can optionally remove the old FAB, or leave it if you want both. 
-            Let’s remove it for a single approach: */}
-        {/* 
-        <TouchableOpacity
-          style={styles.fabButton}
-          onPress={() => setModalVisible(true)}
-          disabled={playlistsLoading}
-        >
-          <Ionicons name="add-circle" size={24} color={theme.text} />
-          <Text style={[styles.fabButtonText, { color: theme.text }]}>New</Text>
-        </TouchableOpacity>
-        */}
-
         {/* Create Playlist Modal */}
         <Modal
           visible={modalVisible}
@@ -300,22 +287,29 @@ export default function LibraryScreen() {
       return <Text style={[styles.errorText, { color: theme.text }]}>{myUploadsError}</Text>;
     }
     return (
-      <FlatList
-        data={myUploads}
-        keyExtractor={(item) => item.songId.toString()}
-        contentContainerStyle={styles.songListContainer}
-        ListEmptyComponent={() => (
-          <Text style={[styles.emptyText, { color: theme.text }]}>No Uploaded Songs</Text>
-        )}
-        renderItem={({ item }) => (
-          <SongCard
-            song={item}
-            isOwnContent={true}
-            onRemove={handleDeleteSong}
-            isDeleting={deletingId === item.songId}
-          />
-        )}
-      />
+      <>
+        <ActionButton
+          icon="+"
+          title="Upload a Song"
+          onPress={() => navigation.navigate("Upload")}
+        />
+        <FlatList
+          data={myUploads}
+          keyExtractor={(item) => item.songId.toString()}
+          contentContainerStyle={styles.songListContainer}
+          ListEmptyComponent={() => (
+            <Text style={[styles.emptyText, { color: theme.text }]}>No Uploaded Songs</Text>
+          )}
+          renderItem={({ item }) => (
+            <SongCard
+              song={item}
+              isOwnContent={true}
+              onRemove={handleDeleteSong}
+              isDeleting={deletingId === item.songId}
+            />
+          )}
+        />
+      </>
     );
   };
 
@@ -354,8 +348,6 @@ export default function LibraryScreen() {
    ***********************************************/
   const renderDefault = () => (
     <ScrollView style={styles.scrollContainer}>
-      <ActionButton icon="+" title="Upload a Song" onPress={() => navigation.navigate("Upload")} />
-
       <View style={styles.sectionContainer}>
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Recently played</Text>
         {recentlyPlayedLoading ? (
