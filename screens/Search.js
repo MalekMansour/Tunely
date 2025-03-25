@@ -14,6 +14,7 @@ import { songService } from "../services/songService";
 import { useNavigation } from "@react-navigation/native";
 import PlayList from "../components/Playlist";
 import SongCard from "../components/SongCard";
+import { Ionicons } from "@expo/vector-icons";
 
 // THEME IMPORTS
 import { useTheme } from "../context/ThemeContext";
@@ -89,11 +90,11 @@ export default function Search() {
         />
         {query ? (
           <TouchableOpacity style={styles.searchIcon} onPress={clearSearch}>
-            <Text style={{ fontSize: 18, color: "#888" }}>✕</Text>
+            <Text style={{ fontSize: 18, color: "#000" }}>✕</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={styles.searchIcon}>
-            <Text style={{ fontSize: 18, color: "#888" }}>🔍</Text>
+          <Ionicons name="search-outline" size={18} color="#000" />
           </TouchableOpacity>
         )}
       </View>
@@ -120,15 +121,16 @@ export default function Search() {
             ) : (
               <ScrollView horizontal>
                 {playlists.slice(0, 10).map((playlist) => (
-                  <PlayList
-                    key={playlist.id}
-                    title={playlist.title || playlist.name}
-                    playlistId={playlist.id}
-                    songs={playlist.songs || []}
-                    image={{ uri: playlist.image }}
-                    style={{ width: 140, marginRight: 10 }}
-                  />
-                ))}
+                <PlayList
+                key={playlist.id}
+                title={playlist.title || playlist.name}
+                playlistId={playlist.id}
+                songs={playlist.songs || []}
+                image={{ uri: playlist.image }}
+                style={{ width: 140, marginRight: 10 }}
+                textStyle={{ color: theme.text }}  
+              />
+            ))}
               </ScrollView>
             )}
           </View>
@@ -174,7 +176,7 @@ const styles = StyleSheet.create({
   searchBar: {
     flex: 1,
     height: 40,
-    backgroundColor: "#333",
+    backgroundColor: "#fff",
     borderRadius: 20,
     paddingHorizontal: 16,
     fontSize: 16,
@@ -220,7 +222,6 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   playlistName: {
-    color: "#fff",
     fontSize: 14,
   },
   browseGrid: {
