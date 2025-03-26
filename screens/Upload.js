@@ -15,14 +15,16 @@ import * as Haptics from "expo-haptics";
 import { Ionicons } from "@expo/vector-icons";
 import { songService } from "../services/songService";
 import { useTheme } from "../context/ThemeContext";
+// Import useUserData to get user details like username
+import { useUserData } from "../hooks/useUserData";
 import ThemedScreen from "../components/ThemedScreen";
 
 export default function Upload({ navigation }) {
   const { theme } = useTheme();
+  const { username } = useUserData(); // Retrieve the username from your user data hook
 
   const [loading, setLoading] = useState(false);
   const [songTitle, setSongTitle] = useState("");
-  const [artistName, setArtistName] = useState("");
   const [genre, setGenre] = useState("");
   const [songFile, setSongFile] = useState(null);
   const [coverImage, setCoverImage] = useState(null);
@@ -78,10 +80,11 @@ export default function Upload({ navigation }) {
         });
       }
       formData.append("title", songTitle);
-      formData.append("artistName", artistName);
+      // Use the username from useUserData as the artist name
+      formData.append("artistName", username);
       formData.append("genre", genre);
 
-      const result = await songService.uploadSong(formData);
+      await songService.uploadSong(formData);
       Alert.alert("Success", "Song uploaded successfully!");
       navigation.goBack();
     } catch (error) {
@@ -130,13 +133,21 @@ export default function Upload({ navigation }) {
       </TouchableOpacity>
 
       <View style={styles.form}>
-        <TouchableOpacity style={[styles.button, { backgroundColor: theme.secondary }]} onPress={pickSong} disabled={loading}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: theme.secondary }]}
+          onPress={pickSong}
+          disabled={loading}
+        >
           <Text style={[styles.buttonText, { color: theme.text }]}>
             {songFile ? "Song Selected" : "Select Song"}
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.button, { backgroundColor: theme.secondary }]} onPress={pickCover} disabled={loading}>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: theme.secondary }]}
+          onPress={pickCover}
+          disabled={loading}
+        >
           <Text style={[styles.buttonText, { color: theme.text }]}>
             {coverImage ? "Cover Selected" : "Select Cover"}
           </Text>
@@ -153,18 +164,16 @@ export default function Upload({ navigation }) {
           editable={!loading}
         />
 
-        <TextInput
-          style={[styles.input, { backgroundColor: theme.secondary, color: theme.text }]}
-          placeholder="Artist Name"
-          placeholderTextColor="#aaa"
-          value={artistName}
-          onChangeText={setArtistName}
-          editable={!loading}
-        />
+        {/* Artist Name input removed; username from useUserData will be used automatically */}
 
         <View style={[styles.pickerContainer, { backgroundColor: theme.secondary }]}>
           <Text style={[styles.pickerLabel, { color: "#aaa" }]}>Genre</Text>
-          <Picker selectedValue={genre} onValueChange={setGenre} enabled={!loading} style={{ color: theme.text }}>
+          <Picker
+            selectedValue={genre}
+            onValueChange={setGenre}
+            enabled={!loading}
+            style={{ color: theme.text }}
+          >
             <Picker.Item label="Select a genre" value="" color="#aaa" />
             <Picker.Item label="Pop" value="Pop" />
             <Picker.Item label="Rap" value="Rap" />
