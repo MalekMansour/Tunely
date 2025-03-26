@@ -214,6 +214,7 @@ export default function LibraryScreen() {
         />
 
         <FlatList
+          key={"playlists"}
           data={playlists}
           keyExtractor={(item) => item.id.toString()}
           numColumns={2}
