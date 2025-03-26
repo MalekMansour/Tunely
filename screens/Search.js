@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "90%",
     margin: "auto",
-    marginBottom: 50,
+    marginBottom: 100,
   },
   categoryCard: {
     width: "48%",
