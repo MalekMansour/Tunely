@@ -87,7 +87,7 @@ export const themes = {
     name: "Cherry Blossom",
     background: "#FFB7C5",
     primary: "#FF69B4",
-    secondary: "#F0F3FF",
+    secondary: "#FF69B4",
     text: "#1a1a1a",
     border: "#FF69B4",
     icon: "#FF69B4",
