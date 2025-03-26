@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, TouchableOpacity, Alert, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity, Alert, TextInput, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../Utility/firebaseConfig";
@@ -46,6 +46,27 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
+  const handleChangeUsername = () => {
+    Alert.prompt(
+      "Change Username",
+      "Enter your new username:",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "OK",
+          onPress: async (newUsername) => {
+            if (newUsername) {
+              const userId = auth.currentUser.uid;
+              await updateUserData(userId, { username: newUsername });
+            }
+          },
+        },
+      ],
+      "plain-text",
+      username
+    );
+  };
+
   const handleLogout = () => {
     Alert.alert("Confirm Logout", "Are you sure you want to log out?", [
       { text: "Cancel", style: "cancel" },
@@ -81,7 +102,12 @@ export default function ProfileScreen({ navigation }) {
           source={typeof profilePic === "string" ? { uri: profilePic } : blankProfilePic}
           style={[styles.profileImage, { borderColor: theme.text }]}
         />
-        <Text style={[styles.username, { color: theme.text }]}>{username || "User"}</Text>
+        <View style={styles.usernameContainer}>
+          <Text style={[styles.username, { color: theme.text }]}>{username || "User"}</Text>
+          <TouchableOpacity onPress={handleChangeUsername}>
+            <Ionicons name="pencil" size={20} color={theme.text} style={styles.editIcon} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={[styles.separator, { backgroundColor: theme.secondary }]} />
@@ -135,6 +161,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 20,
   },
+  usernameContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 15,
+  },
   profileImage: {
     width: 100,
     height: 100,
@@ -143,7 +174,9 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 20,
-    marginLeft: 15,
+  },
+  editIcon: {
+    marginLeft: 8,
   },
   separator: {
     height: 2,
