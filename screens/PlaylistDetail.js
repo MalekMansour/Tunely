@@ -33,7 +33,7 @@ const PlaylistDetail = () => {
   const { playlistId, title } = route.params;
   const { playSound } = useAudio();
 
-  // ✅ THEME USAGE
+  
   const { theme } = useTheme();
 
   // Local state
@@ -198,7 +198,7 @@ const PlaylistDetail = () => {
   const handleRenamePlaylist = async () => {
     if (newTitle.trim() && newTitle !== title) {
       try {
-        await playlistService.updatePlaylistTitle(playlistId, { title: newTitle });
+        await playlistService.renamePlaylist(playlistId, newTitle);
         Alert.alert("Success", "Playlist name updated successfully.");
         navigation.setParams({ title: newTitle });
       } catch (error) {

@@ -13,6 +13,23 @@ const PlaylistModel = {
     return await db.query(sql, params);
   },
 
+  // Model for renaming the playlist name
+  rename: async (playlistId, newTitle) => {
+    if (!playlistId || !newTitle) {
+        throw new Error("Playlist ID and new title are required");
+    }
+
+    const sql = `
+      UPDATE playlists
+      SET title = ?
+      WHERE id = ?
+    `;
+    const params = [newTitle, playlistId];
+
+    return db.query(sql, params); // No need for 'await' since you're returning the Promise
+},
+
+
   getAll: async () => {
     return await db.query('SELECT * FROM playlists ORDER BY created_at DESC');
   },
