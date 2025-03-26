@@ -149,6 +149,7 @@ export default function SongDetailScreen({ route }) {
           {
             transform: [{ translateY }],
             borderWidth: 1,
+            backgroundColor: theme.background,
             borderColor: theme.border,
             shadowColor: theme.border,
             shadowOffset: { width: 0, height: 0 },
@@ -190,7 +191,6 @@ export default function SongDetailScreen({ route }) {
           <SkipButton direction="forward" onPress={handleNext} />
         </View>
 
-        {/* Like and Comment icons: use theme.text for normal, pink if liked */}
         <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%", paddingHorizontal: 20 }}>
           <TouchableOpacity onPress={() => navigation.navigate("CommentScreen", { song })}>
             <Ionicons
@@ -211,7 +211,6 @@ export default function SongDetailScreen({ route }) {
           </TouchableOpacity>
         </View>
 
-        {/* Down Arrow Button: use theme.text */}
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.arrowButton}>
           <Ionicons name="chevron-down" size={32} color={theme.text} />
         </TouchableOpacity>
