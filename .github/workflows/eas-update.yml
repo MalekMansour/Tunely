@@ -40,4 +40,4 @@ jobs:
         run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
 
       - name: Publish update
-        run: eas update --branch preview --message "${{ env.message }}"
+        run:  npx eas update --branch preview --message "${{ env.message }}"
