@@ -8,6 +8,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   FlatList,
+  Image,
 } from "react-native";
 import { playlistService } from "../services/playlistService";
 import { songService } from "../services/songService";
@@ -34,6 +35,41 @@ const musicGenres = [
   { id: "11", name: "Country", color: "#D35400" },
   { id: "12", name: "Other", color: "#7F8C8D" },
 ];
+
+// Helper function to get an icon image for each genre.
+// Adjust the filenames as needed based on your assets folder.
+const getGenreIcon = (genreName) => {
+  const lower = genreName.toLowerCase();
+  switch (lower) {
+    case "pop":
+      return require("../assets/icons/pop.png");
+    case "rap":
+      return require("../assets/icons/rap.png");
+    case "acoustic":
+      return require("../assets/icons/acoustic.png");
+    case "lofi":
+      return require("../assets/icons/lofi.png");
+    case "r&b":
+    case "rnb":
+      return require("../assets/icons/rnb.png");
+    case "rock":
+      return require("../assets/icons/rock.png");
+    case "electronic":
+      return require("../assets/icons/electronic.png");
+    case "alternative":
+      return require("../assets/icons/alternative.png");
+    case "jazz":
+      return require("../assets/icons/jazz.png");
+    case "trap":
+      return require("../assets/icons/trap.png");
+    case "country":
+      return require("../assets/icons/country.png");
+    case "other":
+      return require("../assets/icons/other.png");
+    default:
+      return null;
+  }
+};
 
 export default function Search() {
   const [playlists, setPlaylists] = useState([]);
@@ -81,20 +117,20 @@ export default function Search() {
   return (
     <ThemedScreen style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.searchBarContainer}>
-      <TextInput
-        style={[styles.searchBar, { color: "#000" }]}
-        placeholder="Search for something"
-        placeholderTextColor="#888"
-        value={query}
-        onChangeText={handleSearch}
-      />
+        <TextInput
+          style={[styles.searchBar, { color: "#000" }]}
+          placeholder="Search for something"
+          placeholderTextColor="#888"
+          value={query}
+          onChangeText={handleSearch}
+        />
         {query ? (
           <TouchableOpacity style={styles.searchIcon} onPress={clearSearch}>
             <Text style={{ fontSize: 18, color: "#000" }}>✕</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={styles.searchIcon}>
-          <Ionicons name="search-outline" size={18} color="#000" />
+            <Ionicons name="search-outline" size={18} color="#000" />
           </TouchableOpacity>
         )}
       </View>
@@ -105,50 +141,52 @@ export default function Search() {
           keyExtractor={(item) => item.songId.toString()}
           renderItem={({ item }) => <SongCard song={item} />}
           ListEmptyComponent={
-            <Text style={[styles.emptyText, { color: "#000" }]}>
-              No results found
-            </Text>
+            <Text style={[styles.emptyText, { color: "#000" }]}>No results found</Text>
           }
         />
       ) : (
         <ScrollView>
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>
-              Playlists
-            </Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Playlists</Text>
             {loading ? (
               <ActivityIndicator size="large" color={theme.text} />
             ) : (
               <ScrollView horizontal>
                 {playlists.slice(0, 10).map((playlist) => (
-                <PlayList
-                key={playlist.id}
-                title={playlist.title || playlist.name}
-                playlistId={playlist.id}
-                songs={playlist.songs || []}
-                image={{ uri: playlist.image }}
-                style={{ width: 140, marginRight: 10 }}
-                textStyle={{ color: theme.text }}  
-              />
-            ))}
+                  <PlayList
+                    key={playlist.id}
+                    title={playlist.title || playlist.name}
+                    playlistId={playlist.id}
+                    songs={playlist.songs || []}
+                    image={{ uri: playlist.image }}
+                    style={{ width: 140, marginRight: 10 }}
+                    textStyle={{ color: theme.text }}
+                  />
+                ))}
               </ScrollView>
             )}
           </View>
 
           <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>
-              Browse by Genre
-            </Text>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>Browse by Genre</Text>
             <View style={styles.browseGrid}>
-              {musicGenres.map((genre) => (
-                <TouchableOpacity
-                  key={genre.id}
-                  style={[styles.categoryCard, { backgroundColor: genre.color }]}
-                  onPress={() => openGenrePage(genre.name)}
-                >
-                  <Text style={styles.categoryName}>{genre.name}</Text>
-                </TouchableOpacity>
-              ))}
+              {musicGenres.map((genre) => {
+                const icon = getGenreIcon(genre.name);
+                return (
+                  <TouchableOpacity
+                    key={genre.id}
+                    style={[styles.categoryCard, { backgroundColor: genre.color }]}
+                    onPress={() => openGenrePage(genre.name)}
+                  >
+                    <View style={styles.genreRow}>
+                      <Text style={styles.categoryName}>{genre.name}</Text>
+                      {icon && (
+                        <Image source={icon} style={styles.genreIcon} />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
         </ScrollView>
@@ -230,6 +268,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "90%",
     margin: "auto",
+    marginBottom: 60,
   },
   categoryCard: {
     width: "48%",
@@ -237,18 +276,25 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 12,
     padding: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
     overflow: "hidden",
   },
-  categoryContent: {
+  genreRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     flex: 1,
-    justifyContent: "center",
+    paddingHorizontal: 10,
   },
   categoryName: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+    textAlign: "left",
+  },
+  genreIcon: {
+    width: 80,
+    height: 80,
+    resizeMode: "contain",
   },
   categorySubtext: {
     color: "#fff",
