@@ -177,7 +177,7 @@ export const themes = {
     secondary: "#1DB954",
     text: "#FFFFFF",
     border: "#149414",
-    icon: "#00FF00",
+    icon: "#1DB954",
   }),
   bloodMoon: createTheme({
     name: "The Blood Moon",
