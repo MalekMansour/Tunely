@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import ThemedScreen from "../components/ThemedScreen";
 export default function SettingsScreen({ navigation }) {
   const [isPrivate, setIsPrivate] = useState(false);
   const { theme } = useTheme();
-  const { chatbotVisible, setChatbotVisible } = useChatbot(); 
+  const { chatbotVisible, setChatbotVisible } = useChatbot();
 
   const handleDeleteAccount = () => {
     Alert.alert(
@@ -44,14 +44,9 @@ export default function SettingsScreen({ navigation }) {
       onPress: () => navigation.navigate("ThemeSettings"),
     },
     {
-      label: `ChatBot Buddy: ${chatbotVisible ? "On" : "Off"}`, // ✅ dynamic label
+      label: `ChatBot Buddy: ${chatbotVisible ? "On" : "Off"}`,
       icon: chatbotVisible ? "chatbubbles" : "chatbubbles-outline",
-      onPress: () => setChatbotVisible(!chatbotVisible), // ✅ toggle
-    },
-    {
-      label: "Audio Quality",
-      icon: "musical-notes-outline",
-      onPress: () => navigation.navigate("AudioQuality"),
+      onPress: () => setChatbotVisible(!chatbotVisible),
     },
     {
       label: "Notifications",
@@ -148,6 +143,10 @@ export default function SettingsScreen({ navigation }) {
             DELETE ACCOUNT
           </Text>
         </TouchableOpacity>
+
+        <Text style={{ color: theme.text, fontSize: 12, marginTop: 20 }}>
+          App Version: Early Access 0.3.1
+        </Text>
       </ScrollView>
     </ThemedScreen>
   );
