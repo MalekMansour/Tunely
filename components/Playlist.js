@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import { playlistService } from "../services/playlistService";
+import { useTheme } from "../context/ThemeContext";
 
 const defaultCoverImage = require('../assets/note.jpg');
 
 const PlayList = ({ title, playlistId, songs: initialSongs = [], image, style, onDelete }) => {
   const navigation = useNavigation();
   const [songs, setSongs] = useState(initialSongs);
+  const { theme } = useTheme();
   
   useEffect(() => {
     const loadPlaylist = async () => {
@@ -85,7 +87,7 @@ const PlayList = ({ title, playlistId, songs: initialSongs = [], image, style, o
       style={[styles.container, style]} 
       onPress={handlePress}
       onLongPress={handleLongPress}
-      delayLongPress={500} // Half second hold to trigger
+      delayLongPress={500}
     >
       <View style={styles.playlistCoverGrid}>
         <View style={styles.playlistCoverRow}>
@@ -98,16 +100,17 @@ const PlayList = ({ title, playlistId, songs: initialSongs = [], image, style, o
         </View>
       </View>
       
-      <Text style={styles.titleText} numberOfLines={1}>{title}</Text>
+      <Text style={[styles.titleText, { color: theme.text }]} numberOfLines={1}>
+        {title}
+      </Text>
     </TouchableOpacity>
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'transparent',
-    borderRadius: 10,
+    borderRadius: 0,
     marginHorizontal: 10,
     marginVertical: 8,
     overflow: 'hidden',
@@ -141,7 +144,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   titleText: {
-    color: '#fff',
+    color: '#fff', 
     fontSize: 14,
     fontWeight: 'bold',
     marginBottom: 2,
