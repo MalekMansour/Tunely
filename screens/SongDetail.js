@@ -18,7 +18,8 @@ import { useAudio } from "../context/AudioContext";
 import { likesService } from "../services/likesService";
 import { auth } from "../Utility/firebaseConfig";
 import { styles } from "../styles";
-import { useTheme } from "../context/ThemeContext"; // get theme
+import { useTheme } from "../context/ThemeContext";
+
 
 const defaultCoverImage = require("../assets/note.jpg");
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -30,7 +31,7 @@ export default function SongDetailScreen({ route }) {
   const translateY = useRef(new Animated.Value(0)).current;
 
   const { currentSong, isPlaying, playNextSong, playPreviousSong, playlist } = useAudio();
-  const { theme } = useTheme(); // theme with background, text, border, etc.
+  const { theme, opacity  } = useTheme(); 
 
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(song.likes || 0);
@@ -150,6 +151,7 @@ export default function SongDetailScreen({ route }) {
             transform: [{ translateY }],
             borderWidth: 1,
             backgroundColor: theme.background,
+            opacity: opacity,
             borderColor: theme.border,
             shadowColor: theme.border,
             shadowOffset: { width: 0, height: 0 },
