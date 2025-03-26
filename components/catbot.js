@@ -3,6 +3,7 @@ import { Animated, StyleSheet, Dimensions, TouchableOpacity } from "react-native
 import { Ionicons } from "@expo/vector-icons";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
+import { useTheme } from "../context/ThemeContext";
 
 const { width, height } = Dimensions.get("window");
 const BUTTON_SIZE = 80;
@@ -19,6 +20,7 @@ const DEFAULT_X = MAX_X;
 const DEFAULT_Y = height - BUTTON_SIZE - BOTTOM_MARGIN;
 
 export default function CatBot() {
+  const { theme } = useTheme();
   const translateX = useRef(new Animated.Value(DEFAULT_X)).current;
   const translateY = useRef(new Animated.Value(DEFAULT_Y)).current;
   const lastPositionRef = useRef({ x: DEFAULT_X, y: DEFAULT_Y });
@@ -98,7 +100,7 @@ export default function CatBot() {
           { transform: [{ translateX }, { translateY }] },
         ]}
       >
-        <TouchableOpacity onPress={openChat} style={styles.button}>
+        <TouchableOpacity onPress={openChat} style={[styles.button, { backgroundColor: theme.secondary }]}>
           <Ionicons name="logo-octocat" size={40} color="#fff" />
         </TouchableOpacity>
       </Animated.View>
@@ -115,7 +117,6 @@ const styles = StyleSheet.create({
     width: BUTTON_SIZE,
     height: BUTTON_SIZE,
     borderRadius: BUTTON_SIZE / 2,
-    backgroundColor: "#182952",
     alignItems: "center",
     justifyContent: "center",
     elevation: 5,
