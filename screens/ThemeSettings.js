@@ -76,7 +76,7 @@ export default function ThemeSettings({ navigation }) {
           />
 
           <View style={styles.sliderMarksContainer}>
-            {["10%", "100%"].map(
+            {["0%", "100%"].map(
               (label, index) => (
                 <Text
                   key={index}
