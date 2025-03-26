@@ -1,12 +1,18 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Animated } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { useAudio } from '../context/AudioContext';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from 'expo-blur'; 
-
-// import { LinearGradient } from 'expo-linear-gradient'; 
+import { BlurView } from 'expo-blur';
+import { likesService } from "../services/likesService";
+import { auth } from "../Utility/firebaseConfig";
 
 const defaultCoverImage = require('../assets/note.jpg');
 
@@ -16,59 +22,60 @@ export default function FloatingPlayer() {
   const routes = useNavigationState(state => state?.routes);
   const currentRoute = routes?.[routes.length - 1];
 
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeLoading, setLikeLoading] = useState(false);
 
-  if (!currentSong || 
-    currentRoute?.name === 'SongDetail' || 
-    currentRoute?.name === 'CommentScreen' || 
-    currentRoute?.name === 'Profile' || 
-    currentRoute?.name === 'Upload' ||
-    currentRoute?.name === 'Login' ||
-    currentRoute?.name === 'LoginFormPage' ||
-    currentRoute?.name === 'SignUp' ||
-    currentRoute?.name === 'Settings' ||
-    currentRoute?.name === 'PrivacySettings' ||
-    currentRoute?.name === 'Notifications' ||
-    currentRoute?.name === 'AdminPage' ||
-    currentRoute?.name === 'AuthCheck' ||
-    currentRoute?.name === 'ThemeSettings'
-) return null;
+  useEffect(() => {
+    const checkLike = async () => {
+      if (!currentSong) return;
+      const user = auth.currentUser;
+      if (!user) return;
+      const result = await likesService.checkLiked(currentSong.songId);
+      setIsLiked(result.liked);
+    };
+    checkLike();
+  }, [currentSong]);
+
+  const toggleLike = async () => {
+    if (likeLoading || !currentSong) return;
+    setLikeLoading(true);
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
+      const result = await likesService.toggleLike(currentSong.songId);
+      setIsLiked(result.action === "liked");
+    } catch (e) {
+      console.error("Toggle like error:", e);
+    } finally {
+      setLikeLoading(false);
+    }
+  };
 
   const handlePress = () => {
     navigation.navigate('SongDetail', { song: currentSong });
   };
 
-  const handleCommentPress = (event) => {
-    event.stopPropagation();
+  const handleCommentPress = (e) => {
+    e.stopPropagation();
     if (currentSong) {
-      navigation.navigate('CommentScreen', { 
-        song: currentSong 
-      });
+      navigation.navigate('CommentScreen', { song: currentSong });
     }
   };
 
+  const hiddenScreens = [
+    "SongDetail", "CommentScreen", "Profile", "Upload", "Login",
+    "LoginFormPage", "SignUp", "Settings", "PrivacySettings",
+    "Notifications", "AdminPage", "AuthCheck", "ThemeSettings"
+  ];
+
+  if (!currentSong || hiddenScreens.includes(currentRoute?.name)) return null;
+
   return (
-    <TouchableOpacity 
-      style={styles.container} 
-      onPress={handlePress}
-      activeOpacity={0.9}
-    >
-    {/* <LinearGradient
-    colors={['#000428', '#004e92']}
-    start={{ x: 0, y: 0 }}
-    end={{ x: 1, y: 1 }}
-    style={styles.gradientBackground}
-    /> // gradient instead of blurview?? */} 
-      <BlurView
-        intensity={80}
-        tint="dark"
-        style={styles.blurContainer}
-      />
+    <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={0.9}>
+      <BlurView intensity={80} tint="dark" style={styles.blurContainer} />
       <View style={styles.content}>
         <Image
-          source={currentSong.song_photo_url 
-            ? { uri: currentSong.song_photo_url }
-            : defaultCoverImage
-          }
+          source={currentSong.song_photo_url ? { uri: currentSong.song_photo_url } : defaultCoverImage}
           style={styles.coverArt}
         />
         <View style={styles.songInfo}>
@@ -79,27 +86,28 @@ export default function FloatingPlayer() {
             {currentSong.artistName}
           </Text>
         </View>
+
         <View style={styles.controls}>
-          <TouchableOpacity 
-            onPress={handleCommentPress}
-            style={styles.commentButton}
-          >
+          <TouchableOpacity onPress={handleCommentPress} style={styles.controlButton}>
             <Ionicons name="chatbubble-ellipses-outline" size={24} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity 
-            onPress={() => isPlaying ? pauseSound() : playSound(currentSong)}
-            style={styles.playButton}
-          >
-            <Icon 
-              name={isPlaying ? 'pause' : 'play-arrow'} 
-              size={32} 
-              color="#fff" 
+
+          <TouchableOpacity onPress={toggleLike} style={styles.controlButton} disabled={likeLoading}>
+            <Ionicons
+              name={isLiked ? "heart" : "heart-outline"}
+              size={24}
+              color={isLiked ? "#ff375f" : "#fff"}
             />
           </TouchableOpacity>
-          <TouchableOpacity 
-            onPress={playNextSong}
-            style={styles.nextButton}
+
+          <TouchableOpacity
+            onPress={() => isPlaying ? pauseSound() : playSound(currentSong)}
+            style={styles.controlButton}
           >
+            <Icon name={isPlaying ? 'pause' : 'play-arrow'} size={32} color="#fff" />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={playNextSong} style={styles.controlButton}>
             <Icon name="skip-next" size={32} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -112,7 +120,7 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     bottom: 72,
-    left: 8, 
+    left: 8,
     right: 8,
     height: 64,
     borderRadius: 15,
@@ -126,19 +134,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  gradientBackground: { 
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
   blurContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    ...StyleSheet.absoluteFillObject,
   },
   content: {
     flex: 1,
@@ -169,17 +166,10 @@ const styles = StyleSheet.create({
   controls: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8, 
+    gap: 8,
   },
-  commentButton: {
+  controlButton: {
     padding: 4,
-    marginRight: 8,
+    marginHorizontal: 4,
   },
-  playButton: {
-    marginRight: 8,
-    padding: 4,
-  },
-  nextButton: {
-    padding: 4,
-  }
 });
