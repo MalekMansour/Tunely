@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, TouchableOpacity, Alert, TextInput, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity, Alert, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../Utility/firebaseConfig";
@@ -9,7 +9,7 @@ import blankProfilePic from "../assets/blank_profile.png";
 import { useUserData } from "../hooks/useUserData";
 import { useTheme } from "../context/ThemeContext";
 import ThemedScreen from "../components/ThemedScreen";
-import { useAudio } from '../context/AudioContext';
+import { useAudio } from "../context/AudioContext";
 
 export default function ProfileScreen({ navigation }) {
   const [isGoogleUser, setIsGoogleUser] = useState(false);
@@ -44,27 +44,6 @@ export default function ProfileScreen({ navigation }) {
     } catch (error) {
       Alert.alert("Error", "Failed to update profile picture.");
     }
-  };
-
-  const handleChangeUsername = () => {
-    Alert.prompt(
-      "Change Username",
-      "Enter your new username:",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "OK",
-          onPress: async (newUsername) => {
-            if (newUsername) {
-              const userId = auth.currentUser.uid;
-              await updateUserData(userId, { username: newUsername });
-            }
-          },
-        },
-      ],
-      "plain-text",
-      username
-    );
   };
 
   const handleLogout = () => {
@@ -104,9 +83,6 @@ export default function ProfileScreen({ navigation }) {
         />
         <View style={styles.usernameContainer}>
           <Text style={[styles.username, { color: theme.text }]}>{username || "User"}</Text>
-          <TouchableOpacity onPress={handleChangeUsername}>
-            <Ionicons name="pencil" size={20} color={theme.text} style={styles.editIcon} />
-          </TouchableOpacity>
         </View>
       </View>
 
@@ -174,9 +150,6 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 20,
-  },
-  editIcon: {
-    marginLeft: 8,
   },
   separator: {
     height: 2,
