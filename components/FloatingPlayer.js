@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -9,10 +9,7 @@ import {
 import { useNavigation, useNavigationState } from '@react-navigation/native';
 import { useAudio } from '../context/AudioContext';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from 'expo-blur';
-import { likesService } from "../services/likesService";
-import { auth } from "../Utility/firebaseConfig";
 
 const defaultCoverImage = require('../assets/note.jpg');
 
@@ -22,46 +19,6 @@ export default function FloatingPlayer() {
   const routes = useNavigationState(state => state?.routes);
   const currentRoute = routes?.[routes.length - 1];
 
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeLoading, setLikeLoading] = useState(false);
-
-  useEffect(() => {
-    const checkLike = async () => {
-      if (!currentSong) return;
-      const user = auth.currentUser;
-      if (!user) return;
-      const result = await likesService.checkLiked(currentSong.songId);
-      setIsLiked(result.liked);
-    };
-    checkLike();
-  }, [currentSong]);
-
-  const toggleLike = async () => {
-    if (likeLoading || !currentSong) return;
-    setLikeLoading(true);
-    try {
-      const user = auth.currentUser;
-      if (!user) return;
-      const result = await likesService.toggleLike(currentSong.songId);
-      setIsLiked(result.action === "liked");
-    } catch (e) {
-      console.error("Toggle like error:", e);
-    } finally {
-      setLikeLoading(false);
-    }
-  };
-
-  const handlePress = () => {
-    navigation.navigate('SongDetail', { song: currentSong });
-  };
-
-  const handleCommentPress = (e) => {
-    e.stopPropagation();
-    if (currentSong) {
-      navigation.navigate('CommentScreen', { song: currentSong });
-    }
-  };
-
   const hiddenScreens = [
     "SongDetail", "CommentScreen", "Profile", "Upload", "Login",
     "LoginFormPage", "SignUp", "Settings", "PrivacySettings",
@@ -69,6 +26,10 @@ export default function FloatingPlayer() {
   ];
 
   if (!currentSong || hiddenScreens.includes(currentRoute?.name)) return null;
+
+  const handlePress = () => {
+    navigation.navigate('SongDetail', { song: currentSong });
+  };
 
   return (
     <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={0.9}>
@@ -88,18 +49,6 @@ export default function FloatingPlayer() {
         </View>
 
         <View style={styles.controls}>
-          <TouchableOpacity onPress={handleCommentPress} style={styles.controlButton}>
-            <Ionicons name="chatbubble-ellipses-outline" size={24} color="#fff" />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={toggleLike} style={styles.controlButton} disabled={likeLoading}>
-            <Ionicons
-              name={isLiked ? "heart" : "heart-outline"}
-              size={24}
-              color={isLiked ? "#ff375f" : "#fff"}
-            />
-          </TouchableOpacity>
-
           <TouchableOpacity
             onPress={() => isPlaying ? pauseSound() : playSound(currentSong)}
             style={styles.controlButton}
