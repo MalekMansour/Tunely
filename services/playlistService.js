@@ -89,6 +89,28 @@ export const playlistService = {
     }
   },
 
+  // Rename playlist
+  renamePlaylist: async (playlistId, newTitle) => {
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${API_URL}/playlists/${playlistId}/rename`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({newTitle}),
+      });
+  
+      if (!response.ok) {
+        const errorBody = await response.text(); // To get the response body
+        console.error('Error response:', errorBody);
+        throw new Error('Failed to rename playlist');
+    }
+      return await response.json();
+    } catch (error) {
+      console.error('Rename playlist error:', error);
+      throw error;
+    }
+  },  
+
   // Fetch available songs for modal
   fetchAvailableSongsForModal: async () => {
     try {

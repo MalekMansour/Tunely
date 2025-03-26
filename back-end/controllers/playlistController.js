@@ -79,6 +79,25 @@ const playlistController = {
     }
   },
 
+  // Function that renames the playlist
+  renamePlaylist: async (req, res) => {
+    try {
+      const { playlistId } = req.params;
+      const { newTitle } = req.body;
+  
+      if (!newTitle) {
+        return res.status(400).json({ error: 'New title is required' });
+      }
+  
+      await PlaylistModel.rename(playlistId, newTitle);
+      res.json({ message: 'Playlist renamed successfully' });
+    } catch (error) {
+      console.error('Error renaming playlist:', error);
+      res.status(500).json({ error: 'Failed to rename playlist' });
+    }
+  },
+  
+
   // Fetch songs to show the user
  getUserSongs: async(req, res) => {
     const { playlistId } = req.params
