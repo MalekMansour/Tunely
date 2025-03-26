@@ -101,7 +101,7 @@ export default function CommentScreen({ route }) {
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
-        keyboardVerticalOffset={70}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
         <FlatList
           data={comments}
@@ -112,34 +112,36 @@ export default function CommentScreen({ route }) {
         <View style={styles.inputContainer}>
           {replyingTo && (
             <View style={styles.replyingToContainer}>
-              <Text style={styles.replyingToText}>Replying to a comment...</Text>
+              <Text style={styles.replyingToText}>Replying to a comment</Text>
               <TouchableOpacity onPress={cancelReply} style={styles.cancelReplyButton}>
                 <Text style={styles.cancelReplyText}>Cancel</Text>
               </TouchableOpacity>
             </View>
           )}
-          <TextInput
-            ref={inputRef}
-            style={styles.input}
-            value={comment}
-            onChangeText={setComment}
-            placeholder={replyingTo ? "Add a reply..." : "Add a comment..."}
-            placeholderTextColor="#666"
-            multiline
-            returnKeyType="done"
-            onSubmitEditing={Keyboard.dismiss}
-          />
-          <TouchableOpacity
-            style={[styles.submitButton, (isSubmitting || !comment.trim()) && styles.submitButtonDisabled]}
-            onPress={handleSubmitComment}
-            disabled={isSubmitting || !comment.trim()}
-          >
-            {isSubmitting ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <Text style={styles.submitText}>Post</Text>
-            )}
-          </TouchableOpacity>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              ref={inputRef}
+              style={styles.input}
+              value={comment}
+              onChangeText={setComment}
+              placeholder={replyingTo ? "Add a reply..." : "Add a comment..."}
+              placeholderTextColor="#666"
+              multiline={false}
+              returnKeyType="send"
+              onSubmitEditing={handleSubmitComment}
+            />
+            <TouchableOpacity
+              style={[styles.submitButton, (isSubmitting || !comment.trim()) && styles.submitButtonDisabled]}
+              onPress={handleSubmitComment}
+              disabled={isSubmitting || !comment.trim()}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <Text style={styles.submitText}>Send</Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -147,23 +149,108 @@ export default function CommentScreen({ route }) {
 }
 
 const styles = StyleSheet.create({
-  mainContainer: { flex: 1, backgroundColor: '#000' },
-  commentItem: { padding: 16, borderBottomWidth: 0.5, borderBottomColor: '#333' },
-  commentWrapper: { flexDirection: 'row', alignItems: 'flex-start' },
-  profilePic: { width: 30, height: 30, borderRadius: 15 },
-  commentContent: { marginLeft: 8, flex: 1 },
-  username: { color: '#fff', fontWeight: '600', fontSize: 14 },
-  commentText: { color: '#fff', fontSize: 14, lineHeight: 20 },
-  replyText: { color: '#007AFF', fontSize: 12, marginTop: 4 },
-  replyItem: { marginLeft: 30, borderLeftWidth: 1, borderLeftColor: '#333', paddingLeft: 10 },
-  replyingToContainer: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 14, marginBottom: 6 },
-  replyingToText: { color: '#999', fontSize: 14 },
-  cancelReplyButton: { padding: 5 },
-  cancelReplyText: { color: '#007AFF', fontSize: 14 },
-  inputContainer: { flexDirection: 'row', padding: 14, borderTopWidth: 0.5, borderTopColor: '#333', backgroundColor: '#000' },
-  input: { flex: 1, backgroundColor: '#1a1a1a', borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, color: '#fff', fontSize: 16 },
-  submitButton: { backgroundColor: '#007AFF', paddingHorizontal: 20, paddingVertical: 10, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
-  submitText: { color: '#fff', fontWeight: '600' },
-  submitButtonDisabled: { backgroundColor: '#333', opacity: 0.6 },
-  emptyText: { color: '#999', textAlign: 'center', padding: 20 },
+  mainContainer: { 
+    flex: 1, 
+    backgroundColor: '#000' 
+  },
+  commentItem: { 
+    padding: 16, 
+    borderBottomWidth: 0.5, 
+    borderBottomColor: '#333' 
+  },
+  commentWrapper: { 
+    flexDirection: 'row', 
+    alignItems: 'flex-start' 
+  },
+  profilePic: { 
+    width: 30, 
+    height: 30, 
+    borderRadius: 15 
+  },
+  commentContent: { 
+    marginLeft: 8, 
+    flex: 1 
+  },
+  username: { 
+    color: '#fff', 
+    fontWeight: '600', 
+    fontSize: 14 
+  },
+  commentText: { 
+    color: '#fff', 
+    fontSize: 14, 
+    lineHeight: 20 
+  },
+  replyText: { 
+    color: '#007AFF', 
+    fontSize: 12, 
+    marginTop: 4 
+  },
+  replyItem: { 
+    marginLeft: 30, 
+    borderLeftWidth: 1, 
+    borderLeftColor: '#333', 
+    paddingLeft: 10 
+  },
+  replyingToContainer: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingHorizontal: 14, 
+    paddingTop: 8 
+  },
+  replyingToText: { 
+    color: '#999', 
+    fontSize: 12 
+  },
+  cancelReplyButton: { 
+    padding: 5 
+  },
+  cancelReplyText: { 
+    color: '#007AFF', 
+    fontSize: 12 
+  },
+  inputContainer: { 
+    borderTopWidth: 0.5, 
+    borderTopColor: '#333', 
+    backgroundColor: '#000' 
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  input: { 
+    flex: 1,
+    backgroundColor: '#1a1a1a', 
+    borderRadius: 20, 
+    paddingHorizontal: 16, 
+    paddingVertical: 8, 
+    color: '#fff', 
+    fontSize: 16,
+    maxHeight: 100
+  },
+  submitButton: { 
+    backgroundColor: '#007AFF', 
+    paddingHorizontal: 15, 
+    paddingVertical: 8, 
+    borderRadius: 20, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    marginLeft: 10
+  },
+  submitText: { 
+    color: '#fff', 
+    fontWeight: '600' 
+  },
+  submitButtonDisabled: { 
+    backgroundColor: '#333', 
+    opacity: 0.6 
+  },
+  emptyText: { 
+    color: '#999', 
+    textAlign: 'center', 
+    padding: 20 
+  },
 });
