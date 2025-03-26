@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     width: "90%",
     margin: "auto",
-    marginBottom: 60,
+    marginBottom: 50,
   },
   categoryCard: {
     width: "48%",
@@ -292,9 +292,10 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   genreIcon: {
-    width: 80,
-    height: 80,
+    width: 70,
+    height: 70,
     resizeMode: "contain",
+    marginLeft: 5,
   },
   categorySubtext: {
     color: "#fff",
