@@ -6,6 +6,8 @@ const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
   const [themeName, setThemeName] = useState("dark");
+  const [opacity, setOpacity] = useState(1); 
+
 
   useEffect(() => {
     const loadTheme = async () => {
@@ -33,7 +35,7 @@ export const ThemeProvider = ({ children }) => {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme: themes[themeName], themeName, changeTheme }}>
+    <ThemeContext.Provider value={{ theme: themes[themeName], themeName, changeTheme, opacity, setOpacity }}>
       {children}
     </ThemeContext.Provider>
   );
