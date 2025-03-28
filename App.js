@@ -39,7 +39,6 @@ import GenreSongs from "./screens/GenreSongs";
 import CatBot from "./components/catbot";
 import BotChat from "./screens/BotCat";
 import ThemeSettings from "./screens/ThemeSettings";
-// NEW: Import ArtistPage
 import ArtistPage from "./screens/ArtistPage";
 
 const Tab = createBottomTabNavigator();
