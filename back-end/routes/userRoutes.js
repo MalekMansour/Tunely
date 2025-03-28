@@ -14,5 +14,4 @@ router.get('/me', verifyToken, userController.getUserProfile);
 // Get user's liked songs
 router.get('/me/likes', verifyToken, userController.getLikedSongs);
 
-
 module.exports = router;
