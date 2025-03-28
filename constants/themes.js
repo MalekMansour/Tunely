@@ -170,13 +170,13 @@ export const themes = {
     border: "#FF6000",
     icon: "#F59C00",
   }),
-  hacker: createTheme({
+  spotTheMusic: createTheme({
     name: "Spot the Music",
     background: "#191414",
     primary: "#1DB954",
     secondary: "#1DB954",
     text: "#FFFFFF",
-    border: "#149414",
+    border: "#99a9b9",
     icon: "#1DB954",
   }),
   bloodMoon: createTheme({
