@@ -39,6 +39,8 @@ import GenreSongs from "./screens/GenreSongs";
 import CatBot from "./components/catbot";
 import BotChat from "./screens/BotCat";
 import ThemeSettings from "./screens/ThemeSettings";
+// NEW: Import ArtistPage
+import ArtistPage from "./screens/ArtistPage";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -47,10 +49,12 @@ function ScreenWithTopBar({ navigation, children, title }) {
   const { theme } = useTheme();
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
-      <View style={[styles.topBar, { backgroundColor: theme.background}]}>
-        <Text style={[styles.title,{ color: theme.text , marginTop: 30 }]}>{title}</Text>
+      <View style={[styles.topBar, { backgroundColor: theme.background }]}>
+        <Text style={[styles.title, { color: theme.text, marginTop: 30 }]}>
+          {title}
+        </Text>
         <TouchableOpacity
-          style={[styles.profileButton, {marginTop: 30}] }
+          style={[styles.profileButton, { marginTop: 30 }]}
           onPress={() => navigation.navigate("Profile")}
         >
           <TopBarProfileIcon size={30} />
@@ -134,9 +138,12 @@ function TabNavigator() {
         ),
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
-          if (route.name === "Home") iconName = focused ? "home" : "home-outline";
-          else if (route.name === "Search") iconName = focused ? "search" : "search-outline";
-          else if (route.name === "Library") iconName = focused ? "library" : "library-outline";
+          if (route.name === "Home")
+            iconName = focused ? "home" : "home-outline";
+          else if (route.name === "Search")
+            iconName = focused ? "search" : "search-outline";
+          else if (route.name === "Library")
+            iconName = focused ? "library" : "library-outline";
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
@@ -173,14 +180,14 @@ export default function App() {
                     screenOptions={{ headerShown: false }}
                   >
                     <Stack.Screen name="Home" component={TabNavigator} />
-                    <Stack.Screen 
-                      name="SongDetail" 
+                    <Stack.Screen
+                      name="SongDetail"
                       component={SongDetailScreen}
                       options={{
-                      presentation: "transparentModal",
-                      cardStyle: { backgroundColor: "transparent" },
+                        presentation: "transparentModal",
+                        cardStyle: { backgroundColor: "transparent" },
                       }}
-                        />
+                    />
                     <Stack.Screen name="CommentScreen" component={CommentScreen} />
                     <Stack.Screen name="Profile" component={ProfileScreen} />
                     <Stack.Screen name="Settings" component={SettingsScreen} />
@@ -193,6 +200,8 @@ export default function App() {
                     <Stack.Screen name="AdminPage" component={AdminPage} />
                     <Stack.Screen name="AuthCheck" component={AdminCheck} />
                     <Stack.Screen name="BotCat" component={BotChat} />
+                    {/* Added ArtistPage navigation */}
+                    <Stack.Screen name="ArtistPage" component={ArtistPage} />
                   </Stack.Navigator>
 
                   <FloatingPlayer />
