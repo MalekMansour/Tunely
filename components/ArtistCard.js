@@ -29,7 +29,7 @@ const ArtistCard = ({ artist, isOwnContent }) => {
       >
         <Image
           source={artist.profilePicture ? { uri: artist.profilePicture } : defaultProfileImage}
-          style={styles.songCardImage} // Reusing the image style from SongCard
+          style={styles.songCardImage} 
         />
         <View style={styles.songCardInfo}>
           <Text style={[styles.songCardTitle, { color: theme.text }]}>
