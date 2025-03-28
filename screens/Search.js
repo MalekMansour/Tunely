@@ -50,7 +50,6 @@ const getGenreIcon = (genreName) => {
     case "lofi":
       return require("../assets/icons/lofi.png");
     case "r&b":
-    case "rnb":
       return require("../assets/icons/rnb.png");
     case "rock":
       return require("../assets/icons/rock.png");
