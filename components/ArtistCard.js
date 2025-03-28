@@ -4,45 +4,41 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useTheme } from "../context/ThemeContext";
-import ThemedView from "../components/ThemedScreen";   
+import ThemedView from "../components/ThemedScreen";
 
 import { styles } from "../styles";
-import { auth } from "../Utility/firebaseConfig";
 
-const defaultProfileImage = require("../assets/profile.png");  // Default image if no profile picture
+const defaultProfileImage = require("../assets/profile.png");
 
 const ArtistCard = ({ artist, isOwnContent }) => {
   const navigation = useNavigation();
   const { theme } = useTheme();
 
   const handlePress = () => {
-    // Navigate to the Artist's page, passing the artist's name and profile picture
     navigation.navigate("ArtistPage", {
       artistName: artist.artistName,
-      profilePicture: artist.profilePicture || defaultProfileImage,  // Fallback to default image
+      profilePicture: artist.profilePicture || defaultProfileImage,
     });
   };
 
   return (
     <ThemedView style={{ marginVertical: 4 }}>
       <TouchableOpacity
-        style={styles.artistCard}
+        style={[styles.songCard]} // Using SongCard's style for consistency
         onPress={handlePress}
       >
         <Image
           source={artist.profilePicture ? { uri: artist.profilePicture } : defaultProfileImage}
-          style={styles.artistCardImage}
+          style={styles.songCardImage} // Reusing the image style from SongCard
         />
-        <View style={styles.artistCardInfo}>
-          {/* Apply the theme color here */}
-          <Text style={[styles.artistCardName, { color: theme.text }]}>
+        <View style={styles.songCardInfo}>
+          <Text style={[styles.songCardTitle, { color: theme.text }]}>
             {artist.artistName}
           </Text>
-          <Text style={[styles.artistCardBio, { color: theme.text }]}>
+          <Text style={[styles.songCardArtist, { color: theme.text }]}>
             {artist.bio || "No bio available."}
           </Text>
         </View>
-
         {isOwnContent && (
           <TouchableOpacity
             onPress={() => {}}
