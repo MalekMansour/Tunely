@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { useTheme } from "../context/ThemeContext"; // for colors
+import { useTheme } from "../context/ThemeContext"; 
 import ThemedView from "../components/ThemedScreen";   
 
 import { styles } from "../styles";
