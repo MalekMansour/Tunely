@@ -79,6 +79,10 @@ export default function Search() {
   const [results, setResults] = useState({ songs: [], artists: [] });
   const [isSearching, setIsSearching] = useState(false);
 
+  // Pagination state for songs
+  const [songPage, setSongPage] = useState(1);
+  const songsPerPage = 5;
+
   // THEME USAGE
   const { theme } = useTheme();
 
@@ -103,9 +107,8 @@ export default function Search() {
         const artistMap = {};
         songs.forEach((song) => {
           if (song.artistName && !artistMap[song.artistName]) {
-            // Using song.artistName and optionally song.artistProfilePic if available
             artistMap[song.artistName] = {
-              artistId: song.userId || song.artistId || song.artistName,
+              artistId: song.user_id || song.artistId || song.artistName,
               artistName: song.artistName,
               profilePicture: song.artistProfilePic || null,
             };
@@ -113,6 +116,8 @@ export default function Search() {
         });
         const artists = Object.values(artistMap);
         setResults({ songs, artists });
+        // Reset song pagination
+        setSongPage(1);
       } catch (error) {
         console.error("Error searching songs:", error);
         setResults({ songs: [], artists: [] });
@@ -120,6 +125,7 @@ export default function Search() {
     } else {
       setIsSearching(false);
       setResults({ songs: [], artists: [] });
+      setSongPage(1);
     }
   };
 
@@ -127,10 +133,15 @@ export default function Search() {
     setQuery("");
     setResults({ songs: [], artists: [] });
     setIsSearching(false);
+    setSongPage(1);
   };
 
   const openGenrePage = (genre) => {
     navigation.navigate("GenreSongs", { genre });
+  };
+
+  const loadMoreSongs = () => {
+    setSongPage((prevPage) => prevPage + 1);
   };
 
   return (
@@ -138,7 +149,7 @@ export default function Search() {
       <View style={styles.searchBarContainer}>
         <TextInput
           style={[styles.searchBar, { color: "#000" }]}
-          placeholder="Search for something"
+          placeholder="Search for songs, artists, or tags"
           placeholderTextColor="#888"
           value={query}
           onChangeText={handleSearch}
@@ -156,28 +167,44 @@ export default function Search() {
 
       {isSearching ? (
         <View style={styles.resultsList}>
-          {/* Songs Results */}
-          {results.songs && results.songs.length > 0 && (
-            <FlatList
-              data={results.songs}
-              keyExtractor={(item) => item.songId.toString()}
-              renderItem={({ item }) => <SongCard song={item} />}
-              ListEmptyComponent={
-                <Text style={[styles.emptyText, { color: "#000" }]}>No songs found</Text>
-              }
-            />
-          )}
-          {/* Artist Results */}
+          {/* Artist Results Section */}
           {results.artists && results.artists.length > 0 && (
-            <FlatList
-              data={results.artists}
-              keyExtractor={(item) => item.artistId.toString()}
-              horizontal
-              renderItem={({ item }) => <ArtistCard artist={item} />}
-              ListEmptyComponent={
-                <Text style={[styles.emptyText, { color: "#000" }]}>No artists found</Text>
-              }
-            />
+            <>
+              <Text style={[styles.sectionTitle, { color: theme.text, marginLeft: 16 }]}>
+                Artists
+              </Text>
+              <FlatList
+                data={results.artists}
+                keyExtractor={(item) => item.artistId.toString()}
+                horizontal
+                renderItem={({ item }) => <ArtistCard artist={item} />}
+                ListEmptyComponent={
+                  <Text style={[styles.emptyText, { color: "#000" }]}>
+                    No artists found
+                  </Text>
+                }
+              />
+            </>
+          )}
+          {/* Song Results Section */}
+          {results.songs && results.songs.length > 0 && (
+            <>
+              <Text style={[styles.sectionTitle, { color: theme.text, marginLeft: 16 }]}>
+                Songs
+              </Text>
+              <FlatList
+                data={results.songs.slice(0, songPage * songsPerPage)}
+                keyExtractor={(item) => item.songId.toString()}
+                renderItem={({ item }) => <SongCard song={item} />}
+                ListFooterComponent={() =>
+                  results.songs.length > songPage * songsPerPage ? (
+                    <TouchableOpacity onPress={loadMoreSongs} style={styles.loadMoreButton}>
+                      <Text style={[styles.loadMoreText, { color: theme.text }]}>Load More</Text>
+                    </TouchableOpacity>
+                  ) : null
+                }
+              />
+            </>
           )}
         </View>
       ) : (
@@ -267,34 +294,19 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     marginLeft: 18,
   },
-  artistCard: {
-    marginRight: 16,
-    width: 100,
-    alignItems: "center",
-  },
-  artistImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 12,
-    marginBottom: 8,
-  },
-  artistName: {
-    color: "#fff",
+  emptyText: {
+    color: "#888",
     fontSize: 14,
     textAlign: "center",
+    marginTop: 10,
   },
-  playlistCard: {
-    marginRight: 16,
-    width: 160,
+  loadMoreButton: {
+    alignItems: "center",
+    padding: 10,
   },
-  playlistImage: {
-    width: 160,
-    height: 120,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  playlistName: {
-    fontSize: 14,
+  loadMoreText: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
   browseGrid: {
     flexDirection: "row",
@@ -330,74 +342,5 @@ const styles = StyleSheet.create({
     height: 70,
     resizeMode: "contain",
     marginLeft: 5,
-  },
-  categorySubtext: {
-    color: "#fff",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  categoryIconContainer: {
-    width: 60,
-    height: 60,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  categoryIcon: {
-    width: 60,
-    height: 60,
-    resizeMode: "contain",
-  },
-  navbar: {
-    flexDirection: "row",
-    height: 60,
-    backgroundColor: "#0A0E20",
-    borderTopWidth: 0,
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  navItem: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  navIcon: {
-    fontSize: 20,
-    color: "#888",
-    marginBottom: 4,
-  },
-  navText: {
-    fontSize: 12,
-    color: "#888",
-  },
-  activeNavItem: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-  },
-  activeNavIcon: {
-    color: "#fff",
-  },
-  activeNavText: {
-    color: "#fff",
-  },
-  emptyText: {
-    color: "#888",
-    fontSize: 14,
-    textAlign: "center",
-    marginTop: 10,
-  },
-  playlistsContainer: {
-    paddingRight: 10,
-    paddingBottom: 5,
-    flexDirection: "row",
-  },
-  playlistWrap: {
-    width: 300,
-    marginRight: 0,
-  },
-  resultsList: {
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 70,
   },
 });
