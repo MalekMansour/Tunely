@@ -20,7 +20,6 @@ import { auth } from "../Utility/firebaseConfig";
 import { styles } from "../styles";
 import { useTheme } from "../context/ThemeContext";
 
-
 const defaultCoverImage = require("../assets/note.jpg");
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const IMAGE_SIZE = 350;
@@ -31,11 +30,21 @@ export default function SongDetailScreen({ route }) {
   const translateY = useRef(new Animated.Value(0)).current;
 
   const { currentSong, isPlaying, playNextSong, playPreviousSong, playlist } = useAudio();
-  const { theme, opacity  } = useTheme(); 
+  const { theme, opacity } = useTheme(); 
 
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(song.likes || 0);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
+
+  // Navigate to ArtistPage when title or artist name is pressed
+  const handleArtistPress = () => {
+    const artist = {
+      id: song.user_id, // assuming song.user_id is the artist's id
+      name: song.artistName,
+      profilePicture: song.artistProfilePicture ? song.artistProfilePicture : defaultCoverImage,
+    };
+    navigation.navigate("ArtistPage", { artist });
+  };
 
   useEffect(() => {
     if (currentSong && song.songId !== currentSong.songId) {
@@ -178,8 +187,18 @@ export default function SongDetailScreen({ route }) {
               },
             ]}
           />
-          <Text style={[styles.songTitle, { color: theme.text }]}>{song.title}</Text>
-          <Text style={[styles.songArtist, { color: theme.text }]}>{song.artistName}</Text>
+          <Text
+            style={[styles.songTitle, { color: theme.text }]}
+            onPress={handleArtistPress}
+          >
+            {song.title}
+          </Text>
+          <Text
+            style={[styles.songArtist, { color: theme.text }]}
+            onPress={handleArtistPress}
+          >
+            {song.artistName}
+          </Text>
         </View>
 
         <Scrubber />
@@ -208,7 +227,7 @@ export default function SongDetailScreen({ route }) {
               name={isLiked ? "heart" : "heart-outline"}
               size={40}
               style={{ marginTop: 60, marginRight: 30 }}
-              color={isLiked ? "#ff375f" : theme.text} 
+              color={isLiked ? "#ff375f" : theme.text}
             />
           </TouchableOpacity>
         </View>
