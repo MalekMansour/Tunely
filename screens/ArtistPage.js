@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   Image,
 } from "react-native";
 import { songService } from "../services/songService";
@@ -17,11 +16,12 @@ import { useTheme } from "../context/ThemeContext";
 import ThemedScreen from "../components/ThemedScreen";
 
 export default function ArtistPage() {
-  const [songs, setSongs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [description, setDescription] = useState("");
-  const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
+  const [allFilteredSongs, setAllFilteredSongs] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const songsPerPage = 5;
+  const displayedSongs = allFilteredSongs.slice(0, currentPage * songsPerPage);
+  const [loading, setLoading] = useState(true);
+
   const { theme } = useTheme();
   const route = useRoute();
   const navigation = useNavigation();
@@ -38,11 +38,12 @@ export default function ArtistPage() {
       setLoading(true);
       try {
         const allSongs = await songService.getAllSongs();
-        // Filter songs by the passed artistName
+        // Filter songs by artist name (case-insensitive)
         const artistSongs = allSongs.filter(
           (song) => song.artistName.toLowerCase() === artistName.toLowerCase()
         );
-        setSongs(artistSongs.slice(0, 5)); // Show 5 newest songs initially
+        setAllFilteredSongs(artistSongs);
+        setCurrentPage(1);
       } catch (error) {
         console.error("Error fetching songs by artist:", error);
       } finally {
@@ -53,19 +54,9 @@ export default function ArtistPage() {
   }, [artistName]);
 
   const loadMoreSongs = () => {
-    setCurrentPage((prevPage) => prevPage + 1);
-    const nextSongs = songs.slice(0, (currentPage + 1) * 5); // Load 5 more songs
-    setSongs(nextSongs);
-  };
-
-  const handleDescriptionChange = (text) => {
-    if (isDescriptionEditable) {
-      setDescription(text);
+    if (displayedSongs.length < allFilteredSongs.length) {
+      setCurrentPage(prevPage => prevPage + 1);
     }
-  };
-
-  const toggleDescriptionEdit = () => {
-    setIsDescriptionEditable((prev) => !prev);
   };
 
   return (
@@ -90,34 +81,19 @@ export default function ArtistPage() {
         <ActivityIndicator size="large" color={theme.text} style={styles.loader} />
       ) : (
         <FlatList
-          data={songs}
+          data={displayedSongs}
           keyExtractor={(item) => item.songId.toString()}
           renderItem={({ item }) => <SongCard song={item} />}
           contentContainerStyle={styles.list}
-          ListFooterComponent={
-            <TouchableOpacity onPress={loadMoreSongs} style={styles.loadMoreButton}>
-              <Text style={[styles.loadMoreText, { color: theme.text }]}>Load More</Text>
-            </TouchableOpacity>
+          ListFooterComponent={() =>
+            displayedSongs.length < allFilteredSongs.length ? (
+              <TouchableOpacity onPress={loadMoreSongs} style={styles.loadMoreButton}>
+                <Text style={[styles.loadMoreText, { color: theme.text }]}>Load More</Text>
+              </TouchableOpacity>
+            ) : null
           }
         />
       )}
-
-      <View style={styles.descriptionContainer}>
-        <Text style={[styles.descriptionTitle, { color: theme.text }]}>Description</Text>
-        <TextInput
-          style={[styles.descriptionInput, { color: theme.text, borderColor: theme.text }]}
-          value={description}
-          onChangeText={handleDescriptionChange}
-          editable={isDescriptionEditable}
-          multiline
-          numberOfLines={4}
-        />
-        <TouchableOpacity onPress={toggleDescriptionEdit} style={styles.editButton}>
-          <Text style={[styles.editButtonText, { color: theme.text }]}>
-            {isDescriptionEditable ? "Save Description" : "Edit Description"}
-          </Text>
-        </TouchableOpacity>
-      </View>
     </ThemedScreen>
   );
 }
@@ -159,31 +135,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loadMoreText: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  descriptionContainer: {
-    marginTop: 20,
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#ccc",
-  },
-  descriptionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  descriptionInput: {
-    borderWidth: 1,
-    padding: 8,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  editButton: {
-    alignItems: "center",
-    paddingVertical: 8,
-  },
-  editButtonText: {
     fontSize: 16,
     fontWeight: "bold",
   },
