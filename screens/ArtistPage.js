@@ -13,11 +13,8 @@ import { songService } from "../services/songService";
 import SongCard from "../components/SongCard";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-
-// THEME IMPORTS
 import { useTheme } from "../context/ThemeContext";
 import ThemedScreen from "../components/ThemedScreen";
-import { useUserData } from "../hooks/useUserData";
 
 export default function ArtistPage() {
   const [songs, setSongs] = useState([]);
@@ -26,23 +23,24 @@ export default function ArtistPage() {
   const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const { theme } = useTheme();
-  const { username } = useUserData();  // Get the artist name from the current user
   const route = useRoute();
   const navigation = useNavigation();
-  const { profilePicture } = route.params; // Get profile picture from params
+  
+  // Extract artistName and profilePicture from route params
+  const { artistName, profilePicture } = route.params || {};
 
   useEffect(() => {
     const fetchSongsByArtist = async () => {
-      if (!username) {
+      if (!artistName) {
         console.error("Artist name is missing");
         return;
       }
-
       setLoading(true);
       try {
         const allSongs = await songService.getAllSongs();
+        // Filter songs by the passed artistName
         const artistSongs = allSongs.filter(
-          (song) => song.artistName.toLowerCase() === username.toLowerCase()
+          (song) => song.artistName.toLowerCase() === artistName.toLowerCase()
         );
         setSongs(artistSongs.slice(0, 5)); // Show 5 newest songs initially
       } catch (error) {
@@ -52,7 +50,7 @@ export default function ArtistPage() {
       }
     };
     fetchSongsByArtist();
-  }, [username]);
+  }, [artistName]);
 
   const loadMoreSongs = () => {
     setCurrentPage((prevPage) => prevPage + 1);
@@ -77,8 +75,15 @@ export default function ArtistPage() {
       </TouchableOpacity>
 
       <View style={styles.headerContainer}>
-        <Image source={{ uri: profilePicture }} style={styles.profileImage} />
-        <Text style={[styles.artistName, { color: theme.text }]}>{username}</Text>
+        <Image
+          source={
+            profilePicture
+              ? { uri: profilePicture }
+              : require("../assets/profile.png")
+          }
+          style={styles.profileImage}
+        />
+        <Text style={[styles.artistName, { color: theme.text }]}>{artistName}</Text>
       </View>
 
       {loading ? (
