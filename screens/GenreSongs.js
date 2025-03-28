@@ -104,6 +104,6 @@ const styles = StyleSheet.create({
     // originally color: "#888"
   },
   list: {
-    paddingBottom: 20,
+    paddingBottom: 120,  
   },
 });
