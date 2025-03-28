@@ -2,7 +2,6 @@ import { API_URL } from '../config/apiConfig';
 import { Platform } from 'react-native';
 import { auth } from '../Utility/firebaseConfig';
 
-
 const getAuthHeaders = async () => {
   const user = auth.currentUser;
   if (!user) return {};
@@ -15,43 +14,41 @@ const getAuthHeaders = async () => {
 };
 
 export const songService = {
-    uploadSong: async (formData) => {
-      const headers = await getAuthHeaders();
-        try {
-          if (!formData || !formData._parts || formData._parts.length === 0) {
-            throw new Error('Invalid form data');
-          }
-    
-          const response = await fetch(`${API_URL}/songs/upload`, {
-            method: 'POST',
-            body: formData,
-            headers
-           
-          });
-    
-          const responseText = await response.text();
-          console.log('Upload response:', {
-            status: response.status,
-            statusText: response.statusText,
-            body: responseText
-          });
-    
-          if (!response.ok) {
-            throw new Error(`Upload failed: ${responseText}`);
-          }
-    
-          return JSON.parse(responseText);
-        } catch (error) {
-          console.error('Upload error details:', {
-            message: error.message,
-            platform: Platform.OS,
-            apiUrl: API_URL,
-            stack: error.stack
-          });
-          throw error;
-        }
-      },
-  
+  uploadSong: async (formData) => {
+    const headers = await getAuthHeaders();
+    try {
+      if (!formData || !formData._parts || formData._parts.length === 0) {
+        throw new Error('Invalid form data');
+      }
+
+      const response = await fetch(`${API_URL}/songs/upload`, {
+        method: 'POST',
+        body: formData,
+        headers
+      });
+
+      const responseText = await response.text();
+      console.log('Upload response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: responseText
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${responseText}`);
+      }
+
+      return JSON.parse(responseText);
+    } catch (error) {
+      console.error('Upload error details:', {
+        message: error.message,
+        platform: Platform.OS,
+        apiUrl: API_URL,
+        stack: error.stack
+      });
+      throw error;
+    }
+  },
 
   getAllSongs: async () => {
     try {
@@ -100,6 +97,26 @@ export const songService = {
       throw error;
     }
   },
+
+  // NEW: Fetch songs for a given user (artist)
+  getByUserId: async (userId) => {
+    try {
+      const headers = await getAuthHeaders();
+      // Updated endpoint to use query parameters – adjust this if your backend uses a different URL
+      const response = await fetch(`${API_URL}/songs?userId=${userId}`, {
+        method: 'GET',
+        headers,
+      });
+      if (!response.ok) {
+        throw new Error(`Error fetching songs for user ${userId}: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching songs for user:", error);
+      throw error;
+    }
+  },
+
   getRecentlyPlayed: async (limit = 10) => {
     try {
       const headers = await getAuthHeaders();
@@ -107,11 +124,11 @@ export const songService = {
         method: 'GET',
         headers
       });
-  
+
       if (!response.ok) {
         throw new Error(`Error fetching recently played: ${response.status}`);
       }
-  
+
       const data = await response.json();
       return data;
     } catch (error) {
@@ -119,7 +136,7 @@ export const songService = {
       throw error;
     }
   },
-  
+
   recordSongPlay: async (songId) => {
     try {
       const headers = await getAuthHeaders();
@@ -127,11 +144,11 @@ export const songService = {
         method: 'POST',
         headers
       });
-  
+
       if (!response.ok) {
         throw new Error(`Error recording song play: ${response.status}`);
       }
-  
+
       return true;
     } catch (error) {
       console.error('Error recording song play:', error);
@@ -173,5 +190,3 @@ export const songService = {
     }
   }
 };
-
-  
