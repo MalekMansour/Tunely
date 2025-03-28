@@ -1,149 +1,118 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image,
   FlatList,
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
   TextInput,
-  ScrollView,
+  Image,
 } from "react-native";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { songService } from "../services/songService";
+import SongCard from "../components/SongCard";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+
+// THEME IMPORTS
 import { useTheme } from "../context/ThemeContext";
 import ThemedScreen from "../components/ThemedScreen";
-import SongCard from "../components/SongCard";
-import { API_URL } from "../config/apiConfig";
-import { auth } from "../Utility/firebaseConfig";
+import { useUserData } from "../hooks/useUserData";
 
 export default function ArtistPage() {
-  const { theme } = useTheme();
-  const navigation = useNavigation();
-  const { artist } = useRoute().params; // Expected: { id, name, profilePicture, description }
   const [songs, setSongs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAllSongs, setShowAllSongs] = useState(false);
-
-  // Description state for the "About the Artist" section
-  const [description, setDescription] = useState(artist.description || "");
-  const [isEditing, setIsEditing] = useState(false);
-
-  // Determine if the logged-in user is the artist
-  const isArtist = auth.currentUser && auth.currentUser.uid === artist.id;
+  const [description, setDescription] = useState("");
+  const [isDescriptionEditable, setIsDescriptionEditable] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const { theme } = useTheme();
+  const { username } = useUserData();  // Get the artist name from the current user
+  const route = useRoute();
+  const navigation = useNavigation();
+  const { profilePicture } = route.params; // Get profile picture from params
 
   useEffect(() => {
     const fetchSongsByArtist = async () => {
+      if (!username) {
+        console.error("Artist name is missing");
+        return;
+      }
+
+      setLoading(true);
       try {
-        // Fetch all songs and filter on the client side by artistName
-        const response = await fetch(`${API_URL}/songs`);
-        if (!response.ok) {
-          throw new Error(`Error fetching songs: ${response.status}`);
-        }
-        const allSongs = await response.json();
-        const filteredSongs = allSongs.filter(
-          (song) => song.artistName === artist.name
+        const allSongs = await songService.getAllSongs();
+        const artistSongs = allSongs.filter(
+          (song) => song.artistName.toLowerCase() === username.toLowerCase()
         );
-        setSongs(filteredSongs);
+        setSongs(artistSongs.slice(0, 5)); // Show 5 newest songs initially
       } catch (error) {
-        console.error("Error fetching songs for artist:", error);
+        console.error("Error fetching songs by artist:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchSongsByArtist();
-  }, [artist]);
+  }, [username]);
 
-  const displayedSongs = showAllSongs ? songs : songs.slice(0, 5);
-
-  const renderSongItem = ({ item }) => <SongCard song={item} />;
-
-  const handleSaveDescription = () => {
-    // Here you would call an API to update the artist's description.
-    // For now, we'll simply exit edit mode and log the new description.
-    setIsEditing(false);
-    console.log("Saved description:", description);
+  const loadMoreSongs = () => {
+    setCurrentPage((prevPage) => prevPage + 1);
+    const nextSongs = songs.slice(0, (currentPage + 1) * 5); // Load 5 more songs
+    setSongs(nextSongs);
   };
 
   const handleDescriptionChange = (text) => {
-    // Enforce a maximum of 500 words.
-    const words = text.trim().split(/\s+/);
-    if (words.filter(Boolean).length <= 500) {
+    if (isDescriptionEditable) {
       setDescription(text);
-    } else {
-      alert("Description cannot exceed 500 words.");
     }
   };
 
+  const toggleDescriptionEdit = () => {
+    setIsDescriptionEditable((prev) => !prev);
+  };
+
   return (
-    <ThemedScreen style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={theme.text} />
+    <ThemedScreen style={[styles.container, { backgroundColor: theme.background }]}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.arrowButton}>
+        <Ionicons name="arrow-back" size={28} color={theme.text} />
+      </TouchableOpacity>
+
+      <View style={styles.headerContainer}>
+        <Image source={{ uri: profilePicture }} style={styles.profileImage} />
+        <Text style={[styles.artistName, { color: theme.text }]}>{username}</Text>
+      </View>
+
+      {loading ? (
+        <ActivityIndicator size="large" color={theme.text} style={styles.loader} />
+      ) : (
+        <FlatList
+          data={songs}
+          keyExtractor={(item) => item.songId.toString()}
+          renderItem={({ item }) => <SongCard song={item} />}
+          contentContainerStyle={styles.list}
+          ListFooterComponent={
+            <TouchableOpacity onPress={loadMoreSongs} style={styles.loadMoreButton}>
+              <Text style={[styles.loadMoreText, { color: theme.text }]}>Load More</Text>
+            </TouchableOpacity>
+          }
+        />
+      )}
+
+      <View style={styles.descriptionContainer}>
+        <Text style={[styles.descriptionTitle, { color: theme.text }]}>Description</Text>
+        <TextInput
+          style={[styles.descriptionInput, { color: theme.text, borderColor: theme.text }]}
+          value={description}
+          onChangeText={handleDescriptionChange}
+          editable={isDescriptionEditable}
+          multiline
+          numberOfLines={4}
+        />
+        <TouchableOpacity onPress={toggleDescriptionEdit} style={styles.editButton}>
+          <Text style={[styles.editButtonText, { color: theme.text }]}>
+            {isDescriptionEditable ? "Save Description" : "Edit Description"}
+          </Text>
         </TouchableOpacity>
-        <View style={styles.header}>
-          <Image source={{ uri: artist.profilePicture }} style={styles.profileImage} />
-          <Text style={[styles.artistName, { color: theme.text }]}>{artist.name}</Text>
-        </View>
-        <View style={styles.songsSection}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>Songs</Text>
-          {loading ? (
-            <ActivityIndicator size="large" color={theme.icon} />
-          ) : (
-            <>
-              <FlatList
-                data={displayedSongs}
-                keyExtractor={(item) => item.songId.toString()}
-                renderItem={renderSongItem}
-                contentContainerStyle={styles.songList}
-              />
-              {songs.length > 5 && !showAllSongs && (
-                <TouchableOpacity
-                  style={styles.loadAllButton}
-                  onPress={() => setShowAllSongs(true)}
-                >
-                  <Text style={[styles.loadAllText, { color: theme.text }]}>Load All</Text>
-                </TouchableOpacity>
-              )}
-              {showAllSongs && songs.length > 5 && (
-                <TouchableOpacity
-                  style={styles.loadAllButton}
-                  onPress={() => setShowAllSongs(false)}
-                >
-                  <Text style={[styles.loadAllText, { color: theme.text }]}>Show Less</Text>
-                </TouchableOpacity>
-              )}
-            </>
-          )}
-        </View>
-        <View style={styles.descriptionSection}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>About the Artist</Text>
-          {isEditing ? (
-            <>
-              <TextInput
-                style={[styles.descriptionInput, { color: theme.text, borderColor: theme.border }]}
-                value={description}
-                onChangeText={handleDescriptionChange}
-                multiline
-              />
-              <TouchableOpacity style={styles.saveButton} onPress={handleSaveDescription}>
-                <Text style={[styles.saveButtonText, { color: theme.text }]}>Save</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <View style={styles.descriptionContainer}>
-              <Text style={[styles.descriptionText, { color: theme.text }]}>{description}</Text>
-              {isArtist && (
-                <TouchableOpacity style={styles.editButton} onPress={() => setIsEditing(true)}>
-                  <Ionicons name="create-outline" size={20} color={theme.text} />
-                </TouchableOpacity>
-              )}
-            </View>
-          )}
-        </View>
-      </ScrollView>
+      </View>
     </ThemedScreen>
   );
 }
@@ -151,83 +120,66 @@ export default function ArtistPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 16,
   },
-  scrollContainer: {
-    paddingBottom: 20,
+  arrowButton: {
+    position: "absolute",
+    left: 16,
+    zIndex: 1,
+    marginTop: 60,
   },
-  backButton: {
-    margin: 15,
-  },
-  header: {
+  headerContainer: {
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    marginTop: 80,
   },
   profileImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    marginBottom: 10,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 16,
   },
   artistName: {
     fontSize: 24,
     fontWeight: "bold",
+    textAlign: "center",
   },
-  songsSection: {
-    paddingHorizontal: 20,
-    marginTop: 20,
+  loader: {
+    marginTop: 50,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 10,
+  list: {
+    paddingBottom: 120,
   },
-  songList: {
-    paddingBottom: 20,
+  loadMoreButton: {
+    marginTop: 16,
+    alignItems: "center",
   },
-  loadAllButton: {
-    alignSelf: "center",
-    padding: 10,
-    marginVertical: 10,
-  },
-  loadAllText: {
+  loadMoreText: {
     fontSize: 16,
-    textDecorationLine: "underline",
-  },
-  descriptionSection: {
-    paddingHorizontal: 20,
-    marginTop: 20,
+    fontWeight: "bold",
   },
   descriptionContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
+    marginTop: 20,
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#ccc",
   },
-  descriptionText: {
-    flex: 1,
-    fontSize: 16,
-  },
-  editButton: {
-    marginLeft: 10,
-    marginTop: 5,
+  descriptionTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
   },
   descriptionInput: {
     borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    minHeight: 100,
-    textAlignVertical: "top",
-    fontSize: 16,
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 12,
   },
-  saveButton: {
-    alignSelf: "flex-end",
-    marginTop: 10,
-    paddingHorizontal: 15,
+  editButton: {
+    alignItems: "center",
     paddingVertical: 8,
-    borderRadius: 5,
-    backgroundColor: "#007AFF",
   },
-  saveButtonText: {
-    color: "#fff",
+  editButtonText: {
     fontSize: 16,
+    fontWeight: "bold",
   },
 });
