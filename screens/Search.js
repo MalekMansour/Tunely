@@ -15,6 +15,7 @@ import { songService } from "../services/songService";
 import { useNavigation } from "@react-navigation/native";
 import PlayList from "../components/Playlist";
 import SongCard from "../components/SongCard";
+import ArtistCard from "../components/ArtistCard"; // Import ArtistCard
 import { Ionicons } from "@expo/vector-icons";
 
 // THEME IMPORTS
@@ -37,7 +38,6 @@ const musicGenres = [
 ];
 
 // Helper function to get an icon image for each genre.
-// Adjust the filenames as needed based on your assets folder.
 const getGenreIcon = (genreName) => {
   const lower = genreName.toLowerCase();
   switch (lower) {
@@ -75,7 +75,8 @@ export default function Search() {
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
+  // results is an object with two arrays: one for songs and one for artists
+  const [results, setResults] = useState({ songs: [], artists: [] });
   const [isSearching, setIsSearching] = useState(false);
 
   // THEME USAGE
@@ -95,17 +96,36 @@ export default function Search() {
     setQuery(text);
     if (text.length > 2) {
       setIsSearching(true);
-      const songs = await songService.searchSongs(text);
-      setResults(songs);
+      try {
+        // Get songs matching the search query
+        const songs = await songService.searchSongs(text);
+        // Derive unique artists from the songs results
+        const artistMap = {};
+        songs.forEach((song) => {
+          if (song.artistName && !artistMap[song.artistName]) {
+            // Using song.artistName and optionally song.artistProfilePic if available
+            artistMap[song.artistName] = {
+              artistId: song.userId || song.artistId || song.artistName,
+              artistName: song.artistName,
+              profilePicture: song.artistProfilePic || null,
+            };
+          }
+        });
+        const artists = Object.values(artistMap);
+        setResults({ songs, artists });
+      } catch (error) {
+        console.error("Error searching songs:", error);
+        setResults({ songs: [], artists: [] });
+      }
     } else {
       setIsSearching(false);
-      setResults([]);
+      setResults({ songs: [], artists: [] });
     }
   };
 
   const clearSearch = () => {
     setQuery("");
-    setResults([]);
+    setResults({ songs: [], artists: [] });
     setIsSearching(false);
   };
 
@@ -135,14 +155,31 @@ export default function Search() {
       </View>
 
       {isSearching ? (
-        <FlatList
-          data={results}
-          keyExtractor={(item) => item.songId.toString()}
-          renderItem={({ item }) => <SongCard song={item} />}
-          ListEmptyComponent={
-            <Text style={[styles.emptyText, { color: "#000" }]}>No results found</Text>
-          }
-        />
+        <View style={styles.resultsList}>
+          {/* Songs Results */}
+          {results.songs && results.songs.length > 0 && (
+            <FlatList
+              data={results.songs}
+              keyExtractor={(item) => item.songId.toString()}
+              renderItem={({ item }) => <SongCard song={item} />}
+              ListEmptyComponent={
+                <Text style={[styles.emptyText, { color: "#000" }]}>No songs found</Text>
+              }
+            />
+          )}
+          {/* Artist Results */}
+          {results.artists && results.artists.length > 0 && (
+            <FlatList
+              data={results.artists}
+              keyExtractor={(item) => item.artistId.toString()}
+              horizontal
+              renderItem={({ item }) => <ArtistCard artist={item} />}
+              ListEmptyComponent={
+                <Text style={[styles.emptyText, { color: "#000" }]}>No artists found</Text>
+              }
+            />
+          )}
+        </View>
       ) : (
         <ScrollView>
           <View style={styles.section}>
@@ -179,9 +216,7 @@ export default function Search() {
                   >
                     <View style={styles.genreRow}>
                       <Text style={styles.categoryName}>{genre.name}</Text>
-                      {icon && (
-                        <Image source={icon} style={styles.genreIcon} />
-                      )}
+                      {icon && <Image source={icon} style={styles.genreIcon} />}
                     </View>
                   </TouchableOpacity>
                 );
