@@ -75,13 +75,18 @@ export default function Search() {
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
   const [query, setQuery] = useState("");
-  // results is an object with two arrays: one for songs and one for artists
+  // results: songs and artists arrays.
   const [results, setResults] = useState({ songs: [], artists: [] });
   const [isSearching, setIsSearching] = useState(false);
 
-  // Pagination state for songs
+  // Pagination for songs
   const [songPage, setSongPage] = useState(1);
-  const songsPerPage = 5;
+  const songsPerPage = 10;
+
+  // Pagination for artists
+  const [artistPage, setArtistPage] = useState(1);
+  // For artists: show 3 initially, then each load adds 10.
+  const getArtistsToShow = () => (artistPage === 1 ? 3 : 3 + (artistPage - 1) * 10);
 
   // THEME USAGE
   const { theme } = useTheme();
@@ -101,9 +106,8 @@ export default function Search() {
     if (text.length > 2) {
       setIsSearching(true);
       try {
-        // Get songs matching the search query
         const songs = await songService.searchSongs(text);
-        // Derive unique artists from the songs results
+        // Build a unique artist list from songs.
         const artistMap = {};
         songs.forEach((song) => {
           if (song.artistName && !artistMap[song.artistName]) {
@@ -116,8 +120,8 @@ export default function Search() {
         });
         const artists = Object.values(artistMap);
         setResults({ songs, artists });
-        // Reset song pagination
         setSongPage(1);
+        setArtistPage(1);
       } catch (error) {
         console.error("Error searching songs:", error);
         setResults({ songs: [], artists: [] });
@@ -126,6 +130,7 @@ export default function Search() {
       setIsSearching(false);
       setResults({ songs: [], artists: [] });
       setSongPage(1);
+      setArtistPage(1);
     }
   };
 
@@ -134,6 +139,7 @@ export default function Search() {
     setResults({ songs: [], artists: [] });
     setIsSearching(false);
     setSongPage(1);
+    setArtistPage(1);
   };
 
   const openGenrePage = (genre) => {
@@ -142,6 +148,10 @@ export default function Search() {
 
   const loadMoreSongs = () => {
     setSongPage((prevPage) => prevPage + 1);
+  };
+
+  const loadMoreArtists = () => {
+    setArtistPage((prevPage) => prevPage + 1);
   };
 
   return (
@@ -174,18 +184,20 @@ export default function Search() {
                 Artists
               </Text>
               <FlatList
-                data={results.artists}
+                data={results.artists.slice(0, getArtistsToShow())}
                 keyExtractor={(item) => item.artistId.toString()}
-                horizontal
                 renderItem={({ item }) => <ArtistCard artist={item} />}
-                ListEmptyComponent={
-                  <Text style={[styles.emptyText, { color: "#000" }]}>
-                    No artists found
-                  </Text>
+                ListFooterComponent={() =>
+                  results.artists.length > getArtistsToShow() ? (
+                    <TouchableOpacity onPress={loadMoreArtists} style={styles.loadMoreButton}>
+                      <Text style={[styles.loadMoreText, { color: theme.text }]}>Load More</Text>
+                    </TouchableOpacity>
+                  ) : null
                 }
               />
             </>
           )}
+
           {/* Song Results Section */}
           {results.songs && results.songs.length > 0 && (
             <>
