@@ -200,7 +200,6 @@ export default function App() {
                     <Stack.Screen name="AdminPage" component={AdminPage} />
                     <Stack.Screen name="AuthCheck" component={AdminCheck} />
                     <Stack.Screen name="BotCat" component={BotChat} />
-                    {/* Added ArtistPage navigation */}
                     <Stack.Screen name="ArtistPage" component={ArtistPage} />
                   </Stack.Navigator>
 
