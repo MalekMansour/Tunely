@@ -36,14 +36,12 @@ export default function SongDetailScreen({ route }) {
   const [likeCount, setLikeCount] = useState(song.likes || 0);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
 
-  // Navigate to ArtistPage when title or artist name is pressed
+  // When song title or artist is pressed, replace current screen with ArtistPage
   const handleArtistPress = () => {
-    const artist = {
-      id: song.user_id, // assuming song.user_id is the artist's id
-      name: song.artistName,
-      profilePicture: song.artistProfilePicture ? song.artistProfilePicture : defaultCoverImage,
-    };
-    navigation.navigate("ArtistPage", { artist });
+    navigation.replace("ArtistPage", { 
+      artistName: song.artistName, 
+      profilePicture: song.artistProfilePicture ? song.artistProfilePicture : defaultCoverImage 
+    });
   };
 
   useEffect(() => {
