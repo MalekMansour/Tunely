@@ -1,21 +1,39 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import ThemedView from "../components/ThemedScreen";
 import { styles } from "../styles";
+import { songService } from "../services/songService";
 
 const defaultProfileImage = require("../assets/profile.png");
 
 const ArtistCard = ({ artist, isOwnContent }) => {
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const [songCount, setSongCount] = useState(0);
+
+  useEffect(() => {
+    const fetchSongCount = async () => {
+      try {
+        const allSongs = await songService.getAllSongs();
+        const count = allSongs.filter(
+          (song) =>
+            song.artistName &&
+            song.artistName.toLowerCase() === artist.artistName.toLowerCase()
+        ).length;
+        setSongCount(count);
+      } catch (error) {
+        console.error("Error fetching song count:", error);
+      }
+    };
+    fetchSongCount();
+  }, [artist.artistName]);
 
   const handlePress = () => {
-    // Pass the artist's name and profilePicture via route params
     navigation.navigate("ArtistPage", {
-      artistName: artist.artistName,  // ensure artist.artistName is defined!
+      artistName: artist.artistName,
       profilePicture: artist.profilePicture || defaultProfileImage,
     });
   };
@@ -36,11 +54,14 @@ const ArtistCard = ({ artist, isOwnContent }) => {
             {artist.artistName}
           </Text>
           <Text style={[styles.songCardArtist, { color: theme.text }]}>
-            {artist.bio || "No bio available."}
+            {`${songCount} songs`}
           </Text>
         </View>
         {isOwnContent && (
-          <TouchableOpacity onPress={() => {}} style={styles.optionsIcon}>
+          <TouchableOpacity
+            onPress={() => {}}
+            style={styles.optionsIcon}
+          >
             <Ionicons name="ellipsis-vertical" size={24} color={theme.text} />
           </TouchableOpacity>
         )}
