@@ -8,17 +8,14 @@ import ThemedView from "../components/ThemedScreen";
 
 import { styles } from "../styles";
 import { useAudio } from "../context/AudioContext";
-import { auth } from "../Utility/firebaseConfig";
-import { likesService } from "../services/likesService";
 
 const defaultCoverImage = require("../assets/note.jpg");
 
-const SongCard = ({ song, playlistId, showOptions, onRemove, isOwnContent }) => {
+const SongCard = ({ song, playlistId, showOptions, onRemove, isOwnContent, noNavigation }) => {
   const navigation = useNavigation();
-  const { theme } = useTheme(); // Access theme.* colors
+  const { theme } = useTheme();
   const { playSound, pauseSound, resumeSound, currentSong, isPlaying } = useAudio();
 
-  // Determine if this is the current song
   const isCurrentSong = currentSong?.songId === song.songId;
 
   const handlePress = async () => {
@@ -44,17 +41,9 @@ const SongCard = ({ song, playlistId, showOptions, onRemove, isOwnContent }) => 
           style={styles.songCardImage}
         />
         <View style={styles.songCardInfo}>
-  
-          {/* Apply the theme color here */}
-          <Text style={[styles.songCardTitle, { color: theme.text }]}>
-            {song.title}
-          </Text>
-          <Text style={[styles.songCardArtist, { color: theme.text }]}>
-            {song.artistName}
-          </Text>
-  
+          <Text style={[styles.songCardTitle, { color: theme.text }]}>{song.title}</Text>
+          <Text style={[styles.songCardArtist, { color: theme.text }]}>{song.artistName}</Text>
         </View>
-  
         {isOwnContent && (
           <TouchableOpacity
             onPress={() => onRemove(song.songId || song.id)}
@@ -66,5 +55,6 @@ const SongCard = ({ song, playlistId, showOptions, onRemove, isOwnContent }) => 
       </TouchableOpacity>
     </ThemedView>
   );
-}
+};
+
 export default SongCard;
