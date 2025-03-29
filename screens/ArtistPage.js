@@ -26,7 +26,7 @@ export default function ArtistPage() {
   const route = useRoute();
   const navigation = useNavigation();
   
-  // Extract artistName and profilePicture from route params
+  // Expect route.params to have artistName and profilePicture
   const { artistName, profilePicture } = route.params || {};
 
   useEffect(() => {
@@ -38,7 +38,6 @@ export default function ArtistPage() {
       setLoading(true);
       try {
         const allSongs = await songService.getAllSongs();
-        // Filter songs by artist name (case-insensitive)
         const artistSongs = allSongs.filter(
           (song) => song.artistName.toLowerCase() === artistName.toLowerCase()
         );
@@ -55,7 +54,7 @@ export default function ArtistPage() {
 
   const loadMoreSongs = () => {
     if (displayedSongs.length < allFilteredSongs.length) {
-      setCurrentPage(prevPage => prevPage + 1);
+      setCurrentPage((prevPage) => prevPage + 1);
     }
   };
 
@@ -83,7 +82,7 @@ export default function ArtistPage() {
         <FlatList
           data={displayedSongs}
           keyExtractor={(item) => item.songId.toString()}
-          renderItem={({ item }) => <SongCard song={item} />}
+          renderItem={({ item }) => <SongCard song={item} noNavigation />}
           contentContainerStyle={styles.list}
           ListFooterComponent={() =>
             displayedSongs.length < allFilteredSongs.length ? (
