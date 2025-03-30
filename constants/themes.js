@@ -85,12 +85,12 @@ export const themes = {
   }),
   cherry: createTheme({
     name: "Cherry Blossom",
-    background: "#FFB7C5",
-    primary: "#FF69B4",
-    secondary: "#FF69B4",
-    text: "#1a1a1a",
-    border: "#FF69B4",
-    icon: "#FF69B4",
+    background: "#FFF0F5",    
+    primary: "#FF69B4",       
+    secondary: "#FFB6C1",     
+    text: "#4a4a4a",          
+    border: "#FF1493",        
+    icon: "#FF1493",          
   }),
   astro: createTheme({
     name: "Astro Neon",
