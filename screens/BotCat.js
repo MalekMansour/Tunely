@@ -21,13 +21,13 @@ export default function BotCat() {
   const navigation = useNavigation();
   const { playSong } = useAudio();
   
-  const { theme } = useTheme();  // <-- THEME HOOK
+  const { theme } = useTheme();  
   
   const [selectedMood, setSelectedMood] = useState(null);
   const [recommendedSongs, setRecommendedSongs] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const moodOptions = ['Happy', 'Sad', 'Energetic', 'Relaxed', 'Romantic', 'Angry'];
+  const moodOptions = ['Happy', 'Sad', 'Energetic', 'Relaxed', 'Angry'];
 
   const handleMoodSelection = async (mood) => {
     setSelectedMood(mood);
@@ -114,7 +114,7 @@ export default function BotCat() {
             </View>
           </>
         )}
-      </ScrollView>
+      </ScrollView>X
     </ThemedScreen>
   );
 }
