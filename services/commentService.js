@@ -52,7 +52,7 @@ export const commentsService = {
 
         return data; // Return success message
     } catch (error) {
-        console.error("Error in postComment:", error);
+        // console.error("Error in postComment:", error);
         throw new Error(error.message || "Something went wrong. Please try again.");
     }
 },

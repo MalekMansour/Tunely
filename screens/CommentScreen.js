@@ -94,7 +94,7 @@ export default function CommentScreen({ route }) {
             setComment('');
             Keyboard.dismiss();
         } catch (error) {
-            console.error('Error posting comment:', error);
+            // console.error('Error posting comment:', error);
             Alert.alert('Error', error.message || 'Failed to post your comment.');
         } finally {
             setIsSubmitting(false);
