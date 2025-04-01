@@ -42,13 +42,13 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "rgb(4, 4, 4)", 
     padding: 15,
-    paddingTop: 40, // For status bar spacing
+    paddingTop: 40, 
   },
   profileButton: {
     padding: 2,
-  },
+    },
   searchBar: {
-    backgroundColor: "#f1f1f1", // Purple for search bar
+    backgroundColor: "#f1f1f1", 
     borderRadius: 25,
     padding: 10,
     marginBottom: 20,
