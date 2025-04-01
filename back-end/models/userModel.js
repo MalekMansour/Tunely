@@ -91,7 +91,18 @@ toggleLikeSong: async (userId, songId) => {
           WHERE ul.user_id = ?
         `;
         return db.query(sql, [userId]);
-      }
+      },
+    
+      updateProfilePicture: async (userId, profilePicUrl) => {
+        try {
+          const sql = 'UPDATE users SET profile_pic_url = ? WHERE id = ?';
+          const result = await db.query(sql, [profilePicUrl, userId]);
+          return result;
+        } catch (error) {
+          console.error('Error in updateProfilePicture model:', error);
+          throw error;
+        }
+      },
 
 
       

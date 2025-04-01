@@ -67,6 +67,48 @@ export const authService = {
     
     return response.json();
   },
+
+  updateProfilePicture: async (imageAsset) => {
+    try {
+      if (!imageAsset || !imageAsset.uri) {
+        throw new Error('Image is required');
+      }
+      
+      // Create form data for image upload
+      const formData = new FormData();
+      
+      // Get filename from URI
+      const uriParts = imageAsset.uri.split('/');
+      const fileName = uriParts[uriParts.length - 1];
+      
+      // Append the image file
+      formData.append('profileImage', {
+        uri: imageAsset.uri,
+        type: imageAsset.mimeType || 'image/jpeg',
+        name: fileName
+      });
+      
+      const headers = await getAuthHeaders();
+      // Delete Content-Type so boundary is set correctly for multipart/form-data
+      delete headers['Content-Type'];
+      
+      const response = await fetch(`${API_URL}/users/profile-picture`, {
+        method: 'POST', // Change to POST for file upload
+        headers,
+        body: formData
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update profile picture: ${errorText}`);
+      }
+      
+      return response.json();
+    } catch (error) {
+      console.error('Error in updateProfilePicture:', error);
+      throw error;
+    }
+  },
   
   
   // Get current user profile

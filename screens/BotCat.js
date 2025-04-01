@@ -114,7 +114,7 @@ export default function BotCat() {
             </View>
           </>
         )}
-      </ScrollView>X
+      </ScrollView>
     </ThemedScreen>
   );
 }

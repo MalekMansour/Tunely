@@ -1,4 +1,5 @@
 const UserModel = require('../models/userModel');
+const { uploadToS3 } = require('../middleware/upload');
 
 const userController = {
     registerUser: async (req, res) => {
@@ -44,7 +45,36 @@ const userController = {
           } catch (error) {
             res.status(500).json({ error: error.message });
           }
-    }
+    },
+    
+    updateProfilePicture: async (req, res) => {
+      try {
+        
+        if (!req.file) {
+          return res.status(400).json({ error: 'No profile image uploaded' });
+        }
+        
+        // Upload to S3
+        const profilePicUrl = await uploadToS3(req.file, 'profilepic');
+        console.log('S3 upload successful, URL:', profilePicUrl);
+        
+        if (!profilePicUrl) {
+          return res.status(500).json({ error: 'Failed to upload to S3' });
+        }
+        
+        // Update in database
+        await UserModel.updateProfilePicture(req.user.uid, profilePicUrl);
+        
+        res.status(200).json({
+          success: true,
+          message: 'Profile picture updated successfully',
+          profilePicUrl
+        });
+      } catch (error) {
+        console.error('Error updating profile picture:', error);
+        res.status(500).json({ error: error.message });
+      }
+    },
 
 };
 module.exports = userController;

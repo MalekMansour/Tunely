@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Image, TouchableOpacity, Alert, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity, Alert, StyleSheet, ActivityIndicator } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { auth } from "../Utility/firebaseConfig";
@@ -10,12 +10,14 @@ import { useUserData } from "../hooks/useUserData";
 import { useTheme } from "../context/ThemeContext";
 import ThemedScreen from "../components/ThemedScreen";
 import { useAudio } from "../context/AudioContext";
+import { authService } from "../services/authService";
 
 export default function ProfileScreen({ navigation }) {
   const [isGoogleUser, setIsGoogleUser] = useState(false);
-  const { username, profilePic } = useUserData();
+  const { username, profilePic, refreshUserData } = useUserData(); // Get the refresh function
   const { theme } = useTheme();
   const { stopSound } = useAudio();
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const requestPermissions = async () => {
@@ -36,13 +38,23 @@ export default function ProfileScreen({ navigation }) {
         aspect: [1, 1],
         quality: 0.8,
       });
+      
       if (!result.canceled) {
-        const userId = auth.currentUser.uid;
-        const downloadURL = await uploadProfilePicture(userId, result.uri);
-        await updateUserData(userId, { profilePic: downloadURL });
+        setUploading(true);
+        
+        // Skip Firebase upload and update - go directly to backend API
+        const response = await authService.updateProfilePicture(result.assets[0]);
+        
+        // Refresh user data instead of navigating
+        refreshUserData();
+        
+        Alert.alert("Success", "Profile picture updated successfully!");
       }
     } catch (error) {
+      console.error("Failed to update profile picture:", error);
       Alert.alert("Error", "Failed to update profile picture.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -77,10 +89,19 @@ export default function ProfileScreen({ navigation }) {
       </View>
 
       <View style={styles.profileSection}>
-        <Image
-          source={typeof profilePic === "string" ? { uri: profilePic } : blankProfilePic}
-          style={[styles.profileImage, { borderColor: theme.text }]}
-        />
+        <TouchableOpacity onPress={changeProfilePicture} disabled={uploading}>
+          <View style={styles.imageContainer}>
+            <Image
+              source={typeof profilePic === "string" ? { uri: profilePic } : blankProfilePic}
+              style={[styles.profileImage, { borderColor: theme.text }]}
+            />
+            {uploading && (
+              <View style={styles.uploadingOverlay}>
+                <ActivityIndicator size="large" color={theme.primary} />
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
         <View style={styles.usernameContainer}>
           <Text style={[styles.username, { color: theme.text }]}>{username || "User"}</Text>
         </View>
@@ -92,8 +113,11 @@ export default function ProfileScreen({ navigation }) {
         <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.primary }]}
           onPress={changeProfilePicture}
+          disabled={uploading}
         >
-          <Text style={[styles.buttonText, { color: theme.text }]}>Change Profile Picture</Text>
+          <Text style={[styles.buttonText, { color: theme.text }]}>
+            {uploading ? "Uploading..." : "Change Profile Picture"}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -168,5 +192,19 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
+  },
+  imageContainer: {
+    position: "relative",
+  },
+  uploadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { auth } from '../Utility/firebaseConfig';
 import blankProfilePic from '../assets/blank_profile.png';
 import { authService } from '../services/authService';
@@ -8,6 +8,12 @@ export const useUserData = () => {
   const [profilePic, setProfilePic] = useState(blankProfilePic);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0); // Add this state
+
+  // Add a function to trigger refresh
+  const refreshUserData = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1);
+  }, []);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -37,7 +43,7 @@ export const useUserData = () => {
     };
 
     fetchUserData();
-  }, []);
+  }, [refreshTrigger]); // Add refreshTrigger as dependency
 
-  return { username, profilePic, isLoading, error };
+  return { username, profilePic, isLoading, error, refreshUserData };
 };
