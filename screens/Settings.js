@@ -13,7 +13,6 @@ import { useChatbot } from "../context/ChatbotContext";
 import ThemedScreen from "../components/ThemedScreen";
 
 export default function SettingsScreen({ navigation }) {
-  const [isPrivate, setIsPrivate] = useState(false);
   const { theme } = useTheme();
   const { chatbotVisible, setChatbotVisible } = useChatbot();
 
@@ -32,12 +31,8 @@ export default function SettingsScreen({ navigation }) {
     );
   };
 
+  // Removed Privacy and Notifications from settingsOptions
   const settingsOptions = [
-    {
-      label: `Privacy: ${isPrivate ? "Private" : "Public"}`,
-      icon: isPrivate ? "lock-closed-outline" : "lock-open-outline",
-      onPress: () => setIsPrivate(!isPrivate),
-    },
     {
       label: "Themes",
       icon: "color-palette-outline",
@@ -47,11 +42,6 @@ export default function SettingsScreen({ navigation }) {
       label: `ChatBot Buddy: ${chatbotVisible ? "On" : "Off"}`,
       icon: chatbotVisible ? "chatbubbles" : "chatbubbles-outline",
       onPress: () => setChatbotVisible(!chatbotVisible),
-    },
-    {
-      label: "Notifications",
-      icon: "notifications-outline",
-      onPress: () => navigation.navigate("Notifications"),
     },
     {
       label: "Terms and Services",
