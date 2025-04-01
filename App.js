@@ -27,14 +27,11 @@ import SongDetailScreen from "./screens/SongDetail";
 import SettingsScreen from "./screens/Settings";
 import UploadScreen from "./screens/Upload";
 import PlaylistDetail from "./screens/PlaylistDetail";
-import PlayListButton from "./components/PlayListButton";
 import CommentScreen from "./screens/CommentScreen";
 import TopBarProfileIcon from "./components/TopBarProfileIcon";
 import FloatingPlayer from "./components/FloatingPlayer";
-import MyUploadButton from "./components/MyUploadButton";
 import AdminPage from "./screens/adminPage";
 import AdminCheck from "./Utility/adminCheck";
-import Notifications from "./screens/Notifications";
 import GenreSongs from "./screens/GenreSongs";
 import CatBot from "./components/catbot";
 import BotChat from "./screens/BotCat";
@@ -195,7 +192,6 @@ export default function App() {
                     <Stack.Screen name="SignUp" component={SignUpScreen} />
                     <Stack.Screen name="Upload" component={UploadScreen} />
                     <Stack.Screen name="ThemeSettings" component={ThemeSettings} />
-                    <Stack.Screen name="Notifications" component={Notifications} />
                     <Stack.Screen name="AdminPage" component={AdminPage} />
                     <Stack.Screen name="AuthCheck" component={AdminCheck} />
                     <Stack.Screen name="BotCat" component={BotChat} />
@@ -232,7 +228,6 @@ function ConditionalCatBot() {
     "AdminPage",
     "ThemeSettings",
     "Settings",
-    "Notifications",
     "Upload",
   ];
 
