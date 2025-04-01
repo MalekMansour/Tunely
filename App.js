@@ -53,7 +53,7 @@ function ScreenWithTopBar({ navigation, children, title }) {
           style={[styles.profileButton, { marginTop: 30 }]}
           onPress={() => navigation.navigate("Profile")}
         >
-          <TopBarProfileIcon size={30} />
+          <TopBarProfileIcon size={45} />
         </TouchableOpacity>
       </View>
       {children}
