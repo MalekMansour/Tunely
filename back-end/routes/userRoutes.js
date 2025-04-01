@@ -14,8 +14,6 @@ router.get('/me', verifyToken, userController.getUserProfile);
 // Get user's liked songs
 router.get('/me/likes', verifyToken, userController.getLikedSongs);
 
-// Add this route for profile picture upload
-// Note: We're using your existing upload middleware properly configured for single file
 router.post('/profile-picture', verifyToken, (req, res, next) => {
   const singleUpload = multer({
     storage: multer.memoryStorage(),
