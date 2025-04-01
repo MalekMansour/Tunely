@@ -145,7 +145,7 @@ export default function SettingsScreen({ navigation }) {
         </TouchableOpacity>
 
         <Text style={{ color: theme.text, fontSize: 12, marginTop: 20 }}>
-          App Version: Early Access 0.6.1
+          App Version: Early Access 0.6.2
         </Text>
       </ScrollView>
     </ThemedScreen>
