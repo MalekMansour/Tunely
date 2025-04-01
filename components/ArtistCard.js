@@ -7,34 +7,47 @@ import ThemedView from "../components/ThemedScreen";
 import { styles } from "../styles";
 import { songService } from "../services/songService";
 
-const defaultProfileImage = require("../assets/profile.png");
+// Updated default cover image (replace with your actual fallback asset)
+const defaultCoverImage = require("../assets/profile.png");
 
 const ArtistCard = ({ artist, isOwnContent }) => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const [songCount, setSongCount] = useState(0);
+  const [latestCover, setLatestCover] = useState(null);
 
   useEffect(() => {
-    const fetchSongCount = async () => {
+    const fetchArtistData = async () => {
       try {
         const allSongs = await songService.getAllSongs();
-        const count = allSongs.filter(
+        // Filter songs for the current artist
+        const artistSongs = allSongs.filter(
           (song) =>
             song.artistName &&
             song.artistName.toLowerCase() === artist.artistName.toLowerCase()
-        ).length;
-        setSongCount(count);
+        );
+        setSongCount(artistSongs.length);
+
+        // Sort songs by release date descending (ensure releaseDate exists)
+        artistSongs.sort(
+          (a, b) => new Date(b.releaseDate) - new Date(a.releaseDate)
+        );
+
+        // Use the cover from the latest song if available
+        if (artistSongs.length > 0 && artistSongs[0].song_photo_url) {
+          setLatestCover(artistSongs[0].song_photo_url);
+        }
       } catch (error) {
-        console.error("Error fetching song count:", error);
+        console.error("Error fetching artist data:", error);
       }
     };
-    fetchSongCount();
+
+    fetchArtistData();
   }, [artist.artistName]);
 
   const handlePress = () => {
     navigation.navigate("ArtistPage", {
       artistName: artist.artistName,
-      profilePicture: artist.profilePicture || defaultProfileImage,
     });
   };
 
@@ -42,11 +55,7 @@ const ArtistCard = ({ artist, isOwnContent }) => {
     <ThemedView style={{ marginVertical: 4 }}>
       <TouchableOpacity style={[styles.songCard]} onPress={handlePress}>
         <Image
-          source={
-            artist.profilePicture
-              ? { uri: artist.profilePicture }
-              : defaultProfileImage
-          }
+          source={latestCover ? { uri: latestCover } : defaultCoverImage}
           style={styles.songCardImage}
         />
         <View style={styles.songCardInfo}>
@@ -58,10 +67,7 @@ const ArtistCard = ({ artist, isOwnContent }) => {
           </Text>
         </View>
         {isOwnContent && (
-          <TouchableOpacity
-            onPress={() => {}}
-            style={styles.optionsIcon}
-          >
+          <TouchableOpacity onPress={() => {}} style={styles.optionsIcon}>
             <Ionicons name="ellipsis-vertical" size={24} color={theme.text} />
           </TouchableOpacity>
         )}
