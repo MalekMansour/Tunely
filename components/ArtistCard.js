@@ -56,7 +56,7 @@ const ArtistCard = ({ artist, isOwnContent }) => {
       <TouchableOpacity style={[styles.songCard]} onPress={handlePress}>
         <Image
           source={latestCover ? { uri: latestCover } : defaultCoverImage}
-          style={styles.songCardImage}
+          style={[styles.songCardImage, { borderRadius: 80 }]}
         />
         <View style={styles.songCardInfo}>
           <Text style={[styles.songCardTitle, { color: theme.text }]}>
