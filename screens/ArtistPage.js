@@ -25,9 +25,9 @@ export default function ArtistPage() {
   const { theme } = useTheme();
   const route = useRoute();
   const navigation = useNavigation();
-  
-  // Expect route.params to have artistName and profilePicture
-  const { artistName, profilePicture } = route.params || {};
+
+  // Expect route.params to have artistName only.
+  const { artistName } = route.params || {};
 
   useEffect(() => {
     const fetchSongsByArtist = async () => {
@@ -38,9 +38,12 @@ export default function ArtistPage() {
       setLoading(true);
       try {
         const allSongs = await songService.getAllSongs();
+        // Filter songs by artist name.
         const artistSongs = allSongs.filter(
           (song) => song.artistName.toLowerCase() === artistName.toLowerCase()
         );
+        // Sort songs by release date descending (assuming releaseDate is a valid date string).
+        artistSongs.sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate));
         setAllFilteredSongs(artistSongs);
         setCurrentPage(1);
       } catch (error) {
@@ -58,6 +61,11 @@ export default function ArtistPage() {
     }
   };
 
+  const latestCover =
+  allFilteredSongs.length > 0 && allFilteredSongs[0].song_photo_url
+    ? allFilteredSongs[0].song_photo_url
+    : null;
+
   return (
     <ThemedScreen style={[styles.container, { backgroundColor: theme.background }]}>
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.arrowButton}>
@@ -67,8 +75,8 @@ export default function ArtistPage() {
       <View style={styles.headerContainer}>
         <Image
           source={
-            profilePicture
-              ? { uri: profilePicture }
+            latestCover
+              ? { uri: latestCover }
               : require("../assets/profile.png")
           }
           style={styles.profileImage}
@@ -113,9 +121,9 @@ const styles = StyleSheet.create({
     marginTop: 80,
   },
   profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 200,
+    height: 200,
+    borderRadius: 150,
     marginBottom: 16,
   },
   artistName: {
