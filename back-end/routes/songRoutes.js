@@ -17,13 +17,8 @@ router.post('/:id/play', verifyToken, songController.recordSongPlay);
 router.get('/:id', songController.getSongById);
 router.delete('/:id', verifyToken, songController.deleteSong);
 
-
-
-
 //like routes
 router.get('/:id/like', verifyToken, likesController.checkLike);
 router.post('/:id/like', verifyToken, likesController.toggleLike);
-
-
 
 module.exports = router;
