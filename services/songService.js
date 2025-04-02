@@ -98,7 +98,6 @@ export const songService = {
     }
   },
 
-  // NEW: Fetch songs for a given user (artist)
   getByUserId: async (userId) => {
     try {
       const headers = await getAuthHeaders();
