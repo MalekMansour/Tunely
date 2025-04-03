@@ -15,14 +15,12 @@ import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../context/ThemeContext";
 import ThemedScreen from "../components/ThemedScreen";
 
-// Import your API key from .env (using react-native-dotenv)
 import { CATBOT_API_KEY } from "@env";
 
 export default function BotCat() {
   const navigation = useNavigation();
   const { theme } = useTheme();
 
-  // Chat messages: each message has a role ("bot" or "user") and text.
   const [messages, setMessages] = useState([
     { role: "bot", text: "Hey there! How can I help you today?" },
   ]);
