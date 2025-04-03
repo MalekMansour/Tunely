@@ -319,6 +319,7 @@ const styles = StyleSheet.create({
   loadMoreText: {
     fontSize: 16,
     fontWeight: "bold",
+    marginBottom: 350,
   },
   browseGrid: {
     flexDirection: "row",
