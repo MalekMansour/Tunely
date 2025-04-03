@@ -22,7 +22,7 @@ export default function BotCat() {
   const { theme } = useTheme();
 
   const [messages, setMessages] = useState([
-    { role: "bot", text: "Hey there! How can I help you today?" },
+    { role: "bot", text: "Hello! How can I help you today?" },
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -40,10 +40,10 @@ export default function BotCat() {
         body: JSON.stringify({
           model: "gpt-3.5-turbo",
           messages: [
-            { role: "system", content: "You are a helpful assistant." },
+            { role: "system", content: "You are a helpful Music assistant." },
             { role: "user", content: userMessage },
           ],
-          temperature: 0.7,
+          temperature: 0.3,
         }),
       });
       const data = await response.json();
