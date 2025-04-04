@@ -32,8 +32,6 @@ const PlaylistDetail = () => {
   const navigation = useNavigation();
   const { playlistId, title } = route.params;
   const { playSound } = useAudio();
-
-  
   const { theme } = useTheme();
 
   // Local state
@@ -45,12 +43,14 @@ const PlaylistDetail = () => {
   const [creatorName, setCreatorName] = useState("");
   const [createdAt, setCreatedAt] = useState("");
 
-  // Add-songs modal
+  // Add-songs modal state
   const [modalVisible, setModalVisible] = useState(false);
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [loadingSearch, setLoadingSearch] = useState(false);
+  const [searchPage, setSearchPage] = useState(1);
+  const resultsPerPage = 10;
 
   // Edit playlist modal
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -78,7 +78,6 @@ const PlaylistDetail = () => {
     try {
       const user = auth.currentUser;
       const details = await playlistService.getPlaylistById(playlistId);
-
       setIsOwnPlaylist(user && details.user_id === user.uid);
       setCreatorName(details.username || "Unknown");
       setCreatedAt(details.created_at || "");
@@ -100,7 +99,6 @@ const PlaylistDetail = () => {
         covers.push(defaultCoverImage);
       }
     }
-    // fill up if fewer than 4
     while (covers.length < 4) {
       covers.push(defaultCoverImage);
     }
@@ -124,15 +122,17 @@ const PlaylistDetail = () => {
     }
   };
 
-  // Searching
+  // Searching for songs to add
   const handleSearch = async (text) => {
     setQuery(text);
+    // Reset pagination when query changes.
+    setSearchPage(1);
     if (text.length > 2) {
       setIsSearching(true);
       setLoadingSearch(true);
       try {
         const results = await songService.searchSongs(text);
-        // Exclude songs already in this playlist
+        // Exclude songs already in this playlist.
         const filtered = results.filter(
           (song) => !playlistSongs.some((ps) => (ps.id || ps.songId) === song.id)
         );
@@ -155,6 +155,7 @@ const PlaylistDetail = () => {
       await playlistService.addSongToPlaylist(playlistId, song);
       setUserSongs((prev) => [...prev, song]);
       setPlaylistSongs((prev) => [...prev, song]);
+      // Remove the added song from the search results.
       setSearchResults((prev) => prev.filter((s) => s.id !== song.id));
     } catch (error) {
       console.error("Error adding song:", error);
@@ -189,12 +190,12 @@ const PlaylistDetail = () => {
     );
   };
 
-  // Edit
+  // Edit playlist
   const handleEditPlaylist = () => {
     setEditModalVisible(true);
   };
 
-  // Rename
+  // Rename playlist
   const handleRenamePlaylist = async () => {
     if (newTitle.trim() && newTitle !== title) {
       try {
@@ -232,7 +233,7 @@ const PlaylistDetail = () => {
     setEditModalVisible(false);
   };
 
-  // Render top
+  // Render header (playlist details, covers, controls)
   const renderHeader = () => (
     <>
       <View style={[styles.topBar, { backgroundColor: theme.background }]}>
@@ -272,7 +273,7 @@ const PlaylistDetail = () => {
     </>
   );
 
-  // Render footer
+  // Render footer (playlist details)
   const renderFooter = () => (
     <View style={styles.footerContainer}>
       <Text style={[styles.footerTitle, { color: theme.text }]}>Playlist Details</Text>
@@ -325,9 +326,6 @@ const PlaylistDetail = () => {
             <Pressable style={[styles.button, { backgroundColor: theme.primary }]} onPress={handleRenamePlaylist}>
               <Text style={[styles.buttonText, { color: theme.text }]}>Rename</Text>
             </Pressable>
-
-            {/* The "Change Cover" is removed, so we skip that pressable */}
-
             <Pressable style={[styles.deleteButton, { backgroundColor: theme.delete }]} onPress={handleDeletePlaylist}>
               <Text style={[styles.buttonText, { color: theme.text }]}>Delete Playlist</Text>
             </Pressable>
@@ -357,7 +355,10 @@ const PlaylistDetail = () => {
                 placeholder="Search by title or artist..."
                 placeholderTextColor="#aaa"
                 value={query}
-                onChangeText={handleSearch}
+                onChangeText={(text) => {
+                  setQuery(text);
+                  handleSearch(text);
+                }}
               />
               {query ? (
                 <TouchableOpacity style={styles.searchIcon} onPress={() => setQuery("")}>
@@ -365,32 +366,42 @@ const PlaylistDetail = () => {
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity style={styles.searchIcon}>
-                  <Text style={{ color: theme.text, fontSize: 18 }}>🔍</Text>
+                  <Ionicons name="search-outline" size={18} color="#000" />
                 </TouchableOpacity>
               )}
             </View>
             {loadingSearch && (
               <ActivityIndicator size="large" color={theme.text} style={{ marginVertical: 10 }} />
             )}
-            <FlatList
-              data={searchResults}
-              keyExtractor={(item, index) => (item.id ? item.id.toString() : `fallback-${index}`)}
-              renderItem={({ item }) => (
-                <View style={styles.songItem}>
-                  <Text style={[styles.songTitle, { color: theme.text }]}>
-                    {item.title} - {item.artist}
-                  </Text>
-                  <TouchableOpacity onPress={() => handleAddToPlaylist(item)}>
-                    <Ionicons name="add-circle" size={24} color="#28a745" />
-                  </TouchableOpacity>
-                </View>
-              )}
-              ListEmptyComponent={
-                !loadingSearch && (
-                  <Text style={[styles.emptyText, { color: theme.text }]}>No results found</Text>
-                )
-              }
-            />
+            {/* Limited search results container with load more */}
+            <View style={styles.searchResultsContainer}>
+              <FlatList
+                data={searchResults.slice(0, searchPage * resultsPerPage)}
+                keyExtractor={(item, index) =>
+                  item.id ? item.id.toString() : `fallback-${index}`
+                }
+                renderItem={({ item }) => (
+                  <View style={styles.songItem}>
+                    <Text style={[styles.songTitle, { color: theme.text }]}>
+                      {item.title} - {item.artist}
+                    </Text>
+                    <TouchableOpacity onPress={() => handleAddToPlaylist(item)}>
+                      <Ionicons name="add-circle" size={24} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                )}
+                ListFooterComponent={() =>
+                  searchResults.length > searchPage * resultsPerPage ? (
+                    <TouchableOpacity
+                      onPress={() => setSearchPage(searchPage + 1)}
+                      style={styles.loadMoreButton}
+                    >
+                      <Text style={[styles.loadMoreText, { color: theme.text }]}>Load More</Text>
+                    </TouchableOpacity>
+                  ) : null
+                }
+              />
+            </View>
             <Pressable
               style={[styles.closeButton, { backgroundColor: theme.primary, marginTop: 20 }]}
               onPress={() => setModalVisible(false)}
@@ -470,12 +481,14 @@ const styles = StyleSheet.create({
   },
   searchBar: {
     flex: 1,
-    backgroundColor: "#444",
     padding: 10,
     borderRadius: 5,
   },
   searchIcon: {
     marginLeft: 10,
+  },
+  searchResultsContainer: {
+    maxHeight: 300,
   },
   songItem: {
     flexDirection: "row",
@@ -485,6 +498,14 @@ const styles = StyleSheet.create({
   },
   songTitle: {
     fontSize: 16,
+  },
+  loadMoreButton: {
+    alignItems: "center",
+    padding: 10,
+  },
+  loadMoreText: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
   emptyText: {
     textAlign: "center",
@@ -531,6 +552,41 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 14,
     marginBottom: 2,
+  },
+  browseGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    width: "90%",
+    margin: "auto",
+    marginBottom: 100,
+  },
+  categoryCard: {
+    width: "48%",
+    height: 100,
+    borderRadius: 8,
+    marginBottom: 12,
+    padding: 12,
+    overflow: "hidden",
+  },
+  genreRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    flex: 1,
+    paddingHorizontal: 10,
+  },
+  categoryName: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "left",
+  },
+  genreIcon: {
+    width: 70,
+    height: 70,
+    resizeMode: "contain",
+    marginLeft: 5,
   },
 });
 
