@@ -1,33 +1,13 @@
-CLASSIC DARK MODE  
-#1a1a1a BACKGROUND
-#182952 BLUE
-#213555 BLUE
-#F1F1F1 TEXT
+COLOR CODE THEMES
+=================
+DELETE Color: #BF3131
 
-CLASSIC LIGHT MODE
-#F1F1F1 BACKGROUND
-#182952 BLUE
-#213555 BLUE
-#1a1a1a TEXT
-
-Astro Neon
-#211951 BACKGROUND
-#836FFF 
-#15F5BA 
-#F0F3FF text
-
-Deep Blue Sea
-#0B2447 BACKGROUND
-#19376D 
-#576CBC 
-#F0F3FF text
-
-Cherry Blossom 
-#F0A8D0 BACKGROUND
-#F7B5CA
-#F3D0D7
-#F0F3FF
-
-DELETE
-#BF3131
+Theme: Classic Dark Mode
+-------------------------
+Background: #1a1a1a
+Primary:    #182952
+Secondary:  #213555
+Text:       #F1F1F1
+Border:     #99a9b9
+Icon:       #0079FF
 
