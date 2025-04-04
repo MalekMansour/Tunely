@@ -85,10 +85,10 @@ export const themes = {
   }),
   cherry: createTheme({
     name: "Cherry Blossom",
-    background: "#FFF0F5",    
+    background: "#FFB6C1",    
     primary: "#FF69B4",       
-    secondary: "#FFB6C1",     
-    text: "#4a4a4a",          
+    secondary: "#FF1493",     
+    text: "#1a1a1a",          
     border: "#FF1493",        
     icon: "#FF1493",          
   }),
