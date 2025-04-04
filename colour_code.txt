@@ -115,3 +115,20 @@ Text:       #FFFFFF
 Border:     #FF6000
 Icon:       #F59C00
 
+Theme: Spot the Music
+---------------------
+Background: #191414
+Primary:    #1DB954
+Secondary:  #1DB954
+Text:       #FFFFFF
+Border:     #99a9b9
+Icon:       #1DB954
+
+Theme: The Blood Moon
+---------------------
+Background: #000000
+Primary:    #CF0A0A
+Secondary:  #DC143C
+Text:       #F1F1F1
+Border:     #CF0A0A
+Icon:       #CF0A0A
