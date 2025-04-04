@@ -11,3 +11,12 @@ Text:       #F1F1F1
 Border:     #99a9b9
 Icon:       #0079FF
 
+Theme: Classic Light Mode
+--------------------------
+Background: #f7f7f7
+Primary:    #7da2a9
+Secondary:  #52767b
+Text:       #1a1a1a
+Border:     #182952
+Icon:       #182952
+
