@@ -28,6 +28,15 @@ Secondary:  #576CBC
 Border:     #99a9b9
 Icon:       #0079FF
 
+Theme: Spot the Music
+---------------------
+Background: #191414
+Primary:    #1DB954
+Secondary:  #1DB954
+Text:       #FFFFFF
+Border:     #99a9b9
+Icon:       #1DB954
+
 Theme: Cherry Blossom
 ----------------------
 Background: #FFB6C1
@@ -63,22 +72,6 @@ Secondary:  #deb992
 Border:     #1ba098
 Icon:       #1ba098
 
-Theme: 808's & Heartbreak
---------------------------
-Background: #D2E0FB
-Primary:    #E50046
-Secondary:  #eb3a70
-Border:     #E50046
-Icon:       #E50046
-
-Theme: Igor
------------
-Background: #000000
-Primary:    #fa255e
-Secondary:  #fa255e
-Border:     #fa255e
-Icon:       #fa255e
-
 Theme: brat
 -----------
 Background: #8ACE00
@@ -106,6 +99,15 @@ Text:       #1a1a1a
 Border:     #9575CD
 Icon:       #7E57C2
 
+Theme: Igor
+-----------
+Background: #000000
+Primary:    #fa255e
+Secondary:  #fa255e
+Border:     #fa255e
+Icon:       #fa255e
+
+
 Theme: Celest
 -------------
 Background: #000000
@@ -114,15 +116,6 @@ Secondary:  #FF8C00
 Text:       #FFFFFF
 Border:     #FF6000
 Icon:       #F59C00
-
-Theme: Spot the Music
----------------------
-Background: #191414
-Primary:    #1DB954
-Secondary:  #1DB954
-Text:       #FFFFFF
-Border:     #99a9b9
-Icon:       #1DB954
 
 Theme: The Blood Moon
 ---------------------
