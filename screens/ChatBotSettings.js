@@ -13,14 +13,14 @@ export default function ChatBotSettings({ navigation }) {
   // Define 9 icon options from assets/catbots/
   const iconOptions = [
     { name: "blue", source: require("../assets/catbots/blue.png") },
+    { name: "cyan", source: require("../assets/catbots/cyan.png") },
     { name: "black", source: require("../assets/catbots/black.png") },
     { name: "red", source: require("../assets/catbots/red.png") },
+    { name: "orange", source: require("../assets/catbots/orange.png") },
+    { name: "yellow", source: require("../assets/catbots/yellow.png") },
     { name: "green", source: require("../assets/catbots/green.png") },
     { name: "purple", source: require("../assets/catbots/purple.png") },
     { name: "pink", source: require("../assets/catbots/pink.png") },
-    { name: "orange", source: require("../assets/catbots/orange.png") },
-    { name: "cyan", source: require("../assets/catbots/cyan.png") },
-    { name: "yellow", source: require("../assets/catbots/yellow.png") },
   ];
 
   return (
@@ -93,7 +93,7 @@ export default function ChatBotSettings({ navigation }) {
                 key={index}
                 onPress={() => setCatbotIcon(iconOption.name)}
                 style={{
-                  backgroundColor: "#fff",
+                  backgroundColor: "#F1EFEC",
                   width: 100,
                   height: 100,
                   justifyContent: "center",
