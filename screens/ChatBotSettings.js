@@ -36,7 +36,7 @@ export default function ChatBotSettings({ navigation }) {
       <Text
         style={[
           styles.title,
-          { marginTop: 100, marginLeft: 160, fontSize: 28, color: theme.text },
+          { marginTop: 100, marginLeft: 100, fontSize: 28, color: theme.text },
         ]}
       >
         ChatBot Settings
