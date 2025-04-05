@@ -37,6 +37,7 @@ import CatBot from "./components/catbot";
 import BotChat from "./screens/BotCat";
 import ThemeSettings from "./screens/ThemeSettings";
 import ArtistPage from "./screens/ArtistPage";
+import ChatBotSettings from "./screens/ChatBotSettings"; // Added ChatBotSettings import
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -184,14 +185,24 @@ export default function App() {
                         cardStyle: { backgroundColor: "transparent" },
                       }}
                     />
-                    <Stack.Screen name="CommentScreen" component={CommentScreen} />
+                    <Stack.Screen
+                      name="CommentScreen"
+                      component={CommentScreen}
+                    />
                     <Stack.Screen name="Profile" component={ProfileScreen} />
                     <Stack.Screen name="Settings" component={SettingsScreen} />
+                    <Stack.Screen name="ChatBotSettings" component={ChatBotSettings} />
                     <Stack.Screen name="Login" component={LoginScreen} />
-                    <Stack.Screen name="LoginFormPage" component={LoginFormPage} />
+                    <Stack.Screen
+                      name="LoginFormPage"
+                      component={LoginFormPage}
+                    />
                     <Stack.Screen name="SignUp" component={SignUpScreen} />
                     <Stack.Screen name="Upload" component={UploadScreen} />
-                    <Stack.Screen name="ThemeSettings" component={ThemeSettings} />
+                    <Stack.Screen
+                      name="ThemeSettings"
+                      component={ThemeSettings}
+                    />
                     <Stack.Screen name="AdminPage" component={AdminPage} />
                     <Stack.Screen name="AuthCheck" component={AdminCheck} />
                     <Stack.Screen name="BotCat" component={BotChat} />
@@ -230,6 +241,7 @@ function ConditionalCatBot() {
     "Settings",
     "Upload",
     "BotCat",
+    "ChatBotSettings",
   ];
 
   if (!chatbotVisible || !routeName || hiddenScreens.includes(routeName)) {
