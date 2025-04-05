@@ -229,6 +229,7 @@ function ConditionalCatBot() {
     "ThemeSettings",
     "Settings",
     "Upload",
+    "BotCat",
   ];
 
   if (!chatbotVisible || !routeName || hiddenScreens.includes(routeName)) {
