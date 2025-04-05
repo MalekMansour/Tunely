@@ -4,6 +4,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../context/ThemeContext";
+import { Image } from 'react-native';
+
 
 const { width, height } = Dimensions.get("window");
 const BUTTON_SIZE = 80;
@@ -100,8 +102,8 @@ export default function CatBot() {
           { transform: [{ translateX }, { translateY }] },
         ]}
       >
-        <TouchableOpacity onPress={openChat} style={[styles.button, { backgroundColor: theme.secondary }]}>
-          <Ionicons name="logo-octocat" size={40} color="#fff" />
+        <TouchableOpacity onPress={openChat} style={[styles.button, { backgroundColor: "#F1EFEC" }]}>
+        <Image source={require('../assets/catbots/blue.png')} style={{ width: 80, height: 80 }} />
         </TouchableOpacity>
       </Animated.View>
     </PanGestureHandler>
