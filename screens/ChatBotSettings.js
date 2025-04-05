@@ -99,7 +99,7 @@ export default function ChatBotSettings({ navigation }) {
                   justifyContent: "center",
                   alignItems: "center",
                   margin: 10,
-                  borderWidth: selected ? 2 : 0,
+                  borderWidth: selected ? 3 : 0,
                   borderColor: selected ? theme.icon || theme.primary : "transparent",
                   borderRadius: 8,
                 }}
