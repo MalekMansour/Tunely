@@ -55,9 +55,10 @@ function ScreenWithTopBar({ navigation, children, title }) {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
-            paddingHorizontal: 20,
+            paddingHorizontal: 5,
             paddingTop: 30,
             marginTop: 20,
+            marginBottom: -30,
           },
         ]}
       >
