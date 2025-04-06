@@ -38,6 +38,8 @@ import CatBot from "./components/catbot";
 import BotChat from "./screens/BotCat";
 import ThemeSettings from "./screens/ThemeSettings";
 import ArtistPage from "./screens/ArtistPage";
+import ChatBotSettings from "./screens/ChatBotSettings";
+import TermsAndServices from "./screens/TermsAndServices";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
