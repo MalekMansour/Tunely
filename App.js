@@ -15,6 +15,7 @@ import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { ChatbotProvider, useChatbot } from "./context/ChatbotContext";
 import { Provider as PaperProvider } from "react-native-paper";
 
+
 // Screens & Components
 import HomeScreen from "./screens/Home";
 import SearchScreen from "./screens/Search";
@@ -37,6 +38,7 @@ import CatBot from "./components/catbot";
 import BotChat from "./screens/BotCat";
 import ThemeSettings from "./screens/ThemeSettings";
 import ArtistPage from "./screens/ArtistPage";
+import TermsAndServices from "./screens/TermsAndServices";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -196,6 +198,9 @@ export default function App() {
                     <Stack.Screen name="AuthCheck" component={AdminCheck} />
                     <Stack.Screen name="BotCat" component={BotChat} />
                     <Stack.Screen name="ArtistPage" component={ArtistPage} />
+                    <Stack.Screen name="TermsAndServices" component={TermsAndServices} />
+                    
+                
                   </Stack.Navigator>
 
                   <FloatingPlayer />
