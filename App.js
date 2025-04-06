@@ -5,7 +5,7 @@ import {
   NavigationContainer,
   useNavigationState,
 } from "@react-navigation/native";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "./styles";
@@ -14,7 +14,6 @@ import { AudioProvider } from "./context/AudioContext";
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { ChatbotProvider, useChatbot } from "./context/ChatbotContext";
 import { Provider as PaperProvider } from "react-native-paper";
-
 
 // Screens & Components
 import HomeScreen from "./screens/Home";
@@ -48,12 +47,36 @@ function ScreenWithTopBar({ navigation, children, title }) {
   const { theme } = useTheme();
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
-      <View style={[styles.topBar, { backgroundColor: theme.background }]}>
-        <Text style={[styles.title, { color: theme.text, marginTop: 30 }]}>
-          {title}
-        </Text>
+      <View
+        style={[
+          styles.topBar,
+          {
+            backgroundColor: theme.background,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            paddingHorizontal: 20,
+            paddingTop: 30,
+            marginTop: 20,
+          },
+        ]}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Image
+            source={require("./assets/tunely_logo_top.png")}
+            style={{ width: 75, height: 75, marginRight: -5, }}  
+          />
+          <Text
+            style={[
+              styles.title,
+              { color: theme.text, fontFamily: "AlegreyaSansSC" },
+            ]}
+          >
+            {title}
+          </Text>
+        </View>
         <TouchableOpacity
-          style={[styles.profileButton, { marginTop: 30 }]}
+          style={styles.profileButton}
           onPress={() => navigation.navigate("Profile")}
         >
           <TopBarProfileIcon size={45} />
@@ -82,7 +105,7 @@ function SearchWithTopBar({ navigation }) {
 
 function LibraryWithTopBar({ navigation }) {
   return (
-    <ScreenWithTopBar navigation={navigation} title="Your Library">
+    <ScreenWithTopBar navigation={navigation} title="Library">
       <LibraryScreen />
     </ScreenWithTopBar>
   );
@@ -193,7 +216,10 @@ export default function App() {
                     />
                     <Stack.Screen name="Profile" component={ProfileScreen} />
                     <Stack.Screen name="Settings" component={SettingsScreen} />
-                    <Stack.Screen name="ChatBotSettings" component={ChatBotSettings} />
+                    <Stack.Screen
+                      name="ChatBotSettings"
+                      component={ChatBotSettings}
+                    />
                     <Stack.Screen name="Login" component={LoginScreen} />
                     <Stack.Screen
                       name="LoginFormPage"
@@ -209,9 +235,10 @@ export default function App() {
                     <Stack.Screen name="AuthCheck" component={AdminCheck} />
                     <Stack.Screen name="BotCat" component={BotChat} />
                     <Stack.Screen name="ArtistPage" component={ArtistPage} />
-                    <Stack.Screen name="TermsAndServices" component={TermsAndServices} />
-                    
-                
+                    <Stack.Screen
+                      name="TermsAndServices"
+                      component={TermsAndServices}
+                    />
                   </Stack.Navigator>
 
                   <FloatingPlayer />
