@@ -14,6 +14,7 @@ export default function LoginFormPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false); // Track password visibility
   const [isLoading, setIsLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false); // New state for reset button
   const navigation = useNavigation(); 
 
   // Animations
@@ -69,6 +70,39 @@ export default function LoginFormPage() {
     }
   };  
 
+  const handleForgotPassword = async () => {
+    // Validate email
+    if (!email || !email.includes('@')) {
+      Alert.alert("Error", "Please enter a valid email address");
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      await authService.resetPassword(email);
+      Alert.alert(
+        "Password Reset Email Sent",
+        `Instructions to reset your password have been sent to ${email}`,
+        [{ text: "OK" }]
+      );
+    } catch (error) {
+      let errorMessage = "Failed to send password reset email";
+      
+      // More descriptive error messages based on Firebase error codes
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = "No account exists with this email address";
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = "Please enter a valid email address";
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMessage = "Too many requests. Please try again later";
+      }
+      
+      Alert.alert("Error", errorMessage);
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.loginBox, { opacity: fadeAnim }]}>
@@ -87,6 +121,8 @@ export default function LoginFormPage() {
           style={styles.input}
           value={email}
           onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
         />
 
         {/* Password Input with Eye Icon */}
@@ -103,6 +139,17 @@ export default function LoginFormPage() {
             <Icon name={showPassword ? "eye-off" : "eye"} size={24} color="#aaa" />
           </TouchableOpacity>
         </View>
+
+        {/* Forgot Password Link */}
+        <TouchableOpacity 
+          onPress={handleForgotPassword}
+          disabled={resetLoading}
+          style={styles.forgotPasswordLink}
+        >
+          <Text style={styles.forgotPasswordText}>
+            {resetLoading ? "Sending..." : "Forgot Password?"}
+          </Text>
+        </TouchableOpacity>
 
         {/* Log In Button */}
         <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
@@ -229,5 +276,14 @@ const styles = StyleSheet.create({
   googleLogo: {
     width: 24,
     height: 24,
-  }
+  },
+  forgotPasswordLink: {
+    alignSelf: 'flex-end',
+    marginBottom: 20,
+    marginTop: -5,
+  },
+  forgotPasswordText: {
+    color: '#64B5F6',
+    fontSize: 14,
+  },
 });

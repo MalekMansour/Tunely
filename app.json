@@ -25,7 +25,7 @@
       ]
     ],
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/tunely_logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

@@ -1,40 +1,127 @@
+COLOR CODE THEMES
+=================
+DELETE Color: #BF3131
 
-GREEN VERSION (Decrapted)
-#AAB99A 
-#727D73
-#D0DDD0
-#F0F0D7 
+Theme: Classic Dark Mode
+-------------------------
+Background: #1a1a1a
+Primary:    #182952
+Secondary:  #213555
+Text:       #F1F1F1
+Border:     #99a9b9
+Icon:       #0079FF
 
-CLASSIC DARK MODE  
-#1a1a1a BACKGROUND
-#182952 BLUE
-#213555 BLUE
-#F1F1F1 TEXT
+Theme: Classic Light Mode
+--------------------------
+Background: #f7f7f7
+Primary:    #7da2a9
+Secondary:  #52767b
+Text:       #1a1a1a
+Border:     #182952
+Icon:       #182952
 
-CLASSIC LIGHT MODE
-#F1F1F1 BACKGROUND
-#182952 BLUE
-#213555 BLUE
-#1a1a1a TEXT
+Theme: Deep Blue Sea
+---------------------
+Background: #0B2447
+Primary:    #19376D
+Secondary:  #576CBC
+Border:     #99a9b9
+Icon:       #0079FF
 
-Astro Neon
-#211951 BACKGROUND
-#836FFF 
-#15F5BA 
-#F0F3FF text
+Theme: Spot the Music
+---------------------
+Background: #191414
+Primary:    #1DB954
+Secondary:  #1DB954
+Text:       #FFFFFF
+Border:     #99a9b9
+Icon:       #1DB954
 
-Deep Blue Sea
-#0B2447 BACKGROUND
-#19376D 
-#576CBC 
-#F0F3FF text
+Theme: Cherry Blossom
+----------------------
+Background: #FFB6C1
+Primary:    #FF69B4
+Secondary:  #FF1493
+Text:       #1a1a1a
+Border:     #FF1493
+Icon:       #FF1493
 
-Cherry Blossom 
-#F0A8D0 BACKGROUND
-#F7B5CA
-#F3D0D7
-#F0F3FF
+Theme: Astro Neon
+------------------
+Background: #211951
+Primary:    #836FFF
+Secondary:  #865DFF
+Text:       #F0F3FF
+Border:     #2D336B
+Icon:       #836FFF
 
-DELETE
-#BF3131
+Theme: Cafe Latte
+------------------
+Background: #FED8B1
+Primary:    #A67B5B
+Secondary:  #6F4E37
+Text:       #1a1a1a
+Border:     #543310
+Icon:       #ECB176
 
+Theme: Slumber
+--------------
+Background: #051622
+Primary:    #1ba098
+Secondary:  #deb992
+Border:     #1ba098
+Icon:       #1ba098
+
+Theme: brat
+-----------
+Background: #8ACE00
+Primary:    #a1e832
+Secondary:  #6fbf00
+Text:       #000000
+Border:     #000000
+Icon:       #000000
+
+Theme: Matcha
+-------------
+Background: #E8F5E9
+Primary:    #A5D6A7
+Secondary:  #66BB6A
+Text:       #1a1a1a
+Border:     #66BB6A
+Icon:       #5F8B4C
+
+Theme: Lavender
+---------------
+Background: #E6E6FA
+Primary:    #B39DDB
+Secondary:  #9575CD
+Text:       #1a1a1a
+Border:     #9575CD
+Icon:       #7E57C2
+
+Theme: Igor
+-----------
+Background: #000000
+Primary:    #fa255e
+Secondary:  #fa255e
+Border:     #fa255e
+Icon:       #fa255e
+
+
+Theme: Celest
+-------------
+Background: #000000
+Primary:    #F59C00
+Secondary:  #FF8C00
+Text:       #FFFFFF
+Border:     #FF6000
+Icon:       #F59C00
+
+Theme: The Blood Moon
+---------------------
+Background: #000000
+Primary:    #CF0A0A
+Secondary:  #DC143C
+Text:       #F1F1F1
+Border:     #CF0A0A
+Icon:       #CF0A0A

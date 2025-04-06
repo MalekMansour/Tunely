@@ -1,9 +1,10 @@
 import React, { useRef, useMemo, useCallback } from "react";
-import { Animated, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
+import { Animated, StyleSheet, Dimensions, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
 import { useTheme } from "../context/ThemeContext";
+import { useChatbot } from "../context/ChatbotContext";
 
 const { width, height } = Dimensions.get("window");
 const BUTTON_SIZE = 80;
@@ -21,6 +22,7 @@ const DEFAULT_Y = height - BUTTON_SIZE - BOTTOM_MARGIN;
 
 export default function CatBot() {
   const { theme } = useTheme();
+  const { catbotIcon } = useChatbot();
   const translateX = useRef(new Animated.Value(DEFAULT_X)).current;
   const translateY = useRef(new Animated.Value(DEFAULT_Y)).current;
   const lastPositionRef = useRef({ x: DEFAULT_X, y: DEFAULT_Y });
@@ -29,6 +31,21 @@ export default function CatBot() {
   const openChat = useCallback(() => {
     navigation.navigate("BotCat");
   }, [navigation]);
+
+  // Map selected icon names to image sources
+  const iconMapping = {
+    blue: require("../assets/catbots/blue.png"),
+    black: require("../assets/catbots/black.png"),
+    red: require("../assets/catbots/red.png"),
+    green: require("../assets/catbots/green.png"),
+    purple: require("../assets/catbots/purple.png"),
+    pink: require("../assets/catbots/pink.png"),
+    orange: require("../assets/catbots/orange.png"),
+    cyan: require("../assets/catbots/cyan.png"),
+    yellow: require("../assets/catbots/yellow.png"),
+  };
+
+  const iconSource = iconMapping[catbotIcon] || iconMapping.blue;
 
   const onGestureEvent = useMemo(
     () =>
@@ -100,8 +117,8 @@ export default function CatBot() {
           { transform: [{ translateX }, { translateY }] },
         ]}
       >
-        <TouchableOpacity onPress={openChat} style={[styles.button, { backgroundColor: theme.secondary }]}>
-          <Ionicons name="logo-octocat" size={40} color="#fff" />
+        <TouchableOpacity onPress={openChat} style={[styles.button, { backgroundColor: "#F1EFEC" }]}>
+          <Image source={iconSource} style={{ width: 80, height: 80 }} />
         </TouchableOpacity>
       </Animated.View>
     </PanGestureHandler>

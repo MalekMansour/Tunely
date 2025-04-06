@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import ThemedScreen from "../components/ThemedScreen";
 
 export default function SettingsScreen({ navigation }) {
   const { theme } = useTheme();
-  const { chatbotVisible, setChatbotVisible } = useChatbot();
+  const { chatbotVisible } = useChatbot();
 
   const handleDeleteAccount = () => {
     Alert.alert(
@@ -39,9 +39,9 @@ export default function SettingsScreen({ navigation }) {
       onPress: () => navigation.navigate("ThemeSettings"),
     },
     {
-      label: `ChatBot Buddy: ${chatbotVisible ? "On" : "Off"}`,
+      label: "ChatBot Settings",
       icon: chatbotVisible ? "chatbubbles" : "chatbubbles-outline",
-      onPress: () => setChatbotVisible(!chatbotVisible),
+      onPress: () => navigation.navigate("ChatBotSettings"),
     },
     {
       label: "Terms and Services",
@@ -135,7 +135,7 @@ export default function SettingsScreen({ navigation }) {
         </TouchableOpacity>
 
         <Text style={{ color: theme.text, fontSize: 12, marginTop: 20 }}>
-          App Version: Early Access 0.6.2
+          App Version: Early Access 0.9.4
         </Text>
       </ScrollView>
     </ThemedScreen>

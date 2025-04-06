@@ -8,6 +8,7 @@ import {
 } from 'firebase/auth';
 import { API_URL } from '../config/apiConfig';
 import { signInWithGoogle } from '../Utility/googleAuth';
+import { sendPasswordResetEmail } from 'firebase/auth';
 
 // Helper to get token and create headers
 const getAuthHeaders = async () => {
@@ -125,5 +126,15 @@ export const authService = {
   // Sign out
   signOut: async () => {
     await firebaseSignOut(auth);
-  }
+  },
+
+  resetPassword: async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return { success: true, message: "Password reset email sent" };
+    } catch (error) {
+      console.error("Error sending password reset email:", error);
+      throw error;
+    }
+  },
 };

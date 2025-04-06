@@ -1,13 +1,13 @@
-// context/ChatbotContext.js
 import React, { createContext, useContext, useState } from "react";
 
 const ChatbotContext = createContext();
 
 export const ChatbotProvider = ({ children }) => {
   const [chatbotVisible, setChatbotVisible] = useState(true);
+  const [catbotIcon, setCatbotIcon] = useState("blue"); // Default icon
 
   return (
-    <ChatbotContext.Provider value={{ chatbotVisible, setChatbotVisible }}>
+    <ChatbotContext.Provider value={{ chatbotVisible, setChatbotVisible, catbotIcon, setCatbotIcon }}>
       {children}
     </ChatbotContext.Provider>
   );
