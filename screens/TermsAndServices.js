@@ -35,7 +35,7 @@ const TermsAndServices = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F1F1F1', // Background color
+    backgroundColor: '#F1F1F1', 
     paddingTop: 20, 
   },
   header: {
