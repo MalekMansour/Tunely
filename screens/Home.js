@@ -55,7 +55,6 @@ export default function HomeScreen() {
   // Get 10 newest songs
   const newSongs = songs.slice(0, 10);
 
-  // Categorize songs by genre (each genre limited to 10 songs)
   const categorizedSongs = {
     Pop: songs.filter((song) => song.genre === "Pop").slice(0, 10),
     Rap: songs.filter((song) => song.genre === "Rap").slice(0, 10),
