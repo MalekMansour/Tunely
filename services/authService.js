@@ -137,4 +137,21 @@ export const authService = {
       throw error;
     }
   },
+  
+  deleteAccount: async () => {
+    const headers = await getAuthHeaders();
+  
+    const response = await fetch(`${API_URL}/users/me`, {
+      method: 'DELETE',
+      headers,
+    });
+  
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to delete account');
+    }
+  
+    return response.json();
+  },
+  
 };

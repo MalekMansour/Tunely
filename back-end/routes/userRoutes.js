@@ -7,6 +7,11 @@ const { upload } = require('../middleware/upload'); // Import your existing uplo
 
 // Register user after signup/login
 router.post('/register', verifyToken, userController.registerUser);
+
+// Delete current user
+router.delete('/me', verifyToken, userController.deleteUser);
+
+
     
 // Get current user profile
 router.get('/me', verifyToken, userController.getUserProfile);

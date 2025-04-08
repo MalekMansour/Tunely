@@ -25,6 +25,11 @@ const CommentModel = {
     const sql = `DELETE FROM comments WHERE id = ?`;
     return await db.query(sql, [commentId]);
   },
+   // Method to delete comments by user ID
+   deleteByUserId: async (userId) => {
+    const sql = `DELETE FROM comments WHERE user_id = ?`;
+    return await db.query(sql, [userId]);
+  },
 };
 
 module.exports = CommentModel;

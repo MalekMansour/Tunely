@@ -11,6 +11,10 @@ import { styles } from "../styles";
 import { useTheme } from "../context/ThemeContext";
 import { useChatbot } from "../context/ChatbotContext";
 import ThemedScreen from "../components/ThemedScreen";
+import { authService } from '../services/authService'; 
+import { signOut } from 'firebase/auth';
+import { auth } from '../Utility/firebaseConfig'
+import { useNavigation } from '@react-navigation/native';
 
 export default function SettingsScreen({ navigation }) {
   const { theme } = useTheme();
@@ -25,7 +29,18 @@ export default function SettingsScreen({ navigation }) {
         {
           text: "Delete",
           style: "destructive",
-          onPress: () => console.log("Delete account logic here"),
+          onPress: async () => {
+            try {
+              await authService.deleteAccount();      // Backend deletion
+              await signOut(auth);                    // Firebase sign-out
+              navigation.reset({                      // Navigate to welcome/login screen
+                index: 0,
+                routes: [{ name: 'Login' }],          // Adjust if your login screen has a different name
+              });
+            } catch (error) {
+              Alert.alert("Error", error.message || "Something went wrong.");
+            }
+          },
         },
       ]
     );
