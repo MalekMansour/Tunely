@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 20,
-    color: '#1a1a1a', // Text color
+    color: '#1a1a1a', 
     fontWeight: 'bold',
     marginLeft: 10,
   },
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#1a1a1a', // Text color
+    color: '#1a1a1a', 
   },
   text: {
     fontSize: 16,
