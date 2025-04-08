@@ -77,7 +77,6 @@ export default function GenreSongs() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // originally backgroundColor: "#000"
     padding: 16,
   },
   arrowButton: {
@@ -92,7 +91,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginTop: 80,
     textAlign: "center",
-    // originally color: "#fff"
   },
   loader: {
     marginTop: 50,
@@ -101,7 +99,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     marginTop: 30,
-    // originally color: "#888"
   },
   list: {
     paddingBottom: 120,  
