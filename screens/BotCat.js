@@ -29,7 +29,6 @@ const ENERGY_TARGETS = {
 };
 
 // ----- Mood Filter Functions -----
-// Each function returns true if a song is considered to match that mood.
 const moodFilters = {
   calm: (song) => {
     const genre = song.genre ? song.genre.toLowerCase() : "";
@@ -71,7 +70,6 @@ const moodFilters = {
 };
 
 // ----- Helper: Shuffle an Array -----
-// Returns a new array with items in random order.
 const shuffleArray = (array) => {
   const arr = array.slice();
   for (let i = arr.length - 1; i > 0; i--) {
@@ -82,7 +80,6 @@ const shuffleArray = (array) => {
 };
 
 // ----- OpenAI Bot Response Generator -----
-// Uses the OpenAI API to generate a creative response based on the mood.
 const generateBotResponse = async (mood) => {
   const apiUrl = "https://api.openai.com/v1/chat/completions";
   try {
@@ -115,7 +112,6 @@ const generateBotResponse = async (mood) => {
 };
 
 // ----- Recommendation Function -----
-// Returns all songs that match the mood filter, then shuffles and selects 5.
 const getFilteredRecommendations = (songs, mood) => {
   const matchingSongs = songs.filter(moodFilters[mood]);
   if (matchingSongs.length === 0) return [];
@@ -123,7 +119,6 @@ const getFilteredRecommendations = (songs, mood) => {
 };
 
 // ----- Cat Icon Mapping -----
-// Map cat icon keys to image sources.
 const catIconMapping = {
   blue: require("../assets/catbots/blue.png"),
   black: require("../assets/catbots/black.png"),
@@ -141,11 +136,11 @@ export default function MoodChatBot() {
   const navigation = useNavigation();
   const { songs, loading: songsLoading, error: songsError, refreshSongs } = useGetSongs("all");
 
-  // Get the current cat icon from Chatbot context (default to "blue" if not set)
+  // Get current cat icon from context; default to blue if not set.
   const { catbotIcon } = useChatbot();
   const currentCatIcon = catIconMapping[catbotIcon] || catIconMapping["blue"];
 
-  // Conversation starts with a welcome message (with logo) that is part of the chat.
+  // Initial conversation starts with a welcome message.
   const initialConversation = [
     {
       sender: "bot",
@@ -156,7 +151,7 @@ export default function MoodChatBot() {
   const [conversation, setConversation] = useState(initialConversation);
   const [loading, setLoading] = useState(false);
 
-  // Define mood options (4 moods).
+  // Mood options (4 moods).
   const moods = [
     { key: "calm", label: "Calm" },
     { key: "energetic", label: "Energetic" },
@@ -164,10 +159,7 @@ export default function MoodChatBot() {
     { key: "hot", label: "Hot" },
   ];
 
-  // When a mood is selected:
-  // 1. Reset conversation (keeping the welcome message).
-  // 2. Append user's mood selection and a bot confirmation (generated via OpenAI).
-  // 3. Filter the song library by the mood, shuffle, and pick 5 recommendations.
+  // When a mood button is pressed, reset conversation and generate recommendations.
   const handleMoodSelection = async (mood) => {
     setConversation(initialConversation);
     setLoading(true);
@@ -201,11 +193,11 @@ export default function MoodChatBot() {
       {/* Simple Top Bar with Back Button */}
       <View style={simpleHeaderStyles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={simpleHeaderStyles.backButton}>
-          <Ionicons name="arrow-back" size={28} color={theme.icon} />
+          <Ionicons name="arrow-back" size={28} color={theme.text} />
         </TouchableOpacity>
       </View>
 
-      {/* Big Cat Icon displayed above the chat conversation */}
+      {/* Big Cat Icon Displayed Above the Chat Conversation */}
       <View style={styles.bigCatIconContainer}>
         <Image source={currentCatIcon} style={styles.bigCatIcon} />
       </View>
@@ -288,7 +280,10 @@ const simpleHeaderStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  backButton: { padding: 8},
+  backButton: {
+    padding: 8,
+    marginTop: 32,
+  },
 });
 
 const chatStyles = StyleSheet.create({
@@ -338,6 +333,7 @@ const styles = StyleSheet.create({
   bigCatIcon: {
     width: 180,
     height: 60,
+    marginTop: -40,
   },
 });
 
