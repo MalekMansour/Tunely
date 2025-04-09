@@ -35,6 +35,7 @@ export default function SongDetailScreen({ route }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(song.likes || 0);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
+  const [isManuallyNavigating, setIsManuallyNavigating] = useState(false);
 
   // When song title or artist is pressed, replace current screen with ArtistPage
   const handleArtistPress = () => {
@@ -45,15 +46,17 @@ export default function SongDetailScreen({ route }) {
   };
 
   useEffect(() => {
-    if (currentSong && song.songId !== currentSong.songId) {
+    if (currentSong && song.songId !== currentSong.songId && !isManuallyNavigating) {
       navigation.replace("SongDetail", { song: currentSong });
     }
+    setIsManuallyNavigating(false);
   }, [currentSong]);
 
   const handleNext = async () => {
     const currentIndex = playlist.findIndex((s) => s.songId === song.songId);
     if (currentIndex < playlist.length - 1) {
       const nextSong = playlist[currentIndex + 1];
+      setIsManuallyNavigating(true);
       await playNextSong();
       navigation.replace("SongDetail", { song: nextSong });
     }
@@ -63,6 +66,7 @@ export default function SongDetailScreen({ route }) {
     const currentIndex = playlist.findIndex((s) => s.songId === song.songId);
     if (currentIndex > 0) {
       const previousSong = playlist[currentIndex - 1];
+      setIsManuallyNavigating(true);
       await playPreviousSong();
       navigation.replace("SongDetail", { song: previousSong });
     }
