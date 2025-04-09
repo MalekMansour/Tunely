@@ -291,6 +291,7 @@ function ConditionalCatBot() {
     "ChatBotSettings",
     "SongDetail",
     "CommentScreen",
+    "TermsAndServices",
   ];
 
   if (!chatbotVisible || !routeName || hiddenScreens.includes(routeName)) {
