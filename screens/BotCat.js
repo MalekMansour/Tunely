@@ -18,23 +18,23 @@ import { useNavigation } from "@react-navigation/native";
 import SongCard from "../components/SongCard";
 
 // ----- Energy Target Values by Mood -----
-// Define target energy for each mood.
+// For "In Love," we choose a moderate target energy (0.65).
 const ENERGY_TARGETS = {
   calm: 0.3,
   energetic: 0.9,
-  angry: 0.8,
+  inlove: 0.65,
   sad: 0.2,
   hot: 0.7,
   default: 0.6,
 };
 
 // ----- Mood Filter Functions -----
-// Each function checks song genre (and optionally song name) and energy.
-// Adjust these criteria according to your song data.
+// Adjust the filters as needed based on your song data.
+// "In Love" now checks for keywords such as "romantic", "love", or "ballad" and a moderate energy.
 const moodFilters = {
   calm: (song) => {
     const genre = song.genre ? song.genre.toLowerCase() : "";
-    // Accept songs that are low-energy or have keywords related to calmness.
+    // Accept songs with low energy or containing keywords related to calmness.
     return song.energy < 0.5 || 
            genre.includes("lofi") ||
            genre.includes("acoustic") ||
@@ -43,7 +43,6 @@ const moodFilters = {
   },
   energetic: (song) => {
     const genre = song.genre ? song.genre.toLowerCase() : "";
-    // Accept songs with high energy or genres typically upbeat.
     return song.energy > 0.7 || 
            genre.includes("pop") ||
            genre.includes("rap") ||
@@ -51,34 +50,37 @@ const moodFilters = {
            genre.includes("electronic") ||
            genre.includes("trap");
   },
-  angry: (song) => {
+  inlove: (song) => {
     const genre = song.genre ? song.genre.toLowerCase() : "";
     const name = song.name ? song.name.toLowerCase() : "";
-    // Accept songs with high energy that have "metal" or "rock" in genre,
-    // or if the song title suggests anger.
-    return song.energy > 0.7 && 
-           (genre.includes("metal") ||
-            genre.includes("rock") ||
-            name.includes("anger") ||
-            name.includes("fury"));
+    // Accept songs that mention "romantic", "love", or "ballad" and have moderate energy.
+    return (
+      (genre.includes("romantic") ||
+       genre.includes("love") ||
+       genre.includes("ballad") ||
+       name.includes("love") ||
+       name.includes("romance")) &&
+      song.energy > 0.4 &&
+      song.energy < 0.8
+    );
   },
   sad: (song) => {
     const genre = song.genre ? song.genre.toLowerCase() : "";
-    // Accept songs with very low energy or that include keywords for sadness.
     return song.energy < 0.4 || 
            genre.includes("acoustic") ||
            genre.includes("alternative");
   },
   hot: (song) => {
     const genre = song.genre ? song.genre.toLowerCase() : "";
-    // Accept songs in R&B, latin, or soul—genres associated with a "hot" vibe.
-    return genre.includes("r&b") || genre.includes("latin") || genre.includes("soul");
+    return genre.includes("r&b") ||
+           genre.includes("latin") ||
+           genre.includes("soul");
   },
 };
 
-// ----- Recommendation Function -----
-// Filters the full library using the mood filter, sorts the results by closeness to the target energy,
-// and returns the top 5 recommended songs.
+// ----- Recommendation Function -----  
+// Filters the song library using the selected mood's filter, sorts the results by
+// closeness of the song's energy to the target, and returns the top 5 songs.
 const getFilteredRecommendations = (songs, mood) => {
   const filterFn = moodFilters[mood];
   if (!filterFn) return [];
@@ -98,7 +100,7 @@ export default function MoodChatBot() {
   const navigation = useNavigation();
   const { songs, loading: songsLoading, error: songsError, refreshSongs } = useGetSongs("all");
 
-  // Initial conversation with a welcome message (logo bubble)
+  // Initial conversation includes a welcome message with a logo bubble.
   const initialConversation = [
     {
       sender: "bot",
@@ -113,15 +115,14 @@ export default function MoodChatBot() {
   const moods = [
     { key: "calm", label: "Calm" },
     { key: "energetic", label: "Energetic" },
-    { key: "angry", label: "Angry" },
+    { key: "inlove", label: "In Love" },
     { key: "sad", label: "Sad" },
     { key: "hot", label: "Hot" },
   ];
 
-  // When a mood button is pressed, reset the conversation and generate recommendations.
+  // When a mood button is pressed, clear the conversation and generate new recommendations.
   const handleMoodSelection = async (mood) => {
-    // Reset conversation to initial welcome.
-    setConversation(initialConversation);
+    setConversation(initialConversation); // Clear previous conversation (keep welcome message)
     setLoading(true);
 
     // Append user's mood selection.
@@ -139,7 +140,7 @@ export default function MoodChatBot() {
     if (songsLoading) {
       await refreshSongs();
     }
-    // Use the full song library (or a sampled subset if desired).
+    // Optionally you can use a subset of songs; here we use the full library.
     const recs = getFilteredRecommendations(songs, mood);
     if (recs.length === 0) {
       const noRecMsg = {
@@ -148,7 +149,7 @@ export default function MoodChatBot() {
       };
       setConversation((prev) => [...prev, noRecMsg]);
     } else {
-      // Append a recommendation message with type "recommendation" that renders SongCards.
+      // Append a recommendation message of type "recommendation" that renders SongCards.
       const recsMsg = {
         sender: "bot",
         type: "recommendation",
@@ -168,10 +169,7 @@ export default function MoodChatBot() {
           { backgroundColor: theme.primary, borderBottomColor: theme.border },
         ]}
       >
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={headerStyles.backButton}
-        >
+        <TouchableOpacity onPress={() => navigation.goBack()} style={headerStyles.backButton}>
           <Ionicons name="arrow-back" size={28} color={theme.icon} />
         </TouchableOpacity>
         <View style={headerStyles.logoContainer}>
@@ -191,7 +189,7 @@ export default function MoodChatBot() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={80}
       >
-        {/* Chat Conversation */}
+        {/* Conversation Messages */}
         <FlatList
           data={conversation}
           keyExtractor={(_, index) => index.toString()}
@@ -205,12 +203,7 @@ export default function MoodChatBot() {
                     { alignSelf: "flex-start", backgroundColor: theme.secondary },
                   ]}
                 >
-                  <Text
-                    style={[
-                      chatStyles.messageText,
-                      { color: theme.text, marginBottom: 8 },
-                    ]}
-                  >
+                  <Text style={[chatStyles.messageText, { color: theme.text, marginBottom: 8 }]}>
                     Here are some recommendations:
                   </Text>
                   {item.data.map((song) => (
@@ -238,12 +231,7 @@ export default function MoodChatBot() {
                     source={require("../assets/tunely_logo_top.png")}
                     style={chatStyles.logoInBubble}
                   />
-                  <Text
-                    style={[
-                      chatStyles.messageText,
-                      { color: theme.text, marginLeft: 8 },
-                    ]}
-                  >
+                  <Text style={[chatStyles.messageText, { color: theme.text, marginLeft: 8 }]}>
                     {item.text}
                   </Text>
                 </View>
@@ -254,19 +242,11 @@ export default function MoodChatBot() {
                   style={[
                     chatStyles.messageBubble,
                     item.sender === "bot"
-                      ? {
-                          alignSelf: "flex-start",
-                          backgroundColor: theme.secondary,
-                        }
-                      : {
-                          alignSelf: "flex-end",
-                          backgroundColor: theme.primary,
-                        },
+                      ? { alignSelf: "flex-start", backgroundColor: theme.secondary }
+                      : { alignSelf: "flex-end", backgroundColor: theme.primary },
                   ]}
                 >
-                  <Text style={[chatStyles.messageText, { color: theme.text }]}>
-                    {item.text}
-                  </Text>
+                  <Text style={[chatStyles.messageText, { color: theme.text }]}>{item.text}</Text>
                 </View>
               );
             }
@@ -276,11 +256,7 @@ export default function MoodChatBot() {
         />
 
         {loading && (
-          <ActivityIndicator
-            size="small"
-            color={theme.icon}
-            style={{ marginVertical: 10 }}
-          />
+          <ActivityIndicator size="small" color={theme.icon} style={{ marginVertical: 10 }} />
         )}
 
         {/* Mood Selection Buttons as 5 Circular Buttons */}
@@ -294,12 +270,7 @@ export default function MoodChatBot() {
               ]}
               onPress={() => handleMoodSelection(m.key)}
             >
-              <Text
-                style={[
-                  buttonStyles.moodButtonText,
-                  { color: theme.background },
-                ]}
-              >
+              <Text style={[buttonStyles.moodButtonText, { color: theme.background }]}>
                 {m.label}
               </Text>
             </TouchableOpacity>
