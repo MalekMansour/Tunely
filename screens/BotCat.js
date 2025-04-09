@@ -16,6 +16,7 @@ import ThemedScreen from "../components/ThemedScreen";
 import { useTheme } from "../context/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
 import SongCard from "../components/SongCard";
+import { useChatbot } from "../context/ChatbotContext";
 import { CATBOT_API_KEY } from "@env";
 
 // ----- Energy Target Values by Mood -----
@@ -81,8 +82,7 @@ const shuffleArray = (array) => {
 };
 
 // ----- OpenAI Bot Response Generator -----
-// Uses the OpenAI API to generate a creative response message based on the mood.
-// Ensure CATBOT_API_KEY is set and valid.
+// Uses the OpenAI API to generate a creative response based on the mood.
 const generateBotResponse = async (mood) => {
   const apiUrl = "https://api.openai.com/v1/chat/completions";
   try {
@@ -98,7 +98,7 @@ const generateBotResponse = async (mood) => {
           {
             role: "system",
             content:
-              "You are a creative and friendly music recommendation assistant. Given a mood, generate a short, unique confirmation message indicating that you have received the mood and are about to provide some recommendations. Do not mention your backend implementation or API keys.",
+              "You are a creative and friendly music recommendation assistant. Given a mood, generate a short, unique confirmation message indicating that you have received the mood and are about to provide recommendations. Keep it varied and friendly.",
           },
           { role: "user", content: `I'm feeling ${mood}.` },
         ],
@@ -107,8 +107,7 @@ const generateBotResponse = async (mood) => {
       }),
     });
     const data = await response.json();
-    const botReply = data.choices[0].message.content.trim();
-    return botReply;
+    return data.choices[0].message.content.trim();
   } catch (error) {
     console.error("Error generating bot response:", error);
     return `Got it, you're feeling ${mood}. Let me recommend some tracks for you...`;
@@ -116,20 +115,37 @@ const generateBotResponse = async (mood) => {
 };
 
 // ----- Recommendation Function -----
-// Returns all songs that match the given mood filter, then shuffles and selects 5.
+// Returns all songs that match the mood filter, then shuffles and selects 5.
 const getFilteredRecommendations = (songs, mood) => {
   const matchingSongs = songs.filter(moodFilters[mood]);
   if (matchingSongs.length === 0) return [];
   return shuffleArray(matchingSongs).slice(0, 5);
 };
 
-// ----- Main Component: MoodChatBot -----
+// ----- Cat Icon Mapping -----
+// Map cat icon keys to image sources.
+const catIconMapping = {
+  blue: require("../assets/catbots/blue.png"),
+  black: require("../assets/catbots/black.png"),
+  red: require("../assets/catbots/red.png"),
+  green: require("../assets/catbots/green.png"),
+  purple: require("../assets/catbots/purple.png"),
+  pink: require("../assets/catbots/pink.png"),
+  orange: require("../assets/catbots/orange.png"),
+  cyan: require("../assets/catbots/cyan.png"),
+  yellow: require("../assets/catbots/yellow.png"),
+};
+
 export default function MoodChatBot() {
   const { theme } = useTheme();
   const navigation = useNavigation();
   const { songs, loading: songsLoading, error: songsError, refreshSongs } = useGetSongs("all");
 
-  // Initial conversation includes a welcome message with a logo.
+  // Get the current cat icon from Chatbot context (default to "blue" if not set)
+  const { catbotIcon } = useChatbot();
+  const currentCatIcon = catIconMapping[catbotIcon] || catIconMapping["blue"];
+
+  // Conversation starts with a welcome message (with logo) that is part of the chat.
   const initialConversation = [
     {
       sender: "bot",
@@ -140,7 +156,7 @@ export default function MoodChatBot() {
   const [conversation, setConversation] = useState(initialConversation);
   const [loading, setLoading] = useState(false);
 
-  // Define mood options (only four now).
+  // Define mood options (4 moods).
   const moods = [
     { key: "calm", label: "Calm" },
     { key: "energetic", label: "Energetic" },
@@ -148,20 +164,17 @@ export default function MoodChatBot() {
     { key: "hot", label: "Hot" },
   ];
 
-  // When a mood button is pressed:
-  // 1. Clear previous conversation (reset to welcome message).
-  // 2. Append user's mood selection.
-  // 3. Call OpenAI API to generate a varied bot confirmation.
-  // 4. Filter the full song library, shuffle, and pick 5 recommendations.
+  // When a mood is selected:
+  // 1. Reset conversation (keeping the welcome message).
+  // 2. Append user's mood selection and a bot confirmation (generated via OpenAI).
+  // 3. Filter the song library by the mood, shuffle, and pick 5 recommendations.
   const handleMoodSelection = async (mood) => {
-    setConversation(initialConversation); // Reset conversation.
+    setConversation(initialConversation);
     setLoading(true);
 
-    // Append user message.
     const userMsg = { sender: "user", text: `I'm feeling ${mood}.` };
     setConversation((prev) => [...prev, userMsg]);
 
-    // Generate a varied bot response using OpenAI.
     const botResponse = await generateBotResponse(mood);
     const moodMsg = {
       sender: "bot",
@@ -169,17 +182,12 @@ export default function MoodChatBot() {
     };
     setConversation((prev) => [...prev, moodMsg]);
 
-    // Ensure songs are loaded.
     if (songsLoading) {
       await refreshSongs();
     }
-    // Filter songs matching the mood.
     const recommendations = getFilteredRecommendations(songs, mood);
     if (recommendations.length === 0) {
-      const noRecMsg = {
-        sender: "bot",
-        text: "Sorry, I couldn't find any matching tracks for that mood.",
-      };
+      const noRecMsg = { sender: "bot", text: "Sorry, I couldn't find any matching tracks for that mood." };
       setConversation((prev) => [...prev, noRecMsg]);
     } else {
       const recsMsg = { sender: "bot", type: "recommendation", data: recommendations };
@@ -190,16 +198,16 @@ export default function MoodChatBot() {
 
   return (
     <ThemedScreen style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Header with Back Button and Logo */}
-      <View style={[headerStyles.header, { backgroundColor: theme.primary, borderBottomColor: theme.border }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={headerStyles.backButton}>
+      {/* Simple Top Bar with Back Button */}
+      <View style={simpleHeaderStyles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={simpleHeaderStyles.backButton}>
           <Ionicons name="arrow-back" size={28} color={theme.icon} />
         </TouchableOpacity>
-        <View style={headerStyles.logoContainer}>
-          <Image source={require("../assets/tunely_logo_top.png")} style={headerStyles.logo} />
-          <Text style={[headerStyles.headerTitle, { color: theme.text }]}>Mood Chat</Text>
-        </View>
-        <View style={{ width: 32 }} />
+      </View>
+
+      {/* Big Cat Icon displayed above the chat conversation */}
+      <View style={styles.bigCatIconContainer}>
+        <Image source={currentCatIcon} style={styles.bigCatIcon} />
       </View>
 
       <KeyboardAvoidingView
@@ -226,7 +234,7 @@ export default function MoodChatBot() {
             } else if (item.type === "logo") {
               return (
                 <View style={[chatStyles.messageBubble, { alignSelf: "flex-start", backgroundColor: theme.secondary, flexDirection: "row", alignItems: "center" }]}>
-                  <Image source={require("../assets/tunely_logo_top.png")} style={chatStyles.logoInBubble} />
+                  <Image source={currentCatIcon} style={chatStyles.logoInBubble} />
                   <Text style={[chatStyles.messageText, { color: theme.text, marginLeft: 8 }]}>{item.text}</Text>
                 </View>
               );
@@ -272,24 +280,15 @@ export default function MoodChatBot() {
   );
 }
 
-const headerStyles = StyleSheet.create({
+const simpleHeaderStyles = StyleSheet.create({
   header: {
-    flexDirection: "row",
-    alignItems: "center",
+    paddingTop: 20,
     paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    marginTop: 40,
-  },
-  backButton: { padding: 8 },
-  logoContainer: {
-    flex: 1,
+    paddingBottom: 10,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
   },
-  logo: { width: 40, height: 40, marginRight: 8 },
-  headerTitle: { fontSize: 20, fontWeight: "bold" },
+  backButton: { padding: 8},
 });
 
 const chatStyles = StyleSheet.create({
@@ -332,4 +331,14 @@ const buttonStyles = StyleSheet.create({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  bigCatIconContainer: {
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  bigCatIcon: {
+    width: 180,
+    height: 60,
+  },
 });
+
+export { MoodChatBot };
