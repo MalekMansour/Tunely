@@ -317,60 +317,49 @@ export default function LibraryScreen() {
   /***********************************************
    * RENDER: LIKED
    ***********************************************/
-  const renderLiked = () => {
-    return (
-      <>
+  const renderLiked = () => (
+    <FlatList
+      data={likedSongs}
+      keyExtractor={(item) => item.songId.toString()}
+      ListHeaderComponent={() => (
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Your Liked Songs</Text>
-        {likedLoading ? (
-          <ActivityIndicator size="large" color={theme.primary} />
-        ) : (
-          <FlatList
-            data={likedSongs}
-            keyExtractor={(item) => item.songId.toString()}
-            renderItem={({ item }) => <SongCard song={item} />}
-            contentContainerStyle={styles.songListContainer}
-            ListEmptyComponent={() => (
-              <Text style={[styles.emptyText, { color: theme.text }]}>No liked songs yet</Text>
-            )}
-            showsVerticalScrollIndicator={false}
-            onRefresh={refreshLikedSongs}
-            refreshing={likedLoading}
-          />
-        )}
-        {likedError && (
-          <Text style={[styles.errorText, { color: theme.text }]}>{likedError}</Text>
-        )}
-      </>
-    );
-  };
+      )}
+      renderItem={({ item }) => <SongCard song={item} />}
+      contentContainerStyle={styles.songListContainer}
+      ListEmptyComponent={() => (
+        <Text style={[styles.emptyText, { color: theme.text }]}>
+          {likedLoading ? <ActivityIndicator size="small" color={theme.primary} /> : "No liked songs yet"}
+        </Text>
+      )}
+      showsVerticalScrollIndicator={false}
+      onRefresh={refreshLikedSongs}
+      refreshing={likedLoading}
+    />
+  );
 
   /***********************************************
    * RENDER: DEFAULT (RECENTLY PLAYED)
    ***********************************************/
   const renderDefault = () => (
-    <ScrollView style={styles.scrollContainer}>
-      <View style={styles.sectionContainer}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Recently played</Text>
-        {recentlyPlayedLoading ? (
-          <ActivityIndicator size="small" color={theme.primary} />
-        ) : recentlyPlayedSongs && recentlyPlayedSongs.length > 0 ? (
-          <FlatList
-            data={recentlyPlayedSongs}
-            keyExtractor={(item) => `recent-${item.songId}`}
-            scrollEnabled={false}
-            renderItem={({ item }) => <SongCard song={item} />}
-            ListEmptyComponent={() => (
-              <Text style={[styles.emptyText, { color: theme.text }]}>No recently played songs</Text>
-            )}
-          />
-        ) : (
-          <Text style={[styles.emptyText, { color: theme.text }]}>No recently played songs</Text>
-        )}
-        {recentlyPlayedError && (
-          <Text style={[styles.errorText, { color: theme.text }]}>{recentlyPlayedError}</Text>
-        )}
-      </View>
-    </ScrollView>
+    <FlatList
+      data={recentlyPlayedSongs}
+      keyExtractor={(item) => `recent-${item.songId}`}
+      ListHeaderComponent={() => (
+        <View style={styles.sectionContainer}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Recently played</Text>
+        </View>
+      )}
+      renderItem={({ item }) => <SongCard song={item} />}
+      contentContainerStyle={styles.songListContainer}
+      showsVerticalScrollIndicator={false}
+      onRefresh={refreshRecentlyPlayed}
+      refreshing={recentlyPlayedLoading}
+      ListEmptyComponent={() => (
+        <Text style={[styles.emptyText, { color: theme.text }]}>
+          {recentlyPlayedLoading ? "Loading..." : "No recently played songs"}
+        </Text>
+      )}
+    />
   );
 
   return (
@@ -450,7 +439,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   songListContainer: {
-    paddingBottom: 100,
+    paddingBottom: 150,
   },
   actionButton: {
     flexDirection: "row",
@@ -471,12 +460,12 @@ const styles = StyleSheet.create({
   },
   sectionContainer: {
     marginTop: 10,
-    marginBottom: 20,
+    marginBottom: 5,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 12,
+    marginBottom: 2,
   },
   emptyText: {
     fontSize: 14,

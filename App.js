@@ -127,6 +127,7 @@ function LibraryStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="LibraryScreen" component={LibraryWithTopBar} />
       <Stack.Screen name="PlaylistDetail" component={PlaylistDetail} />
+      <Stack.Screen name="BotCat" component={BotChat} />
     </Stack.Navigator>
   );
 }
@@ -137,6 +138,7 @@ function SearchStack() {
       <Stack.Screen name="SearchScreen" component={SearchWithTopBar} />
       <Stack.Screen name="PlaylistDetail" component={PlaylistDetail} />
       <Stack.Screen name="GenreSongs" component={GenreSongs} />
+      <Stack.Screen name="BotCat" component={BotChat} />
     </Stack.Navigator>
   );
 }
@@ -257,7 +259,20 @@ export default function App() {
 function ConditionalCatBot() {
   const routeName = useNavigationState((state) => {
     if (!state) return null;
+    
     const route = state.routes[state.index];
+    
+    if (route.name === 'Home' && route.state) {
+      const activeTab = route.state.routes[route.state.index];
+      
+      if (activeTab.state) {
+        const activeScreen = activeTab.state.routes[activeTab.state.index];
+        if (activeScreen.name === "BotCat") {
+          return "BotCat";
+        }
+      }
+    }
+    
     return route.name;
   });
 
@@ -273,8 +288,9 @@ function ConditionalCatBot() {
     "ThemeSettings",
     "Settings",
     "Upload",
-    "BotCat",
     "ChatBotSettings",
+    "SongDetail",
+    "CommentScreen",
   ];
 
   if (!chatbotVisible || !routeName || hiddenScreens.includes(routeName)) {

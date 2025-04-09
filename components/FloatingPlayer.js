@@ -22,7 +22,8 @@ export default function FloatingPlayer() {
   const hiddenScreens = [
     "SongDetail", "CommentScreen", "Profile", "Upload", "Login",
     "LoginFormPage", "SignUp", "Settings", "PrivacySettings",
-    "Notifications", "AdminPage", "AuthCheck", "ThemeSettings"
+    "Notifications", "AdminPage", "AuthCheck", "ThemeSettings",
+    "ChatBotSettings"
   ];
 
   if (!currentSong || hiddenScreens.includes(currentRoute?.name)) return null;
