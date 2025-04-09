@@ -16,13 +16,12 @@ import ThemedScreen from "../components/ThemedScreen";
 import { useTheme } from "../context/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
 import SongCard from "../components/SongCard";
+import { CATBOT_API_KEY } from "@env";
 
 // ----- Energy Target Values by Mood -----
-// (These are kept for reference if you wish to further sort by energy.)
 const ENERGY_TARGETS = {
   calm: 0.3,
   energetic: 0.9,
-  inlove: 0.65,
   sad: 0.2,
   hot: 0.7,
   default: 0.6,
@@ -52,19 +51,6 @@ const moodFilters = {
       genre.includes("trap")
     );
   },
-  inlove: (song) => {
-    const genre = song.genre ? song.genre.toLowerCase() : "";
-    const name = song.name ? song.name.toLowerCase() : "";
-    return (
-      (genre.includes("romantic") ||
-        genre.includes("love") ||
-        genre.includes("ballad") ||
-        name.includes("love") ||
-        name.includes("romance")) &&
-      song.energy > 0.4 &&
-      song.energy < 0.8
-    );
-  },
   sad: (song) => {
     const genre = song.genre ? song.genre.toLowerCase() : "";
     return (
@@ -76,13 +62,15 @@ const moodFilters = {
   hot: (song) => {
     const genre = song.genre ? song.genre.toLowerCase() : "";
     return (
-      genre.includes("r&b") || genre.includes("latin") || genre.includes("soul")
+      genre.includes("r&b") ||
+      genre.includes("latin") ||
+      genre.includes("soul")
     );
   },
 };
 
 // ----- Helper: Shuffle an Array -----
-// This function returns a new array in random order.
+// Returns a new array with items in random order.
 const shuffleArray = (array) => {
   const arr = array.slice();
   for (let i = arr.length - 1; i > 0; i--) {
@@ -92,13 +80,56 @@ const shuffleArray = (array) => {
   return arr;
 };
 
+// ----- OpenAI Bot Response Generator -----
+// Uses the OpenAI API to generate a creative response message based on the mood.
+// Ensure CATBOT_API_KEY is set and valid.
+const generateBotResponse = async (mood) => {
+  const apiUrl = "https://api.openai.com/v1/chat/completions";
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${CATBOT_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a creative and friendly music recommendation assistant. Given a mood, generate a short, unique confirmation message indicating that you have received the mood and are about to provide some recommendations. Do not mention your backend implementation or API keys.",
+          },
+          { role: "user", content: `I'm feeling ${mood}.` },
+        ],
+        temperature: 0.9,
+        max_tokens: 50,
+      }),
+    });
+    const data = await response.json();
+    const botReply = data.choices[0].message.content.trim();
+    return botReply;
+  } catch (error) {
+    console.error("Error generating bot response:", error);
+    return `Got it, you're feeling ${mood}. Let me recommend some tracks for you...`;
+  }
+};
+
+// ----- Recommendation Function -----
+// Returns all songs that match the given mood filter, then shuffles and selects 5.
+const getFilteredRecommendations = (songs, mood) => {
+  const matchingSongs = songs.filter(moodFilters[mood]);
+  if (matchingSongs.length === 0) return [];
+  return shuffleArray(matchingSongs).slice(0, 5);
+};
+
 // ----- Main Component: MoodChatBot -----
 export default function MoodChatBot() {
   const { theme } = useTheme();
   const navigation = useNavigation();
   const { songs, loading: songsLoading, error: songsError, refreshSongs } = useGetSongs("all");
 
-  // An initial conversation (welcome message with logo)
+  // Initial conversation includes a welcome message with a logo.
   const initialConversation = [
     {
       sender: "bot",
@@ -109,32 +140,32 @@ export default function MoodChatBot() {
   const [conversation, setConversation] = useState(initialConversation);
   const [loading, setLoading] = useState(false);
 
-  // Define mood options.
+  // Define mood options (only four now).
   const moods = [
     { key: "calm", label: "Calm" },
     { key: "energetic", label: "Energetic" },
-    { key: "inlove", label: "In Love" },
     { key: "sad", label: "Sad" },
     { key: "hot", label: "Hot" },
   ];
 
   // When a mood button is pressed:
-  // - Clear prior messages (keep the welcome message)
-  // - Append user's mood selection and a bot confirmation
-  // - Filter the full song library using the mood filter,
-  //   then shuffle that list and pick 5 random songs.
+  // 1. Clear previous conversation (reset to welcome message).
+  // 2. Append user's mood selection.
+  // 3. Call OpenAI API to generate a varied bot confirmation.
+  // 4. Filter the full song library, shuffle, and pick 5 recommendations.
   const handleMoodSelection = async (mood) => {
-    setConversation(initialConversation); // Reset conversation
+    setConversation(initialConversation); // Reset conversation.
     setLoading(true);
 
-    // Append user's mood selection.
+    // Append user message.
     const userMsg = { sender: "user", text: `I'm feeling ${mood}.` };
     setConversation((prev) => [...prev, userMsg]);
 
-    // Append bot confirmation.
+    // Generate a varied bot response using OpenAI.
+    const botResponse = await generateBotResponse(mood);
     const moodMsg = {
       sender: "bot",
-      text: `Got it, you're feeling ${mood}. Let me recommend some tracks for you...`,
+      text: botResponse,
     };
     setConversation((prev) => [...prev, moodMsg]);
 
@@ -142,18 +173,15 @@ export default function MoodChatBot() {
     if (songsLoading) {
       await refreshSongs();
     }
-    // Filter the songs that match the chosen mood.
-    const matchingSongs = songs.filter(moodFilters[mood]);
-    let recommendations = [];
-    if (matchingSongs.length === 0) {
+    // Filter songs matching the mood.
+    const recommendations = getFilteredRecommendations(songs, mood);
+    if (recommendations.length === 0) {
       const noRecMsg = {
         sender: "bot",
         text: "Sorry, I couldn't find any matching tracks for that mood.",
       };
       setConversation((prev) => [...prev, noRecMsg]);
     } else {
-      // Always shuffle the matching songs, then slice the first 5.
-      recommendations = shuffleArray(matchingSongs).slice(0, 5);
       const recsMsg = { sender: "bot", type: "recommendation", data: recommendations };
       setConversation((prev) => [...prev, recsMsg]);
     }
@@ -168,10 +196,7 @@ export default function MoodChatBot() {
           <Ionicons name="arrow-back" size={28} color={theme.icon} />
         </TouchableOpacity>
         <View style={headerStyles.logoContainer}>
-          <Image
-            source={require("../assets/tunely_logo_top.png")}
-            style={headerStyles.logo}
-          />
+          <Image source={require("../assets/tunely_logo_top.png")} style={headerStyles.logo} />
           <Text style={[headerStyles.headerTitle, { color: theme.text }]}>Mood Chat</Text>
         </View>
         <View style={{ width: 32 }} />
@@ -224,7 +249,7 @@ export default function MoodChatBot() {
 
         {loading && <ActivityIndicator size="small" color={theme.icon} style={{ marginVertical: 10 }} />}
 
-        {/* Mood Selection Buttons as 5 Circular Buttons */}
+        {/* Mood Selection Buttons as 4 Circular Buttons */}
         <View style={buttonStyles.buttonContainer}>
           {moods.map((m) => (
             <TouchableOpacity
