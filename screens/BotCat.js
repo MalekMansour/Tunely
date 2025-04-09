@@ -11,65 +11,43 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { CATBOT_API_KEY, SPOTIFY_ACCESS_TOKEN } from "@env"; // ensure these are set in your .env
+import { useGetSongs } from "../hooks/useGetSongs";
+import { CATBOT_API_KEY } from "@env";
 import ThemedScreen from "../components/ThemedScreen";
 import { useTheme } from "../context/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
 
-// ----- Mood Mapping for Spotify targets -----
-const MOOD_MAPPING = {
-  happy: { target_valence: 0.9, target_energy: 0.8 },
-  sad: { target_valence: 0.3, target_energy: 0.3 },
-  energetic: { target_valence: 0.8, target_energy: 0.9 },
-  calm: { target_valence: 0.4, target_energy: 0.2 },
-  default: { target_valence: 0.6, target_energy: 0.6 },
+// ----- Energy Mapping by Mood -----
+// Define target energy values for each mood.
+const ENERGY_TARGETS = {
+  happy: 0.8,
+  sad: 0.3,
+  energetic: 0.9,
+  calm: 0.2,
+  default: 0.6,
 };
 
-// Mapping mood to a seed genre for Spotify (adjust as desired)
-const SEED_GENRE_MAPPING = {
-  happy: "pop",
-  sad: "acoustic",
-  energetic: "rock",
-  calm: "chill",
-  default: "pop",
-};
-
-// ----- Spotify Recommendations Function -----
-// Uses the extracted mood to build a Spotify Recommendations request
-const getSpotifyRecommendations = async (mood) => {
-  const mapping = MOOD_MAPPING[mood] || MOOD_MAPPING["default"];
-  const seedGenre = SEED_GENRE_MAPPING[mood] || SEED_GENRE_MAPPING["default"];
-  const endpoint = "https://api.spotify.com/v1/recommendations";
-  const queryParams = new URLSearchParams({
-    limit: "5",
-    seed_genres: seedGenre,
-    target_valence: mapping.target_valence.toString(),
-    target_energy: mapping.target_energy.toString(),
-  });
-  const url = `${endpoint}?${queryParams.toString()}`;
-
-  try {
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Bearer ${SPOTIFY_ACCESS_TOKEN}`,
-      },
-    });
-    const data = await response.json();
-    if (data.tracks) {
-      return data.tracks;
-    } else {
-      console.error("No tracks returned from Spotify:", data);
-      return [];
-    }
-  } catch (error) {
-    console.error("Error fetching Spotify recommendations:", error);
-    return [];
+// ----- Recommendation Function -----
+// Given an array of songs and a mood string, this function computes the absolute difference
+// between each song's energy and the target energy for that mood,
+// and returns the 5 songs with the smallest difference.
+const getRecommendations = (songs, mood) => {
+  const targetEnergy = ENERGY_TARGETS[mood] || ENERGY_TARGETS.default;
+  const validSongs = songs.filter(song => typeof song.energy === "number");
+  if (validSongs.length === 0) {
+    return songs.slice(0, 5);
   }
+  const scoredSongs = validSongs.map(song => ({
+    song,
+    score: Math.abs(song.energy - targetEnergy),
+  }));
+  scoredSongs.sort((a, b) => a.score - b.score);
+  return scoredSongs.slice(0, 5).map(item => item.song);
 };
 
 // ----- OpenAI API Call for Mood Extraction -----
-// Sends the user's text to OpenAI and expects one word: "happy", "sad", "energetic", "calm"
-// Returns "default" if an unrecognized word is received.
+// Sends the user's text to OpenAI and expects one word:
+// "happy", "sad", "energetic", or "calm". If not recognized, returns "default".
 const extractMoodFromText = async (text) => {
   const apiUrl = "https://api.openai.com/v1/chat/completions";
   try {
@@ -108,9 +86,9 @@ const extractMoodFromText = async (text) => {
 export default function MoodChatBot() {
   const { theme } = useTheme();
   const navigation = useNavigation();
+  const { songs, loading: songsLoading, error: songsError, refreshSongs } = useGetSongs("all");
 
-  // We no longer use our local songs hook since we're fetching recommendations from Spotify.
-  // Conversation state holds all messages from both user and bot.
+  // Conversation state holds all chat messages (bot and user)
   const [conversation, setConversation] = useState([
     {
       sender: "bot",
@@ -125,40 +103,37 @@ export default function MoodChatBot() {
     if (input.trim() === "") return;
     // Append user's message to conversation
     const userMsg = { sender: "user", text: input };
-    setConversation((prev) => [...prev, userMsg]);
+    setConversation(prev => [...prev, userMsg]);
     setLoading(true);
 
-    // Extract mood from the user's message using OpenAI
+    // Extract mood using the OpenAI API
     const extractedMood = await extractMoodFromText(input);
     const moodMsg = {
       sender: "bot",
-      text: `Got it, you're feeling ${extractedMood}. Let me recommend some tracks for you...`,
+      text: `Got it, you're feeling ${extractedMood}. Let me analyze some songs for you...`,
     };
-    setConversation((prev) => [...prev, moodMsg]);
+    setConversation(prev => [...prev, moodMsg]);
 
-    // Use Spotify API to get recommendations based on the extracted mood
-    const spotifyRecs = await getSpotifyRecommendations(extractedMood);
-    if (spotifyRecs.length === 0) {
-      const errorMsg = {
-        sender: "bot",
-        text: "Sorry, I couldn't find any recommendations at the moment.",
-      };
-      setConversation((prev) => [...prev, errorMsg]);
-    } else {
-      // Build a vertical newline-separated string of recommended tracks
-      const recsText = spotifyRecs
-        .map(
-          (track, index) =>
-            `${index + 1}. ${track.name} — ${track.artists.map((a) => a.name).join(", ")}`
-        )
-        .join("\n");
-      const recsMsg = {
-        sender: "bot",
-        text: `Here are some recommendations for you:\n${recsText}`,
-      };
-      setConversation((prev) => [...prev, recsMsg]);
+    // Ensure songs are loaded; if still loading, attempt refresh
+    if (songsLoading) {
+      await refreshSongs();
     }
+    // Select 50 random songs from the library (if available)
+    const randomSongs =
+      songs.length >= 50 ? [...songs].sort(() => Math.random() - 0.5).slice(0, 50) : songs;
 
+    // Compute recommendations from these 50 songs based solely on energy
+    const recs = getRecommendations(randomSongs, extractedMood);
+
+    // Create a newline-separated list of recommendations
+    const recsText = recs
+      .map((song, index) => `${index + 1}. ${song.name} — ${song.artists.join(", ")}`)
+      .join("\n");
+    const recsMsg = {
+      sender: "bot",
+      text: `Here are some recommendations for you:\n${recsText}`,
+    };
+    setConversation(prev => [...prev, recsMsg]);
     setInput("");
     setLoading(false);
   };
@@ -179,7 +154,7 @@ export default function MoodChatBot() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={80}
       >
-        {/* Chat Conversation */}
+        {/* Conversation Messages */}
         <FlatList
           data={conversation}
           keyExtractor={(_, index) => index.toString()}
@@ -216,6 +191,12 @@ export default function MoodChatBot() {
             <Ionicons name="send" size={24} color={theme.background} />
           </TouchableOpacity>
         </View>
+
+        {songsError && (
+          <Text style={[chatStyles.errorText, { color: theme.text }]}>
+            Error loading songs: {songsError}
+          </Text>
+        )}
       </KeyboardAvoidingView>
     </ThemedScreen>
   );
@@ -273,7 +254,5 @@ const inputStyles = StyleSheet.create({
 });
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
 });
