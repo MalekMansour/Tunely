@@ -314,6 +314,7 @@ const chatStyles = StyleSheet.create({
     borderRadius: 12,
     marginVertical: 6,
     maxWidth: "80%",
+    maxHeight: 370,
   },
   messageText: { fontSize: 16 },
   errorText: { fontSize: 16, marginTop: 10 },
