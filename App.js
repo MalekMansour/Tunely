@@ -289,7 +289,7 @@ function ConditionalCatBot() {
     "Settings",
     "Upload",
     "ChatBotSettings",
-    "SongDetail",X
+    "SongDetail",
     "CommentScreen",
     "TermsAndServices",
   ];
