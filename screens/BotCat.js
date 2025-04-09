@@ -18,33 +18,32 @@ import { useNavigation } from "@react-navigation/native";
 import SongCard from "../components/SongCard";
 
 // ----- Energy Target Values by Mood -----
+// Define target energy for each mood.
 const ENERGY_TARGETS = {
   calm: 0.3,
-  sad: 0.2,
   energetic: 0.9,
-  raging: 0.85,
+  angry: 0.8,
+  sad: 0.2,
   hot: 0.7,
   default: 0.6,
 };
 
-// ----- Updated Mood Filter Functions -----
+// ----- Mood Filter Functions -----
+// Each function checks song genre (and optionally song name) and energy.
+// Adjust these criteria according to your song data.
 const moodFilters = {
   calm: (song) => {
     const genre = song.genre ? song.genre.toLowerCase() : "";
+    // Accept songs that are low-energy or have keywords related to calmness.
     return song.energy < 0.5 || 
            genre.includes("lofi") ||
            genre.includes("acoustic") ||
            genre.includes("alternative") ||
            genre.includes("jazz");
   },
-  sad: (song) => {
-    const genre = song.genre ? song.genre.toLowerCase() : "";
-    return song.energy < 0.4 || 
-           genre.includes("acoustic") ||
-           genre.includes("alternative");
-  },
   energetic: (song) => {
     const genre = song.genre ? song.genre.toLowerCase() : "";
+    // Accept songs with high energy or genres typically upbeat.
     return song.energy > 0.7 || 
            genre.includes("pop") ||
            genre.includes("rap") ||
@@ -52,49 +51,45 @@ const moodFilters = {
            genre.includes("electronic") ||
            genre.includes("trap");
   },
-  raging: (song) => {
+  angry: (song) => {
     const genre = song.genre ? song.genre.toLowerCase() : "";
     const name = song.name ? song.name.toLowerCase() : "";
+    // Accept songs with high energy that have "metal" or "rock" in genre,
+    // or if the song title suggests anger.
     return song.energy > 0.7 && 
-           (genre.includes("rap") || 
-            genre.includes("rock") || 
-            name.includes("rage") || 
-            name.includes("anger"));
+           (genre.includes("metal") ||
+            genre.includes("rock") ||
+            name.includes("anger") ||
+            name.includes("fury"));
+  },
+  sad: (song) => {
+    const genre = song.genre ? song.genre.toLowerCase() : "";
+    // Accept songs with very low energy or that include keywords for sadness.
+    return song.energy < 0.4 || 
+           genre.includes("acoustic") ||
+           genre.includes("alternative");
   },
   hot: (song) => {
     const genre = song.genre ? song.genre.toLowerCase() : "";
-    return genre.includes("r&b") ||
-           genre.includes("latin") ||
-           genre.includes("soul");
+    // Accept songs in R&B, latin, or soul—genres associated with a "hot" vibe.
+    return genre.includes("r&b") || genre.includes("latin") || genre.includes("soul");
   },
 };
 
-// ----- Updated Recommendation Function -----
+// ----- Recommendation Function -----
+// Filters the full library using the mood filter, sorts the results by closeness to the target energy,
+// and returns the top 5 recommended songs.
 const getFilteredRecommendations = (songs, mood) => {
   const filterFn = moodFilters[mood];
-  const targetEnergy = ENERGY_TARGETS[mood] || ENERGY_TARGETS.default;
+  if (!filterFn) return [];
   const filtered = songs.filter(filterFn);
-  let result = [];
-  if (filtered.length > 0) {
-    result = filtered
-      .sort(
-        (a, b) =>
-          Math.abs(a.energy - targetEnergy) - Math.abs(b.energy - targetEnergy)
-      )
-      .slice(0, 5);
-  } else {
-    // Fallback: use all songs with energy property, sorted by closeness to target
-    const fallback = songs.filter((song) => typeof song.energy === "number");
-    if (fallback.length > 0) {
-      result = fallback
-        .sort(
-          (a, b) =>
-            Math.abs(a.energy - targetEnergy) - Math.abs(b.energy - targetEnergy)
-        )
-        .slice(0, 5);
-    }
-  }
-  return result;
+  if (filtered.length === 0) return [];
+  const targetEnergy = ENERGY_TARGETS[mood] || ENERGY_TARGETS.default;
+  const sorted = filtered.sort(
+    (a, b) =>
+      Math.abs(a.energy - targetEnergy) - Math.abs(b.energy - targetEnergy)
+  );
+  return sorted.slice(0, 5);
 };
 
 // ----- Main Component: MoodChatBot -----
@@ -103,6 +98,7 @@ export default function MoodChatBot() {
   const navigation = useNavigation();
   const { songs, loading: songsLoading, error: songsError, refreshSongs } = useGetSongs("all");
 
+  // Initial conversation with a welcome message (logo bubble)
   const initialConversation = [
     {
       sender: "bot",
@@ -117,32 +113,47 @@ export default function MoodChatBot() {
   const moods = [
     { key: "calm", label: "Calm" },
     { key: "energetic", label: "Energetic" },
-    { key: "raging", label: "Raging" },
+    { key: "angry", label: "Angry" },
     { key: "sad", label: "Sad" },
     { key: "hot", label: "Hot" },
   ];
 
-  // When a mood button is pressed, clear previous chat and generate new recommendations.
+  // When a mood button is pressed, reset the conversation and generate recommendations.
   const handleMoodSelection = async (mood) => {
-    setConversation(initialConversation); // Clear previous chat messages.
+    // Reset conversation to initial welcome.
+    setConversation(initialConversation);
     setLoading(true);
 
+    // Append user's mood selection.
     const userMsg = { sender: "user", text: `I'm feeling ${mood}.` };
     setConversation((prev) => [...prev, userMsg]);
 
-    const moodMsg = { sender: "bot", text: `Got it, you're feeling ${mood}. Let me recommend some tracks for you...` };
+    // Append bot confirmation.
+    const moodMsg = {
+      sender: "bot",
+      text: `Got it, you're feeling ${mood}. Let me recommend some tracks for you...`,
+    };
     setConversation((prev) => [...prev, moodMsg]);
 
+    // Ensure songs are loaded.
     if (songsLoading) {
       await refreshSongs();
     }
-    
+    // Use the full song library (or a sampled subset if desired).
     const recs = getFilteredRecommendations(songs, mood);
     if (recs.length === 0) {
-      const noRecMsg = { sender: "bot", text: "Sorry, I couldn't find any matching tracks for that mood." };
+      const noRecMsg = {
+        sender: "bot",
+        text: "Sorry, I couldn't find any matching tracks for that mood.",
+      };
       setConversation((prev) => [...prev, noRecMsg]);
     } else {
-      const recsMsg = { sender: "bot", type: "recommendation", data: recs };
+      // Append a recommendation message with type "recommendation" that renders SongCards.
+      const recsMsg = {
+        sender: "bot",
+        type: "recommendation",
+        data: recs,
+      };
       setConversation((prev) => [...prev, recsMsg]);
     }
     setLoading(false);
@@ -151,18 +162,35 @@ export default function MoodChatBot() {
   return (
     <ThemedScreen style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header with Back Button and Logo */}
-      <View style={[headerStyles.header, { backgroundColor: theme.primary, borderBottomColor: theme.border }]}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={headerStyles.backButton}>
+      <View
+        style={[
+          headerStyles.header,
+          { backgroundColor: theme.primary, borderBottomColor: theme.border },
+        ]}
+      >
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={headerStyles.backButton}
+        >
           <Ionicons name="arrow-back" size={28} color={theme.icon} />
         </TouchableOpacity>
         <View style={headerStyles.logoContainer}>
-          <Image source={require("../assets/tunely_logo_top.png")} style={headerStyles.logo} />
-          <Text style={[headerStyles.headerTitle, { color: theme.text }]}>Mood Chat</Text>
+          <Image
+            source={require("../assets/tunely_logo_top.png")}
+            style={headerStyles.logo}
+          />
+          <Text style={[headerStyles.headerTitle, { color: theme.text }]}>
+            Mood Chat
+          </Text>
         </View>
         <View style={{ width: 32 }} />
       </View>
 
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={80}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={80}
+      >
         {/* Chat Conversation */}
         <FlatList
           data={conversation}
@@ -170,29 +198,75 @@ export default function MoodChatBot() {
           renderItem={({ item }) => {
             if (item.type === "recommendation") {
               return (
-                <View style={[chatStyles.messageBubble, chatStyles.recommendationBubble, { alignSelf: "flex-start", backgroundColor: theme.secondary }]}>
-                  <Text style={[chatStyles.messageText, { color: theme.text, marginBottom: 8 }]}>Here are some recommendations:</Text>
+                <View
+                  style={[
+                    chatStyles.messageBubble,
+                    chatStyles.recommendationBubble,
+                    { alignSelf: "flex-start", backgroundColor: theme.secondary },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      chatStyles.messageText,
+                      { color: theme.text, marginBottom: 8 },
+                    ]}
+                  >
+                    Here are some recommendations:
+                  </Text>
                   {item.data.map((song) => (
-                    <SongCard key={song.songId ? song.songId : song.id} song={song} />
+                    <SongCard
+                      key={song.songId ? song.songId : song.id}
+                      song={song}
+                    />
                   ))}
                 </View>
               );
             } else if (item.type === "logo") {
               return (
-                <View style={[chatStyles.messageBubble, { alignSelf: "flex-start", backgroundColor: theme.secondary, flexDirection: "row", alignItems: "center" }]}>
-                  <Image source={require("../assets/tunely_logo_top.png")} style={chatStyles.logoInBubble} />
-                  <Text style={[chatStyles.messageText, { color: theme.text, marginLeft: 8 }]}>{item.text}</Text>
+                <View
+                  style={[
+                    chatStyles.messageBubble,
+                    {
+                      alignSelf: "flex-start",
+                      backgroundColor: theme.secondary,
+                      flexDirection: "row",
+                      alignItems: "center",
+                    },
+                  ]}
+                >
+                  <Image
+                    source={require("../assets/tunely_logo_top.png")}
+                    style={chatStyles.logoInBubble}
+                  />
+                  <Text
+                    style={[
+                      chatStyles.messageText,
+                      { color: theme.text, marginLeft: 8 },
+                    ]}
+                  >
+                    {item.text}
+                  </Text>
                 </View>
               );
             } else {
               return (
-                <View style={[
+                <View
+                  style={[
                     chatStyles.messageBubble,
                     item.sender === "bot"
-                      ? { alignSelf: "flex-start", backgroundColor: theme.secondary }
-                      : { alignSelf: "flex-end", backgroundColor: theme.primary },
-                  ]}>
-                  <Text style={[chatStyles.messageText, { color: theme.text }]}>{item.text}</Text>
+                      ? {
+                          alignSelf: "flex-start",
+                          backgroundColor: theme.secondary,
+                        }
+                      : {
+                          alignSelf: "flex-end",
+                          backgroundColor: theme.primary,
+                        },
+                  ]}
+                >
+                  <Text style={[chatStyles.messageText, { color: theme.text }]}>
+                    {item.text}
+                  </Text>
                 </View>
               );
             }
@@ -201,19 +275,41 @@ export default function MoodChatBot() {
           contentContainerStyle={{ padding: 16 }}
         />
 
-        {loading && <ActivityIndicator size="small" color={theme.icon} style={{ marginVertical: 10 }} />}
+        {loading && (
+          <ActivityIndicator
+            size="small"
+            color={theme.icon}
+            style={{ marginVertical: 10 }}
+          />
+        )}
 
         {/* Mood Selection Buttons as 5 Circular Buttons */}
         <View style={buttonStyles.buttonContainer}>
           {moods.map((m) => (
-            <TouchableOpacity key={m.key} style={[buttonStyles.moodButton, { backgroundColor: theme.icon }]} onPress={() => handleMoodSelection(m.key)}>
-              <Text style={[buttonStyles.moodButtonText, { color: theme.background }]}>{m.label}</Text>
+            <TouchableOpacity
+              key={m.key}
+              style={[
+                buttonStyles.moodButton,
+                { backgroundColor: theme.icon },
+              ]}
+              onPress={() => handleMoodSelection(m.key)}
+            >
+              <Text
+                style={[
+                  buttonStyles.moodButtonText,
+                  { color: theme.background },
+                ]}
+              >
+                {m.label}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
 
         {songsError && (
-          <Text style={[chatStyles.errorText, { color: theme.text }]}>Error loading songs: {songsError}</Text>
+          <Text style={[chatStyles.errorText, { color: theme.text }]}>
+            Error loading songs: {songsError}
+          </Text>
         )}
       </KeyboardAvoidingView>
     </ThemedScreen>
