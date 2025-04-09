@@ -5,136 +5,121 @@ import {
   FlatList,
   ActivityIndicator,
   TouchableOpacity,
-  TextInput,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useGetSongs } from "../hooks/useGetSongs";
-import { CATBOT_API_KEY } from "@env";
 import ThemedScreen from "../components/ThemedScreen";
 import { useTheme } from "../context/ThemeContext";
 import { useNavigation } from "@react-navigation/native";
+import SongCard from "../components/SongCard";
 
-// ----- Energy Mapping by Mood -----
-// Define target energy values for each mood.
+// ----- Energy Target Values by Mood -----
+// These target energy values are used for additional sorting if needed.
 const ENERGY_TARGETS = {
-  happy: 0.8,
-  sad: 0.3,
+  calm: 0.3,
   energetic: 0.9,
-  calm: 0.2,
+  angry: 0.8,
+  joyful: 0.7,
+  hot: 0.7,
   default: 0.6,
 };
 
+// ----- Mood Filter Functions -----
+// Here we define criteria based on clues such as genre and song name.
+const moodFilters = {
+  calm: (song) => {
+    const genre = song.genre ? song.genre.toLowerCase() : "";
+    return song.energy < 0.5 || genre.includes("acoustic") || genre.includes("chill") || genre.includes("ambient") || genre.includes("lofi");
+  },
+  energetic: (song) => {
+    const genre = song.genre ? song.genre.toLowerCase() : "";
+    return song.energy > 0.7 || genre.includes("rock") || genre.includes("electronic") || genre.includes("pop");
+  },
+  angry: (song) => {
+    const genre = song.genre ? song.genre.toLowerCase() : "";
+    const name = song.name ? song.name.toLowerCase() : "";
+    return song.energy > 0.6 && (genre.includes("metal") || genre.includes("rock") || name.includes("rage") || name.includes("anger"));
+  },
+  joyful: (song) => {
+    const genre = song.genre ? song.genre.toLowerCase() : "";
+    const name = song.name ? song.name.toLowerCase() : "";
+    return song.energy > 0.5 && (genre.includes("pop") || genre.includes("dance") || name.includes("happy") || name.includes("joy"));
+  },
+  hot: (song) => {
+    const genre = song.genre ? song.genre.toLowerCase() : "";
+    return genre.includes("r&b") || genre.includes("latin") || genre.includes("soul");
+  },
+};
+
 // ----- Recommendation Function -----
-// Given an array of songs and a mood string, this function computes the absolute difference
-// between each song's energy and the target energy for that mood,
-// and returns the 5 songs with the smallest difference.
-const getRecommendations = (songs, mood) => {
+// This function filters the complete song library using the mood filter.
+// If more than 5 songs match, it sorts them by how close the song energy is
+// to a target value (from ENERGY_TARGETS) and picks the top 5.
+const getFilteredRecommendations = (songs, mood) => {
+  const filterFn = moodFilters[mood];
+  if (!filterFn) return [];
+  const filtered = songs.filter(filterFn);
+  if (filtered.length === 0) return [];
   const targetEnergy = ENERGY_TARGETS[mood] || ENERGY_TARGETS.default;
-  const validSongs = songs.filter(song => typeof song.energy === "number");
-  if (validSongs.length === 0) {
-    return songs.slice(0, 5);
-  }
-  const scoredSongs = validSongs.map(song => ({
-    song,
-    score: Math.abs(song.energy - targetEnergy),
-  }));
-  scoredSongs.sort((a, b) => a.score - b.score);
-  return scoredSongs.slice(0, 5).map(item => item.song);
+  const sorted = filtered.sort(
+    (a, b) => Math.abs(a.energy - targetEnergy) - Math.abs(b.energy - targetEnergy)
+  );
+  return sorted.slice(0, 5);
 };
 
-// ----- OpenAI API Call for Mood Extraction -----
-// Sends the user's text to OpenAI and expects one word:
-// "happy", "sad", "energetic", or "calm". If not recognized, returns "default".
-const extractMoodFromText = async (text) => {
-  const apiUrl = "https://api.openai.com/v1/chat/completions";
-  try {
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${CATBOT_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a mood extraction assistant. Analyze the following sentence and reply with one word: happy, sad, energetic, calm. Do not include any additional text.",
-          },
-          { role: "user", content: text },
-        ],
-        temperature: 0.3,
-      }),
-    });
-    const data = await response.json();
-    let mood = data.choices[0].message.content.trim().toLowerCase();
-    if (!["happy", "sad", "energetic", "calm"].includes(mood)) {
-      mood = "default";
-    }
-    return mood;
-  } catch (error) {
-    console.error("Error extracting mood:", error);
-    return "default";
-  }
-};
-
-// ----- Main Component: MoodChatBot -----
+// ----- Main Component: MoodChatBot -----  
 export default function MoodChatBot() {
   const { theme } = useTheme();
   const navigation = useNavigation();
   const { songs, loading: songsLoading, error: songsError, refreshSongs } = useGetSongs("all");
 
-  // Conversation state holds all chat messages (bot and user)
+  // Conversation state holds all chat messages.
+  // Messages are objects with at least a sender ("bot" or "user") and text.
+  // For recommendations, we add a "type" of "recommendation" and attach the recommended songs in "data".
   const [conversation, setConversation] = useState([
-    {
-      sender: "bot",
-      text: "Hi! Tell me how you're feeling and I'll recommend some tracks for you.",
-    },
+    { sender: "bot", text: "Hi! How are you feeling? Choose one:" },
   ]);
-  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Handle sending a message
-  const handleSend = async () => {
-    if (input.trim() === "") return;
-    // Append user's message to conversation
-    const userMsg = { sender: "user", text: input };
-    setConversation(prev => [...prev, userMsg]);
+  // Array of mood options and their labels (capitalized).
+  const moods = [
+    { key: "calm", label: "Calm" },
+    { key: "energetic", label: "Energetic" },
+    { key: "angry", label: "Angry" },
+    { key: "joyful", label: "Joyful" },
+    { key: "hot", label: "Hot" },
+  ];
+
+  // Called when a mood button is pressed
+  const handleMoodSelection = async (mood) => {
     setLoading(true);
+    // Append a user message to simulate selection
+    const userMsg = { sender: "user", text: `I'm feeling ${mood}.` };
+    setConversation((prev) => [...prev, userMsg]);
 
-    // Extract mood using the OpenAI API
-    const extractedMood = await extractMoodFromText(input);
-    const moodMsg = {
-      sender: "bot",
-      text: `Got it, you're feeling ${extractedMood}. Let me analyze some songs for you...`,
-    };
-    setConversation(prev => [...prev, moodMsg]);
+    // Append a bot message confirming the mood
+    const moodMsg = { sender: "bot", text: `Got it, you're feeling ${mood}. Let me recommend some tracks for you...` };
+    setConversation((prev) => [...prev, moodMsg]);
 
-    // Ensure songs are loaded; if still loading, attempt refresh
+    // Ensure songs are loaded; if still loading, refresh them
     if (songsLoading) {
       await refreshSongs();
     }
-    // Select 50 random songs from the library (if available)
-    const randomSongs =
-      songs.length >= 50 ? [...songs].sort(() => Math.random() - 0.5).slice(0, 50) : songs;
-
-    // Compute recommendations from these 50 songs based solely on energy
-    const recs = getRecommendations(randomSongs, extractedMood);
-
-    // Create a newline-separated list of recommendations
-    const recsText = recs
-      .map((song, index) => `${index + 1}. ${song.name} — ${song.artists.join(", ")}`)
-      .join("\n");
-    const recsMsg = {
-      sender: "bot",
-      text: `Here are some recommendations for you:\n${recsText}`,
-    };
-    setConversation(prev => [...prev, recsMsg]);
-    setInput("");
+    // Instead of random sampling, we use the full library here if desired.
+    // (Optionally you can sample only 50 songs; here we use the full list for filtering.)
+    const recs = getFilteredRecommendations(songs, mood);
+    if (recs.length === 0) {
+      const noRecMsg = { sender: "bot", text: "Sorry, I couldn't find any matching tracks for that mood." };
+      setConversation((prev) => [...prev, noRecMsg]);
+    } else {
+      // Append a bot message of type "recommendation" with the recommended songs.
+      const recsMsg = { sender: "bot", type: "recommendation", data: recs };
+      setConversation((prev) => [...prev, recsMsg]);
+    }
     setLoading(false);
   };
 
@@ -158,18 +143,40 @@ export default function MoodChatBot() {
         <FlatList
           data={conversation}
           keyExtractor={(_, index) => index.toString()}
-          renderItem={({ item }) => (
-            <View
-              style={[
-                chatStyles.messageBubble,
-                item.sender === "bot"
-                  ? [chatStyles.botBubble, { alignSelf: "flex-start", backgroundColor: theme.secondary }]
-                  : [chatStyles.userBubble, { alignSelf: "flex-end", backgroundColor: theme.primary }],
-              ]}
-            >
-              <Text style={[chatStyles.messageText, { color: theme.text }]}>{item.text}</Text>
-            </View>
-          )}
+          renderItem={({ item }) => {
+            if (item.type === "recommendation") {
+              // Render recommended songs as a vertical list of SongCard components
+              return (
+                <View
+                  style={[
+                    chatStyles.messageBubble,
+                    chatStyles.recommendationBubble,
+                    { alignSelf: "flex-start", backgroundColor: theme.secondary },
+                  ]}
+                >
+                  <Text style={[chatStyles.messageText, { color: theme.text, marginBottom: 8 }]}>
+                    Here are some recommendations:
+                  </Text>
+                  {item.data.map((song) => (
+                    <SongCard key={song.songId ? song.songId : song.id} song={song} />
+                  ))}
+                </View>
+              );
+            } else {
+              return (
+                <View
+                  style={[
+                    chatStyles.messageBubble,
+                    item.sender === "bot"
+                      ? { alignSelf: "flex-start", backgroundColor: theme.secondary }
+                      : { alignSelf: "flex-end", backgroundColor: theme.primary },
+                  ]}
+                >
+                  <Text style={[chatStyles.messageText, { color: theme.text }]}>{item.text}</Text>
+                </View>
+              );
+            }
+          }}
           style={chatStyles.chatContainer}
           contentContainerStyle={{ padding: 16 }}
         />
@@ -178,18 +185,17 @@ export default function MoodChatBot() {
           <ActivityIndicator size="small" color={theme.icon} style={{ marginVertical: 10 }} />
         )}
 
-        {/* Input Area */}
-        <View style={[inputStyles.inputContainer, { borderTopColor: theme.border }]}>
-          <TextInput
-            style={[inputStyles.input, { color: theme.text, borderColor: theme.primary }]}
-            placeholder="Type your message..."
-            placeholderTextColor={theme.text}
-            value={input}
-            onChangeText={setInput}
-          />
-          <TouchableOpacity onPress={handleSend} style={[inputStyles.sendButton, { backgroundColor: theme.icon }]}>
-            <Ionicons name="send" size={24} color={theme.background} />
-          </TouchableOpacity>
+        {/* Mood Selection Buttons */}
+        <View style={buttonStyles.buttonContainer}>
+          {moods.map((m) => (
+            <TouchableOpacity
+              key={m.key}
+              style={[buttonStyles.moodButton, { backgroundColor: theme.icon }]}
+              onPress={() => handleMoodSelection(m.key)}
+            >
+              <Text style={[buttonStyles.moodButtonText, { color: theme.background }]}>{m.label}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         {songsError && (
@@ -212,12 +218,7 @@ const headerStyles = StyleSheet.create({
     marginTop: 40,
   },
   backButton: { padding: 8 },
-  title: {
-    flex: 1,
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
+  title: { flex: 1, fontSize: 20, fontWeight: "bold", textAlign: "center" },
 });
 
 const chatStyles = StyleSheet.create({
@@ -225,32 +226,26 @@ const chatStyles = StyleSheet.create({
   messageBubble: { padding: 12, borderRadius: 12, marginVertical: 6, maxWidth: "80%" },
   messageText: { fontSize: 16 },
   errorText: { fontSize: 16, marginTop: 10 },
+  recommendationBubble: {
+    // Additional styling for recommendation bubble if needed
+  },
 });
 
-const inputStyles = StyleSheet.create({
-  inputContainer: {
+const buttonStyles = StyleSheet.create({
+  buttonContainer: {
     flexDirection: "row",
-    alignItems: "center",
-    borderTopWidth: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    marginBottom: 80,
+    justifyContent: "space-around",
+    marginHorizontal: 16,
+    marginBottom: 180,
   },
-  input: {
+  moodButton: {
     flex: 1,
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 8,
-  },
-  sendButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: "center",
+    marginHorizontal: 4,
+    paddingVertical: 12,
+    borderRadius: 8,
     alignItems: "center",
   },
+  moodButtonText: { fontSize: 16, fontWeight: "bold" },
 });
 
 const styles = StyleSheet.create({
