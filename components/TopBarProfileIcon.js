@@ -1,5 +1,6 @@
 import React, { memo, useEffect } from 'react';
-import { Image, ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
+import { Image } from 'expo-image';
 import { useUserData } from '../hooks/useUserData';
 import blankProfilePic from '../assets/blank_profile.png';
 import { useIsFocused } from '@react-navigation/native';
@@ -34,6 +35,8 @@ const TopBarProfileIcon = memo(({ size = 30 }) => {
         borderWidth: 1,
         borderColor: 'rgba(200, 200, 200, 0.3)',
       }}
+      cachePolicy="memory-disk"
+      transition={200}
       // Add key to force re-render when profilePic changes
       key={typeof profilePic === 'string' ? profilePic : 'default'}
       onError={(e) => console.log('Error loading profile image:', e.nativeEvent.error)}

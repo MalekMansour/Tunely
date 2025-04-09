@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { Image } from 'expo-image'; 
 import { useNavigation } from '@react-navigation/native';
 import { playlistService } from "../services/playlistService";
 import { useTheme } from "../context/ThemeContext";
@@ -91,12 +92,36 @@ const PlayList = ({ title, playlistId, songs: initialSongs = [], image, style, o
     >
       <View style={styles.playlistCoverGrid}>
         <View style={styles.playlistCoverRow}>
-          <Image source={songCovers[0]} style={styles.playlistCoverQuadrant} />
-          <Image source={songCovers[1]} style={styles.playlistCoverQuadrant} />
+          <Image 
+            source={songCovers[0]} 
+            style={styles.playlistCoverQuadrant} 
+            cachePolicy="memory-disk"
+            transition={300}
+            contentFit="cover"
+          />
+          <Image 
+            source={songCovers[1]} 
+            style={styles.playlistCoverQuadrant} 
+            cachePolicy="memory-disk"
+            transition={300}
+            contentFit="cover"
+          />
         </View>
         <View style={styles.playlistCoverRow}>
-          <Image source={songCovers[2]} style={styles.playlistCoverQuadrant} />
-          <Image source={songCovers[3]} style={styles.playlistCoverQuadrant} />
+          <Image 
+            source={songCovers[2]} 
+            style={styles.playlistCoverQuadrant} 
+            cachePolicy="memory-disk"
+            transition={300}
+            contentFit="cover"
+          />
+          <Image 
+            source={songCovers[3]} 
+            style={styles.playlistCoverQuadrant}
+            cachePolicy="memory-disk"
+            transition={300}
+            contentFit="cover"
+          />
         </View>
       </View>
       
@@ -133,7 +158,6 @@ const styles = StyleSheet.create({
   playlistCoverQuadrant: {
     width: '50%',
     height: '100%',
-    resizeMode: 'cover',
   },
   playlistOverlay: {
     position: 'absolute',

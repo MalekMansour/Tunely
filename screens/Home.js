@@ -1,5 +1,6 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { Text, View, FlatList, ActivityIndicator } from "react-native";
+import { Image } from 'expo-image';
 import { styles } from "../styles";
 import { useFocusEffect } from "@react-navigation/native";
 import { useGetSongs } from "../hooks/useGetSongs";
@@ -51,6 +52,20 @@ export default function HomeScreen() {
       fetchPlaylists();
     }, [])
   );
+
+  // Prefetch images when component mounts
+  useEffect(() => {
+    if (songs.length > 0) {
+      const imagesToPrefetch = songs.slice(0, 20)
+        .map(song => song.song_photo_url)
+        .filter(url => url);
+      
+      // Prefetch images in background
+      Image.prefetch(imagesToPrefetch);
+      
+      console.log(`Prefetching ${imagesToPrefetch.length} images`);
+    }
+  }, [songs]);
 
   // Get 10 newest songs
   const newSongs = songs.slice(0, 10);

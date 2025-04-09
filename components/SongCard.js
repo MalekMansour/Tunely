@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
+import { Image } from 'expo-image';  // Changed from React Native Image to expo-image
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -39,6 +40,8 @@ const SongCard = ({ song, playlistId, showOptions, onRemove, isOwnContent, noNav
         <Image
           source={song.song_photo_url ? { uri: song.song_photo_url } : defaultCoverImage}
           style={styles.songCardImage}
+          cachePolicy="memory-disk"
+          transition={300}
         />
         <View style={styles.songCardInfo}>
           <Text style={[styles.songCardTitle, { color: theme.text }]}>{song.title}</Text>
