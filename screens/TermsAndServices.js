@@ -11,14 +11,14 @@ const TermsAndServices = ({ navigation }) => {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Terms & Services</Text>
       </View>
-      {/* Content */}
+
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Terms & Services</Text>
+    
         <Text style={styles.text}>
           By using this app, you agree to the following:
         </Text>
         <Text style={styles.text}>
-          1. Use the app responsibly.{"\n"}
+          1. Using Tunely and Tunely's services and ressources responsibly.{"\n"}
           2. We may collect some basic data to improve your experience.{"\n"}
           3. We’re not responsible if you break your phone using the app.{"\n"}
           4. These terms can change anytime, so stay updated.
@@ -34,44 +34,50 @@ const TermsAndServices = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F1F1F1', 
-    paddingTop: 20, 
+    backgroundColor: '#F9FAFB',
+    paddingTop: 40,
   },
   header: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F1F1F1',
-    paddingVertical: 10,
+    alignItems: 'flex-end',
+    paddingBottom: 10,
     paddingHorizontal: 15,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#99a9b9', 
+    borderBottomColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   backButton: {
     padding: 5,
+    paddingBottom: 2,
   },
   headerTitle: {
-    fontSize: 20,
-    color: '#1a1a1a', 
-    fontWeight: 'bold',
+    fontSize: 22,
+    color: '#111827',
+    fontWeight: '600',
     marginLeft: 10,
+    paddingBottom: 2,
   },
   content: {
-    padding: 20,
+    padding: 24,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#1a1a1a', 
+    fontSize: 26,
+    fontWeight: '700',
+    marginBottom: 12,
+    color: '#1F2937',
   },
   text: {
     fontSize: 16,
-    marginBottom: 10,
-    color: '#1a1a1a', 
+    lineHeight: 24,
+    marginBottom: 16,
+    color: '#374151',
   },
   icon: {
-    color: '#182952',
-
+    color: '#1D4ED8',
   },
 });
 
