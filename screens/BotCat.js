@@ -159,7 +159,6 @@ export default function MoodChatBot() {
     { key: "hot", label: "Hot" },
   ];
 
-  // When a mood button is pressed, reset conversation and generate recommendations.
   const handleMoodSelection = async (mood) => {
     setConversation(initialConversation);
     setLoading(true);
@@ -190,7 +189,6 @@ export default function MoodChatBot() {
 
   return (
     <ThemedScreen style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Simple Top Bar with Back Button */}
       <View style={simpleHeaderStyles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={simpleHeaderStyles.backButton}>
           <Ionicons name="arrow-back" size={28} color={theme.text} />
