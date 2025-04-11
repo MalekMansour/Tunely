@@ -150,7 +150,7 @@ export default function SettingsScreen({ navigation }) {
         </TouchableOpacity>
 
         <Text style={{ color: theme.text, fontSize: 12, marginTop: 20 }}>
-          App Version: Early Access 0.9.4
+          App Version: Capstone Version 1.1.1
         </Text>
       </ScrollView>
     </ThemedScreen>

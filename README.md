@@ -21,6 +21,8 @@ Tunely helps independent artists by providing a seamless platform to upload musi
 - **Profile Management:** Comprehensive profile management and customizable privacy settings.
 - **Easy Uploads:** Quick and simple song uploads with automatic metadata processing.
 - **Enhanced UI/UX:** Smooth, interactive navigation using BlurView and advanced gesture handling.
+**AI-Driven Music Recommendations:**
+Chat with our AI assistant to receive personalized song recommendations tailored to your mood. Powered by the OpenAI API, this feature analyzes user input and leverages advanced algorithms (including pre-computed audio features via libraries like librosa) to suggest tracks from our own database that best match your vibe.
 
 ## Tech Stack
 ### Frontend  
