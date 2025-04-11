@@ -43,7 +43,7 @@ const SongCard2 = ({ song, contextSongs }) => {
           cachePolicy="memory-disk"
           transition={300}
         />
-        <View style={[styles.songCard2TitleContainer, { position: 'absolute', bottom: 0 }]}>
+        <View style={[styles.songCard2TitleContainer, { position: 'absolute', bottom: 0, width: '100%' }]}>
           <Text style={styles.songCard2Title}>{song.title}</Text>
           <Text style={styles.songCard2Artist}>{song.artistName}</Text>
         </View>
