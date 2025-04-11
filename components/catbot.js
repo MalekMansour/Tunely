@@ -1,9 +1,7 @@
-import React, { useRef, useMemo, useCallback } from "react";
+import React, { useRef, useCallback } from "react";
 import { Animated, StyleSheet, Dimensions, TouchableOpacity, Image } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { PanGestureHandler, State } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/native";
-import { useTheme } from "../context/ThemeContext";
 import { useChatbot } from "../context/ChatbotContext";
 
 const { width, height } = Dimensions.get("window");
@@ -21,18 +19,19 @@ const DEFAULT_X = MAX_X;
 const DEFAULT_Y = height - BUTTON_SIZE - BOTTOM_MARGIN;
 
 export default function CatBot() {
-  const { theme } = useTheme();
   const { catbotIcon } = useChatbot();
-  const translateX = useRef(new Animated.Value(DEFAULT_X)).current;
-  const translateY = useRef(new Animated.Value(DEFAULT_Y)).current;
+  const navigation = useNavigation();
+
+  // Create a single animated value for x and y with the default starting position.
+  const translate = useRef(new Animated.ValueXY({ x: DEFAULT_X, y: DEFAULT_Y })).current;
+  // Store the last snapped position.
   const lastPositionRef = useRef({ x: DEFAULT_X, y: DEFAULT_Y });
 
-  const navigation = useNavigation();
   const openChat = useCallback(() => {
     navigation.navigate("BotCat");
   }, [navigation]);
 
-  // Map selected icon names to image sources
+  // Map selected icon names to image sources.
   const iconMapping = {
     blue: require("../assets/catbots/blue.png"),
     black: require("../assets/catbots/black.png"),
@@ -47,30 +46,28 @@ export default function CatBot() {
 
   const iconSource = iconMapping[catbotIcon] || iconMapping.blue;
 
-  const onGestureEvent = useMemo(
-    () =>
-      Animated.event(
-        [{ nativeEvent: { translationX: translateX, translationY: translateY } }],
-        { useNativeDriver: false }
-      ),
-    [translateX, translateY]
-  );
+  // Instead of Animated.event with setOffset, update the position manually.
+  const onGestureEvent = useCallback((event) => {
+    const { translationX, translationY } = event.nativeEvent;
+    const newX = lastPositionRef.current.x + translationX;
+    const newY = lastPositionRef.current.y + translationY;
+    // Update the animated value with the new position.
+    translate.setValue({ x: newX, y: newY });
+  }, [translate]);
 
+  // When the gesture ends, compute the final position and snap to the nearest corner.
   const onHandlerStateChange = useCallback(
     ({ nativeEvent }) => {
-      if (nativeEvent.state === State.BEGAN) {
-        translateX.setOffset(lastPositionRef.current.x);
-        translateY.setOffset(lastPositionRef.current.y);
-        translateX.setValue(0);
-        translateY.setValue(0);
-      }
       if (nativeEvent.state === State.END) {
-        lastPositionRef.current.x += nativeEvent.translationX;
-        lastPositionRef.current.y += nativeEvent.translationY;
+        // Calculate the new final position by adding the translation to the last recorded position.
+        let finalX = lastPositionRef.current.x + nativeEvent.translationX;
+        let finalY = lastPositionRef.current.y + nativeEvent.translationY;
 
-        lastPositionRef.current.x = Math.max(MIN_X, Math.min(lastPositionRef.current.x, MAX_X));
-        lastPositionRef.current.y = Math.max(MIN_Y, Math.min(lastPositionRef.current.y, MAX_Y));
+        // Clamp the final position within the allowed boundaries.
+        finalX = Math.max(MIN_X, Math.min(finalX, MAX_X));
+        finalY = Math.max(MIN_Y, Math.min(finalY, MAX_Y));
 
+        // Define the four corner targets for snapping.
         const corners = [
           { x: MIN_X, y: TOP_MARGIN },
           { x: MAX_X, y: TOP_MARGIN },
@@ -78,47 +75,40 @@ export default function CatBot() {
           { x: MAX_X, y: height - BUTTON_SIZE - BOTTOM_MARGIN },
         ];
 
+        // Find the nearest corner.
         let nearestCorner = corners[0];
-        let minDistance = Math.hypot(lastPositionRef.current.x - corners[0].x, lastPositionRef.current.y - corners[0].y);
+        let minDistance = Math.hypot(finalX - corners[0].x, finalY - corners[0].y);
         corners.forEach((corner) => {
-          const distance = Math.hypot(lastPositionRef.current.x - corner.x, lastPositionRef.current.y - corner.y);
+          const distance = Math.hypot(finalX - corner.x, finalY - corner.y);
           if (distance < minDistance) {
             minDistance = distance;
             nearestCorner = corner;
           }
         });
 
-        lastPositionRef.current.x = nearestCorner.x;
-        lastPositionRef.current.y = nearestCorner.y;
+        // Update the last position reference.
+        lastPositionRef.current = { x: nearestCorner.x, y: nearestCorner.y };
 
-        Animated.spring(translateX, {
-          toValue: lastPositionRef.current.x,
-          useNativeDriver: false,
+        // Animate the view smoothly to the snapped position.
+        Animated.spring(translate, {
+          toValue: { x: nearestCorner.x, y: nearestCorner.y },
+          bounciness: 8,
+          speed:5,
+          useNativeDriver: true,
         }).start();
-        Animated.spring(translateY, {
-          toValue: lastPositionRef.current.y,
-          useNativeDriver: false,
-        }).start();
-
-        translateX.setOffset(0);
-        translateX.setValue(lastPositionRef.current.x);
-        translateY.setOffset(0);
-        translateY.setValue(lastPositionRef.current.y);
       }
     },
-    [translateX, translateY]
+    [translate]
   );
 
   return (
-    <PanGestureHandler onGestureEvent={onGestureEvent} onHandlerStateChange={onHandlerStateChange}>
-      <Animated.View
-        style={[
-          styles.floatingButton,
-          { transform: [{ translateX }, { translateY }] },
-        ]}
-      >
+    <PanGestureHandler
+      onGestureEvent={onGestureEvent}
+      onHandlerStateChange={onHandlerStateChange}
+    >
+      <Animated.View style={[styles.floatingButton, { transform: translate.getTranslateTransform() }]}>
         <TouchableOpacity onPress={openChat} style={[styles.button, { backgroundColor: "#F1EFEC" }]}>
-          <Image source={iconSource} style={{ width: 80, height: 80 }} />
+          <Image source={iconSource} style={{ width: BUTTON_SIZE, height: BUTTON_SIZE }} />
         </TouchableOpacity>
       </Animated.View>
     </PanGestureHandler>
