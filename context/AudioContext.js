@@ -10,6 +10,28 @@ export const AudioProvider = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playlist, setPlaylist] = useState([]);
   const [playlistSource, setPlaylistSource] = useState('all');
+
+  //This logic ensures the app to play in silent mode
+  React.useEffect(() => {
+    const configureAudio = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          staysActiveInBackground: true,
+          interruptionModeIOS: 1,
+          playsInSilentModeIOS: true, // this will play the songs in silent mode
+          shouldDuckAndroid: true,
+          interruptionModeAndroid: 1,
+        });
+        
+      } catch (err) {
+        
+      }
+    };
+
+    configureAudio();
+  }, []);
+
   
   // Use ref to track current song 
   const currentSongRef = useRef(null);
