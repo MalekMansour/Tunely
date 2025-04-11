@@ -46,7 +46,7 @@ export default function ChatBotSettings({ navigation }) {
         contentContainerStyle={{ paddingVertical: 30, alignItems: "center" }}
         showsVerticalScrollIndicator={false}
       >
-        {/* ChatBot Toggle */}
+        {/* Chatbot Visibility Toggle */} 
         <TouchableOpacity
           onPress={() => setChatbotVisible(!chatbotVisible)}
           style={{
