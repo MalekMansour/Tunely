@@ -107,7 +107,7 @@ export const themes = {
     primary: "#836FFF",
     secondary: "#865DFF",
     text: "#F0F3FF",
-    border: "#2D336B",
+    border: "#F1F1F1",
     icon: "#836FFF",
   }),
   cafe: createTheme({
