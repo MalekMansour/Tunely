@@ -53,14 +53,12 @@ export default function HomeScreen() {
     }, [])
   );
 
-  // Prefetch images when component mounts
   useEffect(() => {
     if (songs.length > 0) {
       const imagesToPrefetch = songs.slice(0, 20)
         .map(song => song.song_photo_url)
         .filter(url => url);
       
-      // Prefetch images in background
       Image.prefetch(imagesToPrefetch);
       
       console.log(`Prefetching ${imagesToPrefetch.length} images`);
