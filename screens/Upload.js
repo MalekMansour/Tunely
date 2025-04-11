@@ -146,7 +146,7 @@ export default function Upload({ navigation }) {
 
   return (
     <ThemedScreen style={{ padding: 20 }}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()} >
         <Ionicons name="arrow-back" size={24} color={theme.text} />
       </TouchableOpacity>
       <ScrollView keyboardShouldPersistTaps="handled">
@@ -264,7 +264,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 40,
     left: 10,
-    padding: 10,
+    padding: 15,
+    zIndex: 100,
   },
   button: {
     padding: 15,

@@ -28,12 +28,22 @@ export default function FloatingPlayer() {
 
   if (!currentSong || hiddenScreens.includes(currentRoute?.name)) return null;
 
+  // Determine if we're on the ArtistPage (needs to be lower on artist page without nav bar)
+  const isArtistPage = currentRoute?.name === "ArtistPage";
+
   const handlePress = () => {
     navigation.navigate('SongDetail', { song: currentSong });
   };
 
   return (
-    <TouchableOpacity style={styles.container} onPress={handlePress} activeOpacity={0.9}>
+    <TouchableOpacity 
+      style={[
+        styles.container, 
+        isArtistPage && styles.artistPageContainer
+      ]} 
+      onPress={handlePress} 
+      activeOpacity={0.9}
+    >
       <BlurView intensity={80} tint="dark" style={styles.blurContainer} />
       <View style={styles.content}>
         <Image
@@ -83,6 +93,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
+  },
+  artistPageContainer: {
+    bottom: 24,
   },
   blurContainer: {
     ...StyleSheet.absoluteFillObject,

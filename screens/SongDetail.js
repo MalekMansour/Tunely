@@ -25,50 +25,69 @@ const SCREEN_HEIGHT = Dimensions.get("window").height;
 const IMAGE_SIZE = 350;
 
 export default function SongDetailScreen({ route }) {
-  const { song } = route.params;
+  const { song: initialSong } = route.params;
   const navigation = useNavigation();
   const translateY = useRef(new Animated.Value(0)).current;
+  const translateX = useRef(new Animated.Value(0)).current;
 
   const { currentSong, isPlaying, playNextSong, playPreviousSong, playlist } = useAudio();
-  const { theme, opacity } = useTheme(); 
+  const { theme, opacity } = useTheme();
 
+  const [currentSongState, setCurrentSongState] = useState(initialSong);
   const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(song.likes || 0);
+  const [likeCount, setLikeCount] = useState(initialSong.likes || 0);
   const [isLikeLoading, setIsLikeLoading] = useState(false);
   const [isManuallyNavigating, setIsManuallyNavigating] = useState(false);
 
-  // When song title or artist is pressed, replace current screen with ArtistPage
   const handleArtistPress = () => {
-    navigation.replace("ArtistPage", { 
-      artistName: song.artistName, 
-      profilePicture: song.artistProfilePicture ? song.artistProfilePicture : defaultCoverImage 
+    navigation.replace("ArtistPage", {
+      artistName: currentSongState.artistName,
+      profilePicture: currentSongState.artistProfilePicture ? currentSongState.artistProfilePicture : defaultCoverImage,
     });
   };
 
+  const animateSongChange = (direction, newSong) => {
+    const startValue = direction === "next" ? Dimensions.get("window").width : -Dimensions.get("window").width;
+    translateX.setValue(startValue);
+
+    setCurrentSongState(newSong);
+
+    Animated.spring(translateX, {
+      toValue: 0,
+      useNativeDriver: false,
+      friction: 8,
+      tension: 40,
+    }).start();
+  };
+
   useEffect(() => {
-    if (currentSong && song.songId !== currentSong.songId && !isManuallyNavigating) {
-      navigation.replace("SongDetail", { song: currentSong });
+    if (currentSong && currentSongState.songId !== currentSong.songId && !isManuallyNavigating) {
+      const currentIndex = playlist.findIndex((s) => s.songId === currentSongState.songId);
+      const newIndex = playlist.findIndex((s) => s.songId === currentSong.songId);
+      const direction = newIndex > currentIndex ? "next" : "prev";
+
+      animateSongChange(direction, currentSong);
     }
     setIsManuallyNavigating(false);
   }, [currentSong]);
 
   const handleNext = async () => {
-    const currentIndex = playlist.findIndex((s) => s.songId === song.songId);
+    const currentIndex = playlist.findIndex((s) => s.songId === currentSongState.songId);
     if (currentIndex < playlist.length - 1) {
       const nextSong = playlist[currentIndex + 1];
       setIsManuallyNavigating(true);
       await playNextSong();
-      navigation.replace("SongDetail", { song: nextSong });
+      animateSongChange("next", nextSong);
     }
   };
 
   const handlePrevious = async () => {
-    const currentIndex = playlist.findIndex((s) => s.songId === song.songId);
+    const currentIndex = playlist.findIndex((s) => s.songId === currentSongState.songId);
     if (currentIndex > 0) {
       const previousSong = playlist[currentIndex - 1];
       setIsManuallyNavigating(true);
       await playPreviousSong();
-      navigation.replace("SongDetail", { song: previousSong });
+      animateSongChange("prev", previousSong);
     }
   };
 
@@ -81,7 +100,7 @@ export default function SongDetailScreen({ route }) {
         Alert.alert("Sign In Required", "Please sign in to like songs");
         return;
       }
-      const result = await likesService.toggleLike(song.songId);
+      const result = await likesService.toggleLike(currentSongState.songId);
       setIsLiked(result.action === "liked");
       setLikeCount(result.likeCount);
     } catch (error) {
@@ -117,7 +136,7 @@ export default function SongDetailScreen({ route }) {
           useNativeDriver: false,
         }).start(() => navigation.goBack());
       } else if (event.nativeEvent.translationY < -100) {
-        navigation.navigate("CommentScreen", { song });
+        navigation.navigate("CommentScreen", { song: currentSongState });
       } else {
         Animated.spring(translateY, {
           toValue: 0,
@@ -141,7 +160,7 @@ export default function SongDetailScreen({ route }) {
       try {
         const user = auth.currentUser;
         if (!user) return;
-        const result = await likesService.checkLiked(song.songId);
+        const result = await likesService.checkLiked(currentSongState.songId);
         setIsLiked(result.liked);
         if (result.likeCount) {
           setLikeCount(result.likeCount);
@@ -151,7 +170,7 @@ export default function SongDetailScreen({ route }) {
       }
     };
     checkLikeStatus();
-  }, [song.songId]);
+  }, [currentSongState.songId]);
 
   return (
     <PanGestureHandler onGestureEvent={onGestureEvent} onHandlerStateChange={onHandlerStateChange}>
@@ -160,11 +179,11 @@ export default function SongDetailScreen({ route }) {
           styles.songDetailsContainer,
           {
             transform: [{ translateY }],
-            borderWidth: 1,
+            borderWidth: 0,
             backgroundColor: theme.background,
             opacity: opacity,
             borderColor: theme.border,
-            shadowColor: theme.border,
+            //shadowColor: theme.border,
             shadowOffset: { width: 0, height: 0 },
             shadowOpacity: 1,
             shadowRadius: 10,
@@ -178,11 +197,15 @@ export default function SongDetailScreen({ route }) {
       >
         <View style={styles.imageTitleContainer}>
           <Animated.Image
-            source={song.song_photo_url ? { uri: song.song_photo_url } : defaultCoverImage}
+            source={currentSongState.song_photo_url ? { uri: currentSongState.song_photo_url } : defaultCoverImage}
             style={[
               styles.songImage,
               {
-                transform: [{ scale }, { translateY: imageTranslateY }],
+                transform: [
+                  { scale },
+                  { translateY: imageTranslateY },
+                  { translateX },
+                ],
                 width: IMAGE_SIZE,
                 height: IMAGE_SIZE,
                 alignSelf: "center",
@@ -193,13 +216,13 @@ export default function SongDetailScreen({ route }) {
             style={[styles.songTitle, { color: theme.text }]}
             onPress={handleArtistPress}
           >
-            {song.title}
+            {currentSongState.title}
           </Text>
           <Text
             style={[styles.songArtist, { color: theme.text }]}
             onPress={handleArtistPress}
           >
-            {song.artistName}
+            {currentSongState.artistName}
           </Text>
         </View>
 
@@ -208,14 +231,14 @@ export default function SongDetailScreen({ route }) {
         <View style={styles.controls}>
           <SkipButton direction="back" onPress={handlePrevious} />
           <PlayPauseButton
-            song={song}
-            isPlaying={isPlaying && currentSong?.songId === song.songId}
+            song={currentSongState}
+            isPlaying={isPlaying && currentSong?.songId === currentSongState.songId}
           />
           <SkipButton direction="forward" onPress={handleNext} />
         </View>
 
         <View style={{ flexDirection: "row", justifyContent: "space-between", width: "100%", paddingHorizontal: 20 }}>
-          <TouchableOpacity onPress={() => navigation.navigate("CommentScreen", { song })}>
+          <TouchableOpacity onPress={() => navigation.navigate("CommentScreen", { song: currentSongState })}>
             <Ionicons
               name="chatbubble-ellipses-outline"
               size={40}

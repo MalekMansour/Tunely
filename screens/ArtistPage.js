@@ -14,6 +14,7 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import ThemedScreen from "../components/ThemedScreen";
+import { useAudio } from "../context/AudioContext";
 
 export default function ArtistPage() {
   const [allFilteredSongs, setAllFilteredSongs] = useState([]);
@@ -23,6 +24,7 @@ export default function ArtistPage() {
   const [loading, setLoading] = useState(true);
 
   const { theme } = useTheme();
+  const { changePlaylist } = useAudio();
   const route = useRoute();
   const navigation = useNavigation();
 
@@ -62,9 +64,9 @@ export default function ArtistPage() {
   };
 
   const latestCover =
-  allFilteredSongs.length > 0 && allFilteredSongs[0].song_photo_url
-    ? allFilteredSongs[0].song_photo_url
-    : null;
+    allFilteredSongs.length > 0 && allFilteredSongs[0].song_photo_url
+      ? allFilteredSongs[0].song_photo_url
+      : null;
 
   return (
     <ThemedScreen style={[styles.container, { backgroundColor: theme.background }]}>
@@ -90,7 +92,16 @@ export default function ArtistPage() {
         <FlatList
           data={displayedSongs}
           keyExtractor={(item) => item.songId.toString()}
-          renderItem={({ item }) => <SongCard song={item} noNavigation />}
+          renderItem={({ item }) => (
+            <SongCard 
+              song={item} 
+              noNavigation 
+              contextSongs={allFilteredSongs}
+              onPress={() => {
+                changePlaylist(allFilteredSongs, 'artist');
+              }}
+            />
+          )}
           contentContainerStyle={styles.list}
           ListFooterComponent={() =>
             displayedSongs.length < allFilteredSongs.length ? (
