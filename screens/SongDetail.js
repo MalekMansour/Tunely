@@ -248,7 +248,6 @@ export default function SongDetailScreen({ route }) {
           </TouchableOpacity>
 
           <TouchableOpacity onPress={toggleLike} disabled={isLikeLoading}>
-            
             <Ionicons
               name={isLiked ? "heart" : "heart-outline"}
               size={40}
