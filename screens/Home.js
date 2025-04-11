@@ -120,7 +120,7 @@ export default function HomeScreen() {
                     renderItem={({ item }) => (
                       <SongCard2 
                         song={item} 
-                        contextSongs={recentlyPlayedSongs} // Add context songs
+                        contextSongs={recentlyPlayedSongs} 
                       />
                     )}
                     showsHorizontalScrollIndicator={false}
@@ -162,7 +162,7 @@ export default function HomeScreen() {
                   renderItem={({ item }) => (
                     <SongCard 
                       song={item} 
-                      contextSongs={songs} // Add context songs for this genre
+                      contextSongs={songs} 
                     />
                   )}
                   showsVerticalScrollIndicator={false}
