@@ -9,6 +9,7 @@ import {
   Image,
 } from "react-native";
 import { songService } from "../services/songService";
+import { likesService } from "../services/likesService"; // Import likesService
 import SongCard from "../components/SongCard";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,6 +19,7 @@ import { useAudio } from "../context/AudioContext";
 
 export default function ArtistPage() {
   const [allFilteredSongs, setAllFilteredSongs] = useState([]);
+  const [totalLikes, setTotalLikes] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const songsPerPage = 5;
   const displayedSongs = allFilteredSongs.slice(0, currentPage * songsPerPage);
@@ -28,7 +30,7 @@ export default function ArtistPage() {
   const route = useRoute();
   const navigation = useNavigation();
 
-  // Expect route.params to have artistName only.
+  // Expect route.params to have artistName.
   const { artistName } = route.params || {};
 
   useEffect(() => {
@@ -44,9 +46,38 @@ export default function ArtistPage() {
         const artistSongs = allSongs.filter(
           (song) => song.artistName.toLowerCase() === artistName.toLowerCase()
         );
-        // Sort songs by release date descending (assuming releaseDate is a valid date string).
-        artistSongs.sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate));
-        setAllFilteredSongs(artistSongs);
+        
+        // For each song, use likesService.checkLiked to get its like count.
+        const artistSongsWithLikes = await Promise.all(
+          artistSongs.map(async (song) => {
+            try {
+              const result = await likesService.checkLiked(song.songId);
+              // Here, we use result.likeCount as the number of likes.
+              return { ...song, likes: Number(result.likeCount || 0) };
+            } catch (error) {
+              console.error("Error fetching like count for song", song.songId, error);
+              return { ...song, likes: 0 };
+            }
+          })
+        );
+
+        // Debug log to inspect each song with its likes.
+        artistSongsWithLikes.forEach((song, index) => {
+          console.log(`Song ${index + 1}: artistName=${song.artistName}, likes=${song.likes}`);
+        });
+
+        // Sort songs by release date descending.
+        artistSongsWithLikes.sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate));
+
+        // Calculate the total likes from all the artist's songs.
+        const combinedLikes = artistSongsWithLikes.reduce(
+          (total, song) => total + song.likes,
+          0
+        );
+        console.log("Computed Total Likes:", combinedLikes);
+        setTotalLikes(combinedLikes);
+
+        setAllFilteredSongs(artistSongsWithLikes);
         setCurrentPage(1);
       } catch (error) {
         console.error("Error fetching songs by artist:", error);
@@ -84,6 +115,10 @@ export default function ArtistPage() {
           style={styles.profileImage}
         />
         <Text style={[styles.artistName, { color: theme.text }]}>{artistName}</Text>
+        {/* Display the total likes across all songs for the artist */}
+        <Text style={[styles.totalLikes, { color: theme.text }]}>
+          Total Likes: {totalLikes}
+        </Text>
       </View>
 
       {loading ? (
@@ -141,6 +176,10 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  totalLikes: {
+    fontSize: 18,
+    marginTop: 8,
   },
   loader: {
     marginTop: 50,
