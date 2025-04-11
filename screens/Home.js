@@ -117,7 +117,12 @@ export default function HomeScreen() {
                     data={recentlyPlayedSongs.slice(0, 8)}
                     keyExtractor={(item) => item.songId.toString()}
                     horizontal
-                    renderItem={({ item }) => <SongCard2 song={item} />}
+                    renderItem={({ item }) => (
+                      <SongCard2 
+                        song={item} 
+                        contextSongs={recentlyPlayedSongs} // Add context songs
+                      />
+                    )}
                     showsHorizontalScrollIndicator={false}
                     onRefresh={refreshRecentlyPlayedSongs}
                     refreshing={recentPlayedLoading}
@@ -137,7 +142,12 @@ export default function HomeScreen() {
               <FlatList
                 data={newSongs}
                 keyExtractor={(item) => item.songId.toString()}
-                renderItem={({ item }) => <SongCard song={item} />}
+                renderItem={({ item }) => (
+                  <SongCard 
+                    song={item} 
+                    contextSongs={newSongs} // Add context songs
+                  />
+                )}
                 showsVerticalScrollIndicator={false}
               />
             </View>
@@ -149,7 +159,12 @@ export default function HomeScreen() {
                 <FlatList
                   data={songs}
                   keyExtractor={(item) => item.songId.toString()}
-                  renderItem={({ item }) => <SongCard song={item} />}
+                  renderItem={({ item }) => (
+                    <SongCard 
+                      song={item} 
+                      contextSongs={songs} // Add context songs for this genre
+                    />
+                  )}
                   showsVerticalScrollIndicator={false}
                   ListEmptyComponent={
                     <Text style={[styles.emptyText, { color: theme.text }]}>
@@ -185,7 +200,9 @@ export default function HomeScreen() {
         }}
         refreshing={loading}
         ListEmptyComponent={
-          <Text style={[styles.emptyText, { color: theme.text }]}>No playlists available</Text>
+          <Text style={[styles.emptyText, { color: theme.text }]}>
+            No playlists available
+          </Text>
         }
       />
       {error && (

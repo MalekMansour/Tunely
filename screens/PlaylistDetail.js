@@ -31,7 +31,7 @@ const PlaylistDetail = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { playlistId, title } = route.params;
-  const { playSound } = useAudio();
+  const { playSound, changePlaylist } = useAudio(); // Add changePlaylist to destructuring
   const { theme } = useTheme();
 
   // Local state
@@ -110,6 +110,8 @@ const PlaylistDetail = () => {
   // Play the first song
   const handlePlay = () => {
     if (userSongs.length > 0) {
+      // Set the current playlist in context before playing
+      changePlaylist(userSongs, 'playlist');
       playSound(userSongs[0]);
     }
   };
@@ -117,6 +119,8 @@ const PlaylistDetail = () => {
   // Shuffle
   const handleShuffle = () => {
     if (userSongs.length > 0) {
+      // Set the current playlist in context before playing a random song
+      changePlaylist(userSongs, 'playlist');
       const randomSong = userSongs[Math.floor(Math.random() * userSongs.length)];
       playSound(randomSong);
     }
@@ -302,6 +306,11 @@ const PlaylistDetail = () => {
             song={item}
             onRemove={() => handleRemoveSong(item.songId)}
             isOwnContent={isOwnPlaylist}
+            contextSongs={userSongs} // Add this line to provide context
+            onPress={() => {
+              changePlaylist(userSongs, 'playlist');
+              playSound(item);
+            }}
           />
         )}
       />

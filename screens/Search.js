@@ -207,7 +207,12 @@ export default function Search() {
               <FlatList
                 data={results.songs.slice(0, songPage * songsPerPage)}
                 keyExtractor={(item) => item.songId.toString()}
-                renderItem={({ item }) => <SongCard song={item} />}
+                renderItem={({ item }) => (
+                  <SongCard 
+                    song={item} 
+                    contextSongs={results.songs} 
+                  />
+                )}
                 ListFooterComponent={() =>
                   results.songs.length > songPage * songsPerPage ? (
                     <TouchableOpacity onPress={loadMoreSongs} style={styles.loadMoreButton}>

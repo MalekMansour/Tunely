@@ -12,10 +12,10 @@ import { useAudio } from "../context/AudioContext";
 
 const defaultCoverImage = require("../assets/note.jpg");
 
-const SongCard = ({ song, playlistId, showOptions, onRemove, isOwnContent, noNavigation }) => {
+const SongCard = ({ song, playlistId, showOptions, onRemove, isOwnContent, noNavigation, contextSongs }) => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const { playSound, pauseSound, resumeSound, currentSong, isPlaying } = useAudio();
+  const { playSound, pauseSound, resumeSound, currentSong, isPlaying, changePlaylist } = useAudio();
 
   const isCurrentSong = currentSong?.songId === song.songId;
 
@@ -27,6 +27,10 @@ const SongCard = ({ song, playlistId, showOptions, onRemove, isOwnContent, noNav
         await resumeSound();
       }
     } else {
+      // If we have context songs (surrounding songs in current view), set them as playlist
+      if (contextSongs && contextSongs.length > 0) {
+        changePlaylist(contextSongs, 'section');
+      }
       await playSound(song);
     }
   };

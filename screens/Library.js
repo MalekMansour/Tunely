@@ -298,6 +298,7 @@ export default function LibraryScreen() {
           data={myUploads}
           keyExtractor={(item) => item.songId.toString()}
           contentContainerStyle={styles.songListContainer}
+          showsVerticalScrollIndicator={true}
           ListEmptyComponent={() => (
             <Text style={[styles.emptyText, { color: theme.text }]}>No Uploaded Songs</Text>
           )}
@@ -307,6 +308,7 @@ export default function LibraryScreen() {
               isOwnContent={true}
               onRemove={handleDeleteSong}
               isDeleting={deletingId === item.songId}
+              contextSongs={myUploads} // Add context songs
             />
           )}
         />
@@ -324,7 +326,12 @@ export default function LibraryScreen() {
       ListHeaderComponent={() => (
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Your Liked Songs</Text>
       )}
-      renderItem={({ item }) => <SongCard song={item} />}
+      renderItem={({ item }) => (
+        <SongCard 
+          song={item} 
+          contextSongs={likedSongs} // Add context songs
+        />
+      )}
       contentContainerStyle={styles.songListContainer}
       ListEmptyComponent={() => (
         <Text style={[styles.emptyText, { color: theme.text }]}>
@@ -349,7 +356,12 @@ export default function LibraryScreen() {
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Recently played</Text>
         </View>
       )}
-      renderItem={({ item }) => <SongCard song={item} />}
+      renderItem={({ item }) => (
+        <SongCard 
+          song={item} 
+          contextSongs={recentlyPlayedSongs} // Add context songs
+        />
+      )}
       contentContainerStyle={styles.songListContainer}
       showsVerticalScrollIndicator={false}
       onRefresh={refreshRecentlyPlayed}

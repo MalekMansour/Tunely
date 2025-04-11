@@ -25,12 +25,18 @@ export const AudioProvider = ({ children }) => {
   };
 
   const playNextSong = async () => {
-    // Use the ref for current song reference
     const currentSongValue = currentSongRef.current;
     
     if (!currentSongValue || playlist.length === 0) return;
     
-    const currentIndex = playlist.findIndex(song => song.songId === currentSongValue.songId);
+    // Check both songId and id properties
+    const currentSongId = currentSongValue.songId || currentSongValue.id;
+    
+    // Modified findIndex to check both ID formats
+    const currentIndex = playlist.findIndex(song => {
+      const songId = song.songId || song.id;
+      return songId === currentSongId;
+    });
     
     if (currentIndex === -1 || currentIndex === playlist.length - 1) return;
     
@@ -39,9 +45,19 @@ export const AudioProvider = ({ children }) => {
   };
 
   const playPreviousSong = async () => {
-    if (!currentSong || playlist.length === 0) return;
+    const currentSongValue = currentSongRef.current;
     
-    const currentIndex = playlist.findIndex(song => song.songId === currentSong.songId);
+    if (!currentSongValue || playlist.length === 0) return;
+    
+    // Check both songId and id properties
+    const currentSongId = currentSongValue.songId || currentSongValue.id;
+    
+    // Modified findIndex to check both ID formats
+    const currentIndex = playlist.findIndex(song => {
+      const songId = song.songId || song.id;
+      return songId === currentSongId;
+    });
+    
     if (currentIndex === -1 || currentIndex === 0) return;
     
     const previousSong = playlist[currentIndex - 1];

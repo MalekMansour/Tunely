@@ -8,18 +8,23 @@ import { Ionicons } from '@expo/vector-icons';
 
 const defaultCoverImage = require('../assets/note.jpg');
 
-const SongCard2 = ({ song }) => {
+const SongCard2 = ({ song, contextSongs }) => {
   const navigation = useNavigation();
-  const { playSound, pauseSound, resumeSound, currentSong, isPlaying } = useAudio();
+  const { playSound, pauseSound, resumeSound, currentSong, isPlaying, changePlaylist } = useAudio();
 
   const handlePress = async () => {
-    if (currentSong?.songId === song.songId) {
+    // If current song, toggle play/pause
+    if (currentSong && currentSong.songId === song.songId) {
       if (isPlaying) {
         await pauseSound();
       } else {
         await resumeSound();
       }
     } else {
+      // Set playlist context if available
+      if (contextSongs && contextSongs.length > 0) {
+        changePlaylist(contextSongs, 'recentlyPlayed');
+      }
       await playSound(song);
     }
   };
