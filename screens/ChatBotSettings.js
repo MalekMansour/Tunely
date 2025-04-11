@@ -10,7 +10,7 @@ export default function ChatBotSettings({ navigation }) {
   const { theme } = useTheme();
   const { chatbotVisible, setChatbotVisible, catbotIcon, setCatbotIcon } = useChatbot();
 
-  // Define 9 icon options from assets/catbots/
+  // ICONS OPTIONS
   const iconOptions = [
     { name: "blue", source: require("../assets/catbots/blue.png") },
     { name: "cyan", source: require("../assets/catbots/cyan.png") },
