@@ -145,7 +145,7 @@ export default function HomeScreen() {
                 renderItem={({ item }) => (
                   <SongCard 
                     song={item} 
-                    contextSongs={newSongs} // Add context songs
+                    contextSongs={newSongs} 
                   />
                 )}
                 showsVerticalScrollIndicator={false}
