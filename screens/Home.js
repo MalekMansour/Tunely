@@ -61,8 +61,7 @@ export default function HomeScreen() {
       
       Image.prefetch(imagesToPrefetch);
       
-      console.log(`Prefetching ${imagesToPrefetch.length} images`);
-    }
+      console.log(`Prefetching ${imagesToPrefetch.length} images`); }
   }, [songs]);
 
   // Get 10 newest songs
