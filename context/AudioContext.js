@@ -19,7 +19,7 @@ export const AudioProvider = ({ children }) => {
           allowsRecordingIOS: false,
           staysActiveInBackground: true,
           interruptionModeIOS: 1,
-          playsInSilentModeIOS: true, // this will play the songs in silent mode
+          playsInSilentModeIOS: true, 
           shouldDuckAndroid: true,
           interruptionModeAndroid: 1,
         });
