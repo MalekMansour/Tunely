@@ -105,6 +105,7 @@ export default function HomeScreen() {
     <ThemedScreen style={[styles.container, { backgroundColor: theme.background }]}>
       <FlatList
         data={playlists}
+        contentContainerStyle={{ paddingBottom: 90 }}
         ListHeaderComponent={
           <>
             {/* Recently Played - Horizontal Only */}
