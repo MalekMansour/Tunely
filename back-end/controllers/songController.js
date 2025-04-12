@@ -170,6 +170,28 @@ deleteSong: async (req, res) => {
     console.error('Error deleting song:', error);
     res.status(500).json({ error: 'Failed to delete song' });
   }
+},
+
+getSongStats: async (req, res) => {
+  try {
+    const userId = req.user.uid;
+    const stats = await SongModel.getSongStats(userId);
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching song stats:', error);
+    res.status(500).json({ error: 'Failed to fetch song statistics' });
+  }
+},
+
+getArtistTotals: async (req, res) => {
+  try {
+    const userId = req.user.uid;
+    const totals = await SongModel.getArtistTotals(userId);
+    res.json(totals);
+  } catch (error) {
+    console.error('Error fetching artist totals:', error);
+    res.status(500).json({ error: 'Failed to fetch artist totals' });
+  }
 }
 };
 

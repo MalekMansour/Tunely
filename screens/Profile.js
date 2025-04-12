@@ -135,6 +135,13 @@ export default function ProfileScreen({ navigation }) {
         </TouchableOpacity>
 
         <TouchableOpacity
+          style={[styles.button, { backgroundColor: theme.primary }]}
+          onPress={() => navigation.navigate('ArtistDashboard')}
+        >
+          <Text style={[styles.buttonText, { color: theme.text }]}>Dashboard</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.delete }]}
           onPress={handleLogout}
         >
@@ -206,5 +213,17 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  optionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 15,
+    borderRadius: 10,
+    width: "80%",
+    marginVertical: 10,
+  },
+  optionText: {
+    fontSize: 16,
+    marginLeft: 10,
   },
 });

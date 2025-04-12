@@ -187,5 +187,43 @@ export const songService = {
       console.error('Delete song error:', error);
       throw error;
     }
+  },
+
+  getSongStats: async () => {
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${API_URL}/songs/stats`, {
+        method: 'GET',
+        headers
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch song stats: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching song stats:', error);
+      throw error;
+    }
+  },
+
+  getArtistTotals: async () => {
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${API_URL}/songs/artist-totals`, {
+        method: 'GET',
+        headers
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch artist totals: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching artist totals:', error);
+      throw error;
+    }
   }
 };

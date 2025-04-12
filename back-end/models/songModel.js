@@ -38,6 +38,7 @@ const SongModel = {
       throw error;
     }
   },
+
   delete: async (songId) => {
     try {
       // delete related records from other tables
@@ -53,9 +54,42 @@ const SongModel = {
       console.error('Error deleting song:', error);
       throw error;
     }
+  },
+
+  getSongStats: async (userId) => {
+    const sql = `
+      SELECT 
+        s.songId,
+        s.title,
+        s.song_photo_url,
+        s.artistName,
+        COUNT(DISTINCT sp.id) AS play_count,
+        COUNT(DISTINCT sl.song_id) AS like_count
+        /* Removed s.created_at which doesn't exist in your table */
+      FROM songs s
+      LEFT JOIN song_plays sp ON s.songId = sp.song_id
+      LEFT JOIN song_likes sl ON s.songId = sl.song_id
+      WHERE s.user_id = ?
+      GROUP BY s.songId
+      ORDER BY play_count DESC
+    `;
+    return await db.query(sql, [userId]);
+  },
+
+  getArtistTotals: async (userId) => {
+    const sql = `
+      SELECT 
+        COUNT(DISTINCT s.songId) AS total_songs,
+        COUNT(DISTINCT sp.id) AS total_plays,
+        COUNT(DISTINCT CONCAT(sl.user_id, sl.song_id)) AS total_likes
+      FROM songs s
+      LEFT JOIN song_plays sp ON s.songId = sp.song_id
+      LEFT JOIN song_likes sl ON s.songId = sl.song_id
+      WHERE s.user_id = ?
+    `;
+    const results = await db.query(sql, [userId]);
+    return results[0];
   }
-
 };
-
 
 module.exports = SongModel;

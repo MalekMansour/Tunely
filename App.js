@@ -39,6 +39,7 @@ import ThemeSettings from "./screens/ThemeSettings";
 import ArtistPage from "./screens/ArtistPage";
 import ChatBotSettings from "./screens/ChatBotSettings";
 import TermsAndServices from "./screens/TermsAndServices";
+import ArtistDashboard from "./screens/ArtistDashboard";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -242,6 +243,7 @@ export default function App() {
                       name="TermsAndServices"
                       component={TermsAndServices}
                     />
+                    <Stack.Screen name="ArtistDashboard" component={ArtistDashboard} />
                   </Stack.Navigator>
 
                   <FloatingPlayer />
@@ -293,6 +295,7 @@ function ConditionalCatBot() {
     "CommentScreen",
     "TermsAndServices",
     "ArtistPage",
+    "ArtistDashboard",
   ];
 
   if (!chatbotVisible || !routeName || hiddenScreens.includes(routeName)) {
