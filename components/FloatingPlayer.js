@@ -23,7 +23,7 @@ export default function FloatingPlayer() {
     "SongDetail", "CommentScreen", "Profile", "Upload", "Login",
     "LoginFormPage", "SignUp", "Settings", "PrivacySettings",
     "Notifications", "AdminPage", "AuthCheck", "ThemeSettings",
-    "ChatBotSettings", "ArtistDashboard"
+    "ChatBotSettings", "TermsAndServices", "ArtistDashboard"
   ];
 
   if (!currentSong || hiddenScreens.includes(currentRoute?.name)) return null;
