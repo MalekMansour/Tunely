@@ -18,10 +18,18 @@ const TermsAndServices = ({ navigation }) => {
           By using this app, you agree to the following:
         </Text>
         <Text style={styles.text}>
-          1. Using Tunely and Tunely's services and ressources responsibly.{"\n"}
-          2. We may collect some basic data to improve your experience.{"\n"}
-          3. We’re not responsible if you break your phone using the app.{"\n"}
-          4. These terms can change anytime, so stay updated.
+          1. Users must use Tunely’s services, features, and resources in a lawful and responsible manner. Any misuse or abuse of the platform may result in suspension or termination of access.{"\n"}
+          2. We may collect certain data to enhance your experience. This may include, but is not limited to, your name, email address, and location. {"\n"}
+          3. Tunely is not liable for any damages resulting from the use or inability to use the platform, including but not limited to data loss, device issues, or service interruptions.{"\n"}
+          4. Use of Tunely is limited to individuals who meet the legal age requirement in their jurisdiction. By using the service, you confirm that you meet these requirements.{"\n"}
+          5. Tunely reserves the right to modify or discontinue any part of the service at any time without notice.{"\n"}
+          6. Users are responsible for maintaining the confidentiality of their account information and for all activities that occur under their account.{"\n"}
+          7. Tunely may send you promotional materials, but you can opt-out at any time.{"\n"}
+          8. By using Tunely, you agree to comply with all applicable laws and regulations.{"\n"}
+          9. You agree not to use the app for any illegal or unauthorized purpose, including but not limited to copyright infringement, harassment, or distribution of malware.{"\n"}
+          10. Users may submit content to the platform. By doing so, they grant Tunely a non-exclusive, worldwide, royalty-free license to use, display, and distribute that content within the scope of the service.{"\n"}
+          11. Tunely may use third-party services for analytics, advertising, and other purposes. These services may collect data about your usage of the app.{"\n"}
+          12. All content, trademarks, and intellectual property on the Tunely platform are the exclusive property of Tunely or its licensors. Unauthorized use or reproduction is strictly prohibited.{"\n"}
         </Text>
         <Text style={styles.text}>
           By continuing to use the app, you acknowledge that you have read and understood these terms and agree to be bound by them. If you do not agree to these terms, please do not use the app.
