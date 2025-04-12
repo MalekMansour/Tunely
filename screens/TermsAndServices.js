@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 10,
     paddingBottom: 2,
+    marginTop: 20,
   },
   content: {
     padding: 24,
