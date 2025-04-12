@@ -13,13 +13,12 @@ const TermsAndServices = ({ navigation }) => {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-    
         <Text style={styles.text}>
           By using this app, you agree to the following:
         </Text>
         <Text style={styles.text}>
           1. Users must use Tunely’s services, features, and resources in a lawful and responsible manner. Any misuse or abuse of the platform may result in suspension or termination of access.{"\n"}
-          2. We may collect certain data to enhance your experience. This may include, but is not limited to, your name, email address, and location. {"\n"}
+          2. We may collect certain data to enhance your experience. This may include, but is not limited to, your name, email address, and location.{"\n"}
           3. Tunely is not liable for any damages resulting from the use or inability to use the platform, including but not limited to data loss, device issues, or service interruptions.{"\n"}
           4. Use of Tunely is limited to individuals who meet the legal age requirement in their jurisdiction. By using the service, you confirm that you meet these requirements.{"\n"}
           5. Tunely reserves the right to modify or discontinue any part of the service at any time without notice.{"\n"}
@@ -74,16 +73,10 @@ const styles = StyleSheet.create({
   content: {
     padding: 24,
   },
-  title: {
-    fontSize: 26,
-    fontWeight: '700',
-    marginBottom: 12,
-    color: '#1F2937',
-  },
   text: {
     fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 16,
+    lineHeight: 28,  
+    marginBottom: 24, 
     color: '#374151',
   },
   icon: {
