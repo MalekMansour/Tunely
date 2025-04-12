@@ -11,7 +11,6 @@ export const AudioProvider = ({ children }) => {
   const [playlist, setPlaylist] = useState([]);
   const [playlistSource, setPlaylistSource] = useState('all');
 
-  //This logic ensures the app to play in silent mode
   React.useEffect(() => {
     const configureAudio = async () => {
       try {
@@ -23,23 +22,20 @@ export const AudioProvider = ({ children }) => {
           shouldDuckAndroid: true,
           interruptionModeAndroid: 1,
         });
-        
       } catch (err) {
-        
+        console.error('Error configuring audio:', err);
       }
     };
 
     configureAudio();
   }, []);
 
-  
-  // Use ref to track current song 
   const currentSongRef = useRef(null);
-  
-  // Update ref whenever currentSong changes
   React.useEffect(() => {
     currentSongRef.current = currentSong;
   }, [currentSong]);
+
+  const playSoundCallIdRef = useRef(0);
 
   const changePlaylist = (songs, source) => {
     setPlaylist(songs);
@@ -48,68 +44,63 @@ export const AudioProvider = ({ children }) => {
 
   const playNextSong = async () => {
     const currentSongValue = currentSongRef.current;
-    
     if (!currentSongValue || playlist.length === 0) return;
-    
-    // Check both songId and id properties
     const currentSongId = currentSongValue.songId || currentSongValue.id;
-    
-    // Modified findIndex to check both ID formats
     const currentIndex = playlist.findIndex(song => {
       const songId = song.songId || song.id;
       return songId === currentSongId;
     });
-    
     if (currentIndex === -1 || currentIndex === playlist.length - 1) return;
-    
     const nextSong = playlist[currentIndex + 1];
     await playSound(nextSong);
   };
 
   const playPreviousSong = async () => {
     const currentSongValue = currentSongRef.current;
-    
     if (!currentSongValue || playlist.length === 0) return;
-    
-    // Check both songId and id properties
     const currentSongId = currentSongValue.songId || currentSongValue.id;
-    
-    // Modified findIndex to check both ID formats
     const currentIndex = playlist.findIndex(song => {
       const songId = song.songId || song.id;
       return songId === currentSongId;
     });
-    
     if (currentIndex === -1 || currentIndex === 0) return;
-    
     const previousSong = playlist[currentIndex - 1];
     await playSound(previousSong);
   };
 
   const playSound = async (song) => {
-    try {
-      // Handle playing the same song
-      if (currentSong?.songId === song.songId && sound) {
-        if (isPlaying) {
-          await pauseSound();
-          return;
-        } else {
-          await resumeSound();
-          return;
-        }
-      }
-      
-      // Unload previous sound if exists
-      if (sound) {
+    playSoundCallIdRef.current += 1;
+    const thisCallId = playSoundCallIdRef.current;
+
+    // If any sound is currently playing, immediately stop it.
+    if (sound) {
+      try {
         await sound.unloadAsync();
-        setSound(null);
+      } catch (error) {
+        console.error('Error unloading previous sound:', error);
       }
+      setSound(null);
+      setIsPlaying(false);
+    }
 
-      // Update the state and ref BEFORE creating the new sound
-      setCurrentSong(song);
-      currentSongRef.current = song;
+    // If the same song is tapped (toggle pause/resume), handle it immediately.
+    if (currentSong?.songId === song.songId && sound) {
+      if (isPlaying) {
+        await pauseSound();
+        return;
+      } else {
+        await resumeSound();
+        return;
+      }
+    }
+    
+    // Update the song state before creating the new sound.
+    setCurrentSong(song);
+    currentSongRef.current = song;
 
-      const { sound: newSound } = await Audio.Sound.createAsync(
+    let newSound;
+    try {
+      const { sound: loadedSound } = await Audio.Sound.createAsync(
         { uri: song.fileUrl },
         { 
           shouldPlay: true,
@@ -118,19 +109,29 @@ export const AudioProvider = ({ children }) => {
         },
         onPlaybackStatusUpdate
       );
-
-      setSound(newSound);
-      setIsPlaying(true);
-
-      //record song play
-      try {
-        await songService.recordSongPlay(song.songId);
-      } catch (error) {
-        // Just log the error but don't stop playback if this fails
-        console.error('Failed to record song play:', error);
-      }
+      newSound = loadedSound;
     } catch (error) {
-      console.error('Error playing sound:', error);
+      console.error('Error creating sound:', error);
+      return;
+    }
+
+    // If another call has started meanwhile, cancel this one immediately.
+    if (thisCallId !== playSoundCallIdRef.current) {
+      try {
+        await newSound.unloadAsync();
+      } catch (error) {
+        console.error('Error unloading canceled sound:', error);
+      }
+      return;
+    }
+    
+    setSound(newSound);
+    setIsPlaying(true);
+
+    try {
+      await songService.recordSongPlay(song.songId);
+    } catch (error) {
+      console.error('Failed to record song play:', error);
     }
   };
 
@@ -159,20 +160,15 @@ export const AudioProvider = ({ children }) => {
   const onPlaybackStatusUpdate = (status) => {
     if (!status.isLoaded) return;
     
-    // Set playing state based on playback status
     setIsPlaying(status.isPlaying);
     
-    // If song finished
+    // When a song finishes playing, automatically play the next song if available.
     if (status.didJustFinish) {
       const songJustFinished = currentSongRef.current;
-      
       if (songJustFinished && playlist.length > 0) {
         const currentIndex = playlist.findIndex(song => song.songId === songJustFinished.songId);
-        
         if (currentIndex !== -1 && currentIndex < playlist.length - 1) {
           const nextSong = playlist[currentIndex + 1];
-          
-          // Use timeout to ensure proper cleanup between tracks
           setTimeout(() => {
             playSound(nextSong);
           }, 500);
@@ -187,20 +183,20 @@ export const AudioProvider = ({ children }) => {
         await sound.unloadAsync();
         setSound(null);
         setIsPlaying(false);
-        // Don't reset currentSong here - useful to remember what was playing
       }
     } catch (error) {
       console.error('Error stopping sound:', error);
     }
   };
-//clean up when not using audio provider anymore
+
+  // Clean up when unmounting the AudioProvider.
   React.useEffect(() => {
     return () => {
       if (sound) {
         sound.unloadAsync();
       }
     };
-  }, []);
+  }, [sound]);
 
   return (
     <AudioContext.Provider 
