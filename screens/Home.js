@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { Text, View, FlatList, ActivityIndicator } from "react-native";
-import { Image } from 'expo-image';
+import { Image } from "expo-image";
 import { styles } from "../styles";
 import { useFocusEffect } from "@react-navigation/native";
 import { useGetSongs } from "../hooks/useGetSongs";
@@ -55,7 +55,8 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (songs.length > 0) {
-      const imagesToPrefetch = songs.slice(0, 20)
+      const imagesToPrefetch = songs
+        .slice(0, 20)
         .map(song => song.song_photo_url)
         .filter(url => url);
       
@@ -106,7 +107,7 @@ export default function HomeScreen() {
         data={playlists}
         ListHeaderComponent={
           <>
-            {/* Recently Played - Horizontal Scroll */}
+            {/* Recently Played - Horizontal Only */}
             <View style={styles.sectionContainer}>
               <Text style={[styles.subtitle, { color: theme.text }]}>Recently Played</Text>
               {recentPlayedLoading ? (
@@ -117,6 +118,8 @@ export default function HomeScreen() {
                     data={recentlyPlayedSongs.slice(0, 8)}
                     keyExtractor={(item) => item.songId.toString()}
                     horizontal
+                    directionalLockEnabled={true} // Locks the swipe to one direction
+                    bounces={false}               // Prevents vertical bounce/scroll
                     renderItem={({ item }) => (
                       <SongCard2 
                         song={item} 
@@ -124,8 +127,7 @@ export default function HomeScreen() {
                       />
                     )}
                     showsHorizontalScrollIndicator={false}
-                    onRefresh={refreshRecentlyPlayedSongs}
-                    refreshing={recentPlayedLoading}
+                    // Removed onRefresh and refreshing to prevent reloads on vertical swipe
                     ListEmptyComponent={
                       <Text style={[styles.emptyText, { color: theme.text }]}>
                         No recently played songs
